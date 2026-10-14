@@ -1,0 +1,16 @@
+{
+  "short_name": "Libertario",
+  "name": "Libertario",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1b1612",
+  "lang": "es"
+}

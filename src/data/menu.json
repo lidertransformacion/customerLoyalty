@@ -1,0 +1,1535 @@
+{
+  "source": "Libertario printed menu. Prices in Colombian pesos, as printed.",
+  "note": "Demo data. It does not come from Odoo or production.",
+  "categories": [
+    {
+      "id": "coffee",
+      "name": "Coffee Program",
+      "photo": "coffee.jpg",
+      "intro": "De lo tradicional a lo experimental."
+    },
+    {
+      "id": "cold-brew",
+      "name": "Cold brew",
+      "photo": "drinks.jpg",
+      "intro": "En lata, para llevar."
+    },
+    {
+      "id": "filter",
+      "name": "Filtrados",
+      "photo": "filter.jpg",
+      "intro": "Chemex, Origami o V60."
+    },
+    {
+      "id": "espresso",
+      "name": "A base de espresso",
+      "photo": "espresso.jpg",
+      "intro": "Blend o single origin."
+    },
+    {
+      "id": "signature",
+      "name": "Bebidas de autor",
+      "photo": "matcha.jpg",
+      "intro": "Cold brew y sodas de la casa."
+    },
+    {
+      "id": "matcha",
+      "name": "Matcha y chai",
+      "photo": "matcha.jpg",
+      "intro": "Tazas fuera del espresso."
+    },
+    {
+      "id": "other-drinks",
+      "name": "Otras bebidas",
+      "photo": "bar.jpg",
+      "intro": "Sin café, o casi."
+    },
+    {
+      "id": "eggs",
+      "name": "Huevos",
+      "photo": "brunch.jpg",
+      "intro": "All day brunch."
+    },
+    {
+      "id": "parfait",
+      "name": "Parfait y chía",
+      "photo": "sweet.jpg",
+      "intro": "Desayuno para quedar."
+    },
+    {
+      "id": "toast",
+      "name": "Tostadas",
+      "photo": "toast.jpg",
+      "intro": "Masa madre y brioche."
+    },
+    {
+      "id": "bakery",
+      "name": "Panadería",
+      "photo": "bread.jpg",
+      "intro": "Horno de la casa."
+    },
+    {
+      "id": "sandwiches",
+      "name": "Sándwiches",
+      "photo": "sandwiches.jpg",
+      "intro": "Masa madre o focaccia, con chips y dip."
+    },
+    {
+      "id": "bowls",
+      "name": "Bowls",
+      "photo": "bowls.jpg",
+      "intro": "Almuerzo."
+    },
+    {
+      "id": "cakes",
+      "name": "Tortas",
+      "photo": "cakes.jpg",
+      "intro": "Para después del café."
+    },
+    {
+      "id": "cookies",
+      "name": "Galletas",
+      "photo": "sweet.jpg",
+      "intro": "Una, con el filtrado."
+    },
+    {
+      "id": "cocktails",
+      "name": "Cócteles",
+      "photo": "bar.jpg",
+      "intro": "Barra de la tarde."
+    },
+    {
+      "id": "extras",
+      "name": "Adiciones",
+      "photo": "coffee.jpg",
+      "intro": "Se suman en caja, no viajan solas."
+    }
+  ],
+  "items": [
+    {
+      "id": "paz-200",
+      "name": "PAZ 200 g",
+      "category": "coffee",
+      "price": 32300,
+      "description": "Balanceado y acaramelado. Notas dulces para cualquier hora.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false,
+      "profile": "PAZ"
+    },
+    {
+      "id": "paz-340",
+      "name": "PAZ 340 g",
+      "category": "coffee",
+      "price": 44100,
+      "description": "Balanceado y acaramelado. Notas dulces para cualquier hora.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false,
+      "profile": "PAZ"
+    },
+    {
+      "id": "paz-454",
+      "name": "PAZ 454 g",
+      "category": "coffee",
+      "price": 60600,
+      "description": "Balanceado y acaramelado. Notas dulces para cualquier hora.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false,
+      "profile": "PAZ"
+    },
+    {
+      "id": "libre-200",
+      "name": "LIBRE 200 g",
+      "category": "coffee",
+      "price": 35400,
+      "description": "Intenso y afrutado. Notas que despiertan.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false,
+      "profile": "LIBRE"
+    },
+    {
+      "id": "libre-340",
+      "name": "LIBRE 340 g",
+      "category": "coffee",
+      "price": 55600,
+      "description": "Intenso y afrutado. Notas que despiertan.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false,
+      "profile": "LIBRE"
+    },
+    {
+      "id": "libre-454",
+      "name": "LIBRE 454 g",
+      "category": "coffee",
+      "price": 65300,
+      "description": "Intenso y afrutado. Notas que despiertan.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false,
+      "profile": "LIBRE"
+    },
+    {
+      "id": "impacto-340",
+      "name": "IMPACTO 340 g",
+      "category": "coffee",
+      "price": 70000,
+      "description": "Agricultura regenerativa. Perfil limpio, desde el origen.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false,
+      "profile": "IMPACTO"
+    },
+    {
+      "id": "rock-200",
+      "name": "ROCK 200 g",
+      "category": "coffee",
+      "price": 51400,
+      "description": "Rebelde y excéntrico. Variedades que salen de lo convencional.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false,
+      "profile": "ROCK"
+    },
+    {
+      "id": "rock-340",
+      "name": "ROCK 340 g",
+      "category": "coffee",
+      "price": 65000,
+      "description": "Rebelde y excéntrico. Variedades que salen de lo convencional.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false,
+      "profile": "ROCK"
+    },
+    {
+      "id": "rock-454",
+      "name": "ROCK 454 g",
+      "category": "coffee",
+      "price": 96600,
+      "description": "Rebelde y excéntrico. Variedades que salen de lo convencional.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false,
+      "profile": "ROCK"
+    },
+    {
+      "id": "punk-340",
+      "name": "PUNK 340 g",
+      "category": "coffee",
+      "price": 83200,
+      "description": "Extravagante y jugoso. Procesos que rompen la regla.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false,
+      "profile": "PUNK"
+    },
+    {
+      "id": "competition-100",
+      "name": "COMPETITION 100 g",
+      "category": "coffee",
+      "price": 99800,
+      "description": "Excepcional. Puntaje superior a 90 en la escala SCA.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false,
+      "profile": "COMPETITION"
+    },
+    {
+      "id": "cb-lata",
+      "name": "Cold brew en lata",
+      "category": "cold-brew",
+      "price": 12800,
+      "description": "Lata de cold brew.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "cb-pack",
+      "name": "Cold brew three pack",
+      "category": "cold-brew",
+      "price": 36800,
+      "description": "Tres latas de cold brew.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "fil-paz-8",
+      "name": "Filtrado PAZ 8 oz",
+      "category": "filter",
+      "price": 10700,
+      "description": "Blend balanceado. Chemex, Origami o V60.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false,
+      "profile": "PAZ"
+    },
+    {
+      "id": "fil-paz-12",
+      "name": "Filtrado PAZ 12 oz",
+      "category": "filter",
+      "price": 18900,
+      "description": "Blend balanceado. Chemex, Origami o V60.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false,
+      "profile": "PAZ"
+    },
+    {
+      "id": "fil-paz-16",
+      "name": "Filtrado PAZ 16 oz",
+      "category": "filter",
+      "price": 29900,
+      "description": "Blend balanceado. Chemex, Origami o V60.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false,
+      "profile": "PAZ"
+    },
+    {
+      "id": "fil-libre-8",
+      "name": "Filtrado LIBRE 8 oz",
+      "category": "filter",
+      "price": 10700,
+      "description": "Blend intenso y afrutado.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false,
+      "profile": "LIBRE"
+    },
+    {
+      "id": "fil-libre-12",
+      "name": "Filtrado LIBRE 12 oz",
+      "category": "filter",
+      "price": 18900,
+      "description": "Blend intenso y afrutado.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false,
+      "profile": "LIBRE"
+    },
+    {
+      "id": "fil-libre-16",
+      "name": "Filtrado LIBRE 16 oz",
+      "category": "filter",
+      "price": 29900,
+      "description": "Blend intenso y afrutado.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false,
+      "profile": "LIBRE"
+    },
+    {
+      "id": "fil-decaf-8",
+      "name": "Filtrado DECAF 8 oz",
+      "category": "filter",
+      "price": 10700,
+      "description": "Blend descafeinado.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false,
+      "profile": "DECAF"
+    },
+    {
+      "id": "fil-decaf-12",
+      "name": "Filtrado DECAF 12 oz",
+      "category": "filter",
+      "price": 18900,
+      "description": "Blend descafeinado.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false,
+      "profile": "DECAF"
+    },
+    {
+      "id": "fil-decaf-16",
+      "name": "Filtrado DECAF 16 oz",
+      "category": "filter",
+      "price": 29900,
+      "description": "Blend descafeinado.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false,
+      "profile": "DECAF"
+    },
+    {
+      "id": "fil-rock-8",
+      "name": "Filtrado ROCK 8 oz",
+      "category": "filter",
+      "price": 12800,
+      "description": "Single origin rebelde.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false,
+      "profile": "ROCK"
+    },
+    {
+      "id": "fil-rock-12",
+      "name": "Filtrado ROCK 12 oz",
+      "category": "filter",
+      "price": 23200,
+      "description": "Single origin rebelde.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false,
+      "profile": "ROCK"
+    },
+    {
+      "id": "fil-rock-16",
+      "name": "Filtrado ROCK 16 oz",
+      "category": "filter",
+      "price": 30800,
+      "description": "Single origin rebelde.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false,
+      "profile": "ROCK"
+    },
+    {
+      "id": "fil-impacto-8",
+      "name": "Filtrado IMPACTO 8 oz",
+      "category": "filter",
+      "price": 12800,
+      "description": "Single origin de agricultura regenerativa.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false,
+      "profile": "IMPACTO"
+    },
+    {
+      "id": "fil-impacto-12",
+      "name": "Filtrado IMPACTO 12 oz",
+      "category": "filter",
+      "price": 23200,
+      "description": "Single origin de agricultura regenerativa.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false,
+      "profile": "IMPACTO"
+    },
+    {
+      "id": "fil-impacto-16",
+      "name": "Filtrado IMPACTO 16 oz",
+      "category": "filter",
+      "price": 34800,
+      "description": "Single origin de agricultura regenerativa.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false,
+      "profile": "IMPACTO"
+    },
+    {
+      "id": "fil-punk-8",
+      "name": "Filtrado PUNK 8 oz",
+      "category": "filter",
+      "price": 13200,
+      "description": "Single origin extravagante.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false,
+      "profile": "PUNK"
+    },
+    {
+      "id": "fil-punk-12",
+      "name": "Filtrado PUNK 12 oz",
+      "category": "filter",
+      "price": 24500,
+      "description": "Single origin extravagante.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false,
+      "profile": "PUNK"
+    },
+    {
+      "id": "fil-punk-16",
+      "name": "Filtrado PUNK 16 oz",
+      "category": "filter",
+      "price": 36800,
+      "description": "Single origin extravagante.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false,
+      "profile": "PUNK"
+    },
+    {
+      "id": "fil-competition-8",
+      "name": "Filtrado COMPETITION 8 oz",
+      "category": "filter",
+      "price": 20500,
+      "description": "Single origin de temporada, arriba de 90 SCA.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false,
+      "profile": "COMPETITION"
+    },
+    {
+      "id": "esp-blend",
+      "name": "Espresso blend",
+      "category": "espresso",
+      "price": 7500,
+      "description": "Corto, con crema. Perfil de la casa.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false,
+      "profile": "BLEND"
+    },
+    {
+      "id": "esp-so",
+      "name": "Espresso single origin",
+      "category": "espresso",
+      "price": 8500,
+      "description": "Corto, con crema. Origen único.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false,
+      "profile": "SINGLE ORIGIN"
+    },
+    {
+      "id": "ame-blend",
+      "name": "Americano blend",
+      "category": "espresso",
+      "price": 8800,
+      "description": "Espresso alargado. Perfil de la casa.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false,
+      "profile": "BLEND"
+    },
+    {
+      "id": "ame-so",
+      "name": "Americano single origin",
+      "category": "espresso",
+      "price": 9800,
+      "description": "Espresso alargado. Origen único.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false,
+      "profile": "SINGLE ORIGIN"
+    },
+    {
+      "id": "mac-blend",
+      "name": "Macchiato blend",
+      "category": "espresso",
+      "price": 8800,
+      "description": "Espresso con una mancha de leche. Perfil de la casa.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false,
+      "profile": "BLEND"
+    },
+    {
+      "id": "mac-so",
+      "name": "Macchiato single origin",
+      "category": "espresso",
+      "price": 9800,
+      "description": "Espresso con una mancha de leche. Origen único.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false,
+      "profile": "SINGLE ORIGIN"
+    },
+    {
+      "id": "lat-blend",
+      "name": "Latte blend",
+      "category": "espresso",
+      "price": 12500,
+      "description": "Espresso y leche. Vegetal de almendra o avena, +$4.000. Perfil de la casa.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false,
+      "profile": "BLEND"
+    },
+    {
+      "id": "lat-so",
+      "name": "Latte single origin",
+      "category": "espresso",
+      "price": 13500,
+      "description": "Espresso y leche. Vegetal de almendra o avena, +$4.000. Origen único.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false,
+      "profile": "SINGLE ORIGIN"
+    },
+    {
+      "id": "cap-blend",
+      "name": "Cappuccino blend",
+      "category": "espresso",
+      "price": 12500,
+      "description": "Espresso, leche y espuma. Vegetal de almendra o avena, +$4.000. Perfil de la casa.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false,
+      "profile": "BLEND"
+    },
+    {
+      "id": "cap-so",
+      "name": "Cappuccino single origin",
+      "category": "espresso",
+      "price": 13500,
+      "description": "Espresso, leche y espuma. Vegetal de almendra o avena, +$4.000. Origen único.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false,
+      "profile": "SINGLE ORIGIN"
+    },
+    {
+      "id": "moc-blend",
+      "name": "Mocaccino blend",
+      "category": "espresso",
+      "price": 12500,
+      "description": "Espresso, chocolate y leche. Vegetal de almendra o avena, +$4.000. Perfil de la casa.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false,
+      "profile": "BLEND"
+    },
+    {
+      "id": "moc-so",
+      "name": "Mocaccino single origin",
+      "category": "espresso",
+      "price": 13500,
+      "description": "Espresso, chocolate y leche. Vegetal de almendra o avena, +$4.000. Origen único.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false,
+      "profile": "SINGLE ORIGIN"
+    },
+    {
+      "id": "fw-blend",
+      "name": "Flat white blend",
+      "category": "espresso",
+      "price": 11500,
+      "description": "Espresso y microespuma. Vegetal de almendra o avena, +$4.000. Perfil de la casa.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false,
+      "profile": "BLEND"
+    },
+    {
+      "id": "fw-so",
+      "name": "Flat white single origin",
+      "category": "espresso",
+      "price": 12500,
+      "description": "Espresso y microespuma. Vegetal de almendra o avena, +$4.000. Origen único.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false,
+      "profile": "SINGLE ORIGIN"
+    },
+    {
+      "id": "iced-cap",
+      "name": "Iced cappuccino",
+      "category": "espresso",
+      "price": 13500,
+      "description": "Cappuccino frío. Vegetal de almendra o avena, +$4.000.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "iced-lat",
+      "name": "Iced latte",
+      "category": "espresso",
+      "price": 13500,
+      "description": "Latte frío. Vegetal de almendra o avena, +$4.000.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "affogato",
+      "name": "Affogato",
+      "category": "espresso",
+      "price": 15000,
+      "description": "Espresso sobre helado.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "lumina",
+      "name": "Lúmina",
+      "category": "signature",
+      "price": 13800,
+      "description": "Soda de feijoa, eneldo e hinojo.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "bruma",
+      "name": "Bruma",
+      "category": "signature",
+      "price": 16800,
+      "description": "Cold brew con yuzu, pétalos de rosa y romero.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "esencia",
+      "name": "Esencia",
+      "category": "signature",
+      "price": 13800,
+      "description": "Cold brew con zumo de naranja, romero y durazno.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "dirty-matcha",
+      "name": "Dirty matcha",
+      "category": "matcha",
+      "price": 16800,
+      "description": "Matcha con un espresso encima.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "strawberry-matcha",
+      "name": "Strawberry matcha",
+      "category": "matcha",
+      "price": 18200,
+      "description": "Matcha y fresa.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "matcha-spritz",
+      "name": "Matcha lemon spritz",
+      "category": "matcha",
+      "price": 16800,
+      "description": "Matcha, limón y burbuja.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "matcha-latte",
+      "name": "Matcha latte",
+      "category": "matcha",
+      "price": 15500,
+      "description": "Matcha y leche.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "chai",
+      "name": "Chai tradicional",
+      "category": "matcha",
+      "price": 12200,
+      "description": "Chai de la casa.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "chai-choc",
+      "name": "Chai chocolate",
+      "category": "matcha",
+      "price": 12200,
+      "description": "Chai con chocolate.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "chai-golden",
+      "name": "Chai golden milk",
+      "category": "matcha",
+      "price": 12200,
+      "description": "Chai con cúrcuma.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "chai-carbon",
+      "name": "Chai carbón activado",
+      "category": "matcha",
+      "price": 12200,
+      "description": "Chai con carbón activado.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "soda-rojos",
+      "name": "Soda frutos rojos",
+      "category": "other-drinks",
+      "price": 11800,
+      "description": "Soda de frutos rojos.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "soda-maracuya",
+      "name": "Soda maracuyá",
+      "category": "other-drinks",
+      "price": 11800,
+      "description": "Soda de maracuyá.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "agua",
+      "name": "Agua sin gas",
+      "category": "other-drinks",
+      "price": 7500,
+      "description": "Agua.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "agua-gas",
+      "name": "Agua con gas",
+      "category": "other-drinks",
+      "price": 7500,
+      "description": "Agua con gas.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "jugo",
+      "name": "Jugo natural",
+      "category": "other-drinks",
+      "price": 10800,
+      "description": "Jugo del día.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "kombucha",
+      "name": "Happy Kombucha",
+      "category": "other-drinks",
+      "price": 12000,
+      "description": "Kombucha.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "inf-rojos",
+      "name": "Infusión frutos rojos",
+      "category": "other-drinks",
+      "price": 11200,
+      "description": "Infusión de frutos rojos.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "inf-amarillos",
+      "name": "Infusión frutos amarillos",
+      "category": "other-drinks",
+      "price": 11200,
+      "description": "Infusión de frutos amarillos.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "cerveza",
+      "name": "Cerveza",
+      "category": "other-drinks",
+      "price": 13800,
+      "description": "Cerveza de la carta.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "chocolate",
+      "name": "Chocolate",
+      "category": "other-drinks",
+      "price": 11800,
+      "description": "Chocolate caliente.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "babyccino",
+      "name": "Babyccino",
+      "category": "other-drinks",
+      "price": 8200,
+      "description": "Espuma de leche, sin café.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "te-verde",
+      "name": "Té verde",
+      "category": "other-drinks",
+      "price": 9800,
+      "description": "Té verde.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "hue-gratin",
+      "name": "Huevos gratinados",
+      "category": "eggs",
+      "price": 25200,
+      "description": "Al horno con mozzarella gratinada, queso crema, jamón serrano y tomates secos. Maridaje: espresso PUNK.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "hue-tomatillo",
+      "name": "Huevos tomatillo verde",
+      "category": "eggs",
+      "price": 24800,
+      "description": "Salsa de tomatillo verde, aguacate, parmesano y perejil. Con pan de masa madre. Maridaje: espresso PAZ.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "hue-turcos",
+      "name": "Huevos turcos",
+      "category": "eggs",
+      "price": 24800,
+      "description": "Tomates secos, yogurt griego al ajo, aceite de paprika y tomates cherry. Con pan de masa madre.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "hue-gusto",
+      "name": "Huevos al gusto",
+      "category": "eggs",
+      "price": 17000,
+      "description": "Fritos o revueltos, con croissant de mantequilla.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "par-rojos",
+      "name": "Parfait frutos rojos",
+      "category": "parfait",
+      "price": 18800,
+      "description": "Yogurt griego, granola, frutos rojos, mermelada de mora y chocolate 70%.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "par-amarillos",
+      "name": "Parfait frutos amarillos",
+      "category": "parfait",
+      "price": 18800,
+      "description": "Yogurt griego, granola, frutos amarillos y mermelada de maracuyá.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "chia",
+      "name": "Chía pudding",
+      "category": "parfait",
+      "price": 19800,
+      "description": "Chía en leche de almendra con panela, granola y fruta de temporada.",
+      "vegan": true,
+      "nuts": true,
+      "extra": false
+    },
+    {
+      "id": "granola",
+      "name": "Bowl de granola",
+      "category": "parfait",
+      "price": 23500,
+      "description": "Chocolate 70%, yogurt griego artesanal y fruta de temporada.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "waffle",
+      "name": "Waffle de avena",
+      "category": "parfait",
+      "price": 26200,
+      "description": "Avena y banano, yogurt griego artesanal y fruta de temporada.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "tos-francesas",
+      "name": "Tostadas francesas",
+      "category": "toast",
+      "price": 22500,
+      "description": "Brioche con canela y vainilla, yogurt griego, frutos rojos y miel. Maridaje: filtrado LIBRE.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "tos-caprese",
+      "name": "Tostada caprese",
+      "category": "toast",
+      "price": 23500,
+      "description": "Masa madre, tomates secos, burrata, cherry, pesto, balsámico y albahaca. Maridaje: cold brew.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "tos-aguacate",
+      "name": "Tostada de aguacate",
+      "category": "toast",
+      "price": 23800,
+      "description": "Masa madre, queso crema, aguacate, cherry, repollo encurtido y germinados.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "tos-serrano",
+      "name": "Tostada jamón serrano",
+      "category": "toast",
+      "price": 27800,
+      "description": "Masa madre, jamón serrano, queso crema, balsámico y germinados. Maridaje: filtrado ROCK.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "tos-salmon",
+      "name": "Tostada de salmón",
+      "category": "toast",
+      "price": 32800,
+      "description": "Masa madre, salmón, aguacate, rábano encurtido, tomates secos y germinados. Maridaje: espresso PAZ.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "pandebono",
+      "name": "Mini pandebonos x5",
+      "category": "bakery",
+      "price": 12800,
+      "description": "Cinco mini pandebonos.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "arepa-mini",
+      "name": "Mini arepas de yuca x5",
+      "category": "bakery",
+      "price": 13800,
+      "description": "Cinco mini arepas de yuca.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "palito",
+      "name": "Palito de queso",
+      "category": "bakery",
+      "price": 9500,
+      "description": "Palito de queso.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "arepa",
+      "name": "Arepa de yuca",
+      "category": "bakery",
+      "price": 7800,
+      "description": "Arepa de yuca.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "croix",
+      "name": "Croissant sencillo",
+      "category": "bakery",
+      "price": 9200,
+      "description": "Croissant de mantequilla. Maridaje: filtrado PAZ.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "croix-almendra",
+      "name": "Croissant de almendra",
+      "category": "bakery",
+      "price": 13800,
+      "description": "Croissant con almendra.",
+      "vegan": false,
+      "nuts": true,
+      "extra": false
+    },
+    {
+      "id": "croix-pistacho",
+      "name": "Croissant de pistacho",
+      "category": "bakery",
+      "price": 16800,
+      "description": "Croissant con pistacho.",
+      "vegan": false,
+      "nuts": true,
+      "extra": false
+    },
+    {
+      "id": "croix-avellana",
+      "name": "Croissant de avellanas",
+      "category": "bakery",
+      "price": 15500,
+      "description": "Croissant con crema de avellanas.",
+      "vegan": false,
+      "nuts": true,
+      "extra": false
+    },
+    {
+      "id": "san-croissant",
+      "name": "Sándwich de croissant",
+      "category": "sandwiches",
+      "price": 27000,
+      "description": "Croissant con jamón serrano, burrata, rúgula y balsámico. Maridaje: espresso o americano PUNK.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "san-serrano",
+      "name": "Sándwich jamón serrano",
+      "category": "sandwiches",
+      "price": 33800,
+      "description": "Focaccia, tomates secos, mozzarella, rúgula, jamón serrano y balsámico. Con chips y dip.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "san-quesos",
+      "name": "Sándwich de quesos",
+      "category": "sandwiches",
+      "price": 30500,
+      "description": "Focaccia, mozzarella, queso crema, gruyère, tomates secos y rúgula. Con chips y dip. Maridaje: americano PAZ.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "san-pollo",
+      "name": "Sándwich de pollo",
+      "category": "sandwiches",
+      "price": 36800,
+      "description": "Pollo horneado, mozzarella, aguacate, rúgula, tomates secos y cilantro. Con chips y dip.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "bow-serrano",
+      "name": "Bowl jamón serrano",
+      "category": "bowls",
+      "price": 35200,
+      "description": "Lechugas, jamón serrano, cherry, mango, lentejas crocantes y burrata con balsámico.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "bow-salmon",
+      "name": "Bowl de salmón",
+      "category": "bowls",
+      "price": 39800,
+      "description": "Arroz jazmín, lechuga crespa, salmón ahumado, mango, cherry, aguacate, rábano y soya.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "bow-veg",
+      "name": "Bowl vegetariano",
+      "category": "bowls",
+      "price": 32800,
+      "description": "Arroz jazmín, lentejas crocantes, mango, maíz, cherry, aguacate y cilantro.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "bow-pollo",
+      "name": "Bowl de pollo",
+      "category": "bowls",
+      "price": 33200,
+      "description": "Pollo horneado, mix de lechugas, lentejas crocantes, cherry, maíz, aguacate y cilantro.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "volcan",
+      "name": "Volcán de chocolate",
+      "category": "cakes",
+      "price": 15200,
+      "description": "Torta volcán de chocolate. Maridaje: filtrado LIBRE.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "almojabana",
+      "name": "Torta de almojábana",
+      "category": "cakes",
+      "price": 15200,
+      "description": "Torta de almojábana. Maridaje: flat white PAZ.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "zanahoria",
+      "name": "Torta de zanahoria",
+      "category": "cakes",
+      "price": 15200,
+      "description": "Torta de zanahoria.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "brownie",
+      "name": "Brownie",
+      "category": "cakes",
+      "price": 14800,
+      "description": "Brownie. Maridaje: americano PUNK.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "cheese-arequipe",
+      "name": "Cheesecake de arequipe",
+      "category": "cakes",
+      "price": 17000,
+      "description": "Cheesecake de arequipe.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "cheese-agraz",
+      "name": "Cheesecake de agraz",
+      "category": "cakes",
+      "price": 17000,
+      "description": "Cheesecake de agraz.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "almo-sin",
+      "name": "Almojábana sin azúcar",
+      "category": "cakes",
+      "price": 16800,
+      "description": "Torta de almojábana sin azúcar.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "gal-chips",
+      "name": "Galleta chips de chocolate",
+      "category": "cookies",
+      "price": 11500,
+      "description": "Chips de chocolate, vegana.",
+      "vegan": true,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "gal-arandanos",
+      "name": "Galleta arándanos y almendras",
+      "category": "cookies",
+      "price": 10200,
+      "description": "Arándanos y almendras.",
+      "vegan": false,
+      "nuts": true,
+      "extra": false
+    },
+    {
+      "id": "gal-avena",
+      "name": "Galleta de avena",
+      "category": "cookies",
+      "price": 10200,
+      "description": "Galleta de avena.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "carajillo",
+      "name": "Carajillo",
+      "category": "cocktails",
+      "price": 29200,
+      "description": "Carajillo de la barra.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "martini",
+      "name": "Patrón espresso martini",
+      "category": "cocktails",
+      "price": 39800,
+      "description": "Espresso martini con Patrón.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "spritz",
+      "name": "St Germain spritz",
+      "category": "cocktails",
+      "price": 35500,
+      "description": "Spritz de St Germain.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "shot-43",
+      "name": "Shot Licor 43",
+      "category": "cocktails",
+      "price": 8200,
+      "description": "Shot de Licor 43.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "shot-sg",
+      "name": "Shot St Germain",
+      "category": "cocktails",
+      "price": 9500,
+      "description": "Shot de St Germain.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "shot-patron",
+      "name": "Shot Patrón reposado",
+      "category": "cocktails",
+      "price": 14800,
+      "description": "Shot de tequila Patrón reposado.",
+      "vegan": false,
+      "nuts": false,
+      "extra": false
+    },
+    {
+      "id": "add-limon",
+      "name": "Zumo de limón",
+      "category": "extras",
+      "price": 1800,
+      "description": "Adición para café o parfait.",
+      "vegan": false,
+      "nuts": false,
+      "extra": true
+    },
+    {
+      "id": "add-vegetal",
+      "name": "Leche vegetal",
+      "category": "extras",
+      "price": 4000,
+      "description": "Almendra o avena, para bebidas de espresso.",
+      "vegan": false,
+      "nuts": false,
+      "extra": true
+    },
+    {
+      "id": "add-deslact",
+      "name": "Leche deslactosada",
+      "category": "extras",
+      "price": 4000,
+      "description": "Cambio de leche.",
+      "vegan": false,
+      "nuts": false,
+      "extra": true
+    },
+    {
+      "id": "add-burrata",
+      "name": "Burrata 30 g",
+      "category": "extras",
+      "price": 5000,
+      "description": "Adición para huevos.",
+      "vegan": false,
+      "nuts": false,
+      "extra": true
+    },
+    {
+      "id": "add-masa",
+      "name": "Pan de masa madre",
+      "category": "extras",
+      "price": 5000,
+      "description": "Adición para huevos.",
+      "vegan": false,
+      "nuts": false,
+      "extra": true
+    },
+    {
+      "id": "add-foca",
+      "name": "Pan focaccia",
+      "category": "extras",
+      "price": 5000,
+      "description": "Adición para huevos.",
+      "vegan": false,
+      "nuts": false,
+      "extra": true
+    },
+    {
+      "id": "add-aguacate",
+      "name": "Aguacate",
+      "category": "extras",
+      "price": 5800,
+      "description": "Adición para huevos.",
+      "vegan": false,
+      "nuts": false,
+      "extra": true
+    },
+    {
+      "id": "add-serrano",
+      "name": "Jamón serrano extra",
+      "category": "extras",
+      "price": 10200,
+      "description": "Adición para huevos.",
+      "vegan": false,
+      "nuts": false,
+      "extra": true
+    },
+    {
+      "id": "add-pollo",
+      "name": "Pollo extra",
+      "category": "extras",
+      "price": 10800,
+      "description": "Adición para huevos.",
+      "vegan": false,
+      "nuts": false,
+      "extra": true
+    },
+    {
+      "id": "add-salmon",
+      "name": "Salmón extra",
+      "category": "extras",
+      "price": 12500,
+      "description": "Adición para huevos.",
+      "vegan": false,
+      "nuts": false,
+      "extra": true
+    },
+    {
+      "id": "add-miel",
+      "name": "Miel",
+      "category": "extras",
+      "price": 3000,
+      "description": "Adición para parfait.",
+      "vegan": false,
+      "nuts": false,
+      "extra": true
+    },
+    {
+      "id": "add-yogurt",
+      "name": "Yogurt griego",
+      "category": "extras",
+      "price": 5500,
+      "description": "Adición para parfait.",
+      "vegan": false,
+      "nuts": false,
+      "extra": true
+    },
+    {
+      "id": "add-helado",
+      "name": "Helado",
+      "category": "extras",
+      "price": 5000,
+      "description": "Adición para parfait.",
+      "vegan": false,
+      "nuts": false,
+      "extra": true
+    },
+    {
+      "id": "add-fruta",
+      "name": "Fruta",
+      "category": "extras",
+      "price": 7800,
+      "description": "Adición para parfait.",
+      "vegan": false,
+      "nuts": false,
+      "extra": true
+    },
+    {
+      "id": "add-huevos",
+      "name": "Huevos extra",
+      "category": "extras",
+      "price": 5500,
+      "description": "Adición para bowls.",
+      "vegan": false,
+      "nuts": false,
+      "extra": true
+    },
+    {
+      "id": "add-mozz",
+      "name": "Queso mozzarella",
+      "category": "extras",
+      "price": 5000,
+      "description": "Adición para bowls.",
+      "vegan": false,
+      "nuts": false,
+      "extra": true
+    },
+    {
+      "id": "add-crema",
+      "name": "Queso crema",
+      "category": "extras",
+      "price": 5000,
+      "description": "Adición para bowls.",
+      "vegan": false,
+      "nuts": false,
+      "extra": true
+    },
+    {
+      "id": "add-dip",
+      "name": "Dip de queso 15 g",
+      "category": "extras",
+      "price": 3000,
+      "description": "Adición para bowls.",
+      "vegan": false,
+      "nuts": false,
+      "extra": true
+    },
+    {
+      "id": "add-chips",
+      "name": "Chips y dip",
+      "category": "extras",
+      "price": 6800,
+      "description": "Adición para bowls.",
+      "vegan": false,
+      "nuts": false,
+      "extra": true
+    }
+  ]
+}
