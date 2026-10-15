@@ -429,6 +429,17 @@ export const copy = {
       "Demo: no se cobra ni se llama a ningún banco. El flujo real va por un proveedor PSE (Wompi o PayU) desde el backend.",
   },
 
+  corners: {
+    kicker: "Corner",
+    title: "Los corners",
+    lead: "Las barras Libertario dentro de otras casas. Cada una tiene su carta.",
+    at: (company: string) => `En ${company}`,
+    open: "Ver la carta",
+    provisional: "Carta provisional. Los precios y las piezas de este corner están por confirmar.",
+    notFound: "Ese corner no está en la lista.",
+    all: "Todos los corners",
+  },
+
   months: [
     "ene",
     "feb",

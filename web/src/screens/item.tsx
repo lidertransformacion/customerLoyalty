@@ -1,6 +1,9 @@
 import { motion } from "motion/react";
 import { useNavigate, useParams } from "react-router";
 
+import { catalogFor, translateCatalog } from "../core/catalog";
+import { cornerById, cornerCatalog } from "../core/corners";
+
 import { pointsForPrice } from "@/src/data/program";
 
 import { menuOnly } from "../core/mode";
@@ -19,8 +22,11 @@ export function ItemScreen() {
   const copy = useCopy();
   const { money } = useLocale();
   const navigate = useNavigate();
-  const { id } = useParams();
-  const catalog = useCatalog();
+  const { id, corner: cornerParam } = useParams();
+  const { lang } = useLocale();
+  const cityCatalog = useCatalog();
+  const corner = cornerById(cornerParam);
+  const catalog = corner ? cornerCatalog(translateCatalog(catalogFor(corner.cityId), lang), corner) : cityCatalog;
   const { account, dispatch } = useAccount();
   const item = catalog.items.find((entry) => entry.id === id);
 

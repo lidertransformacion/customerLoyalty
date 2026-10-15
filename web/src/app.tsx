@@ -4,9 +4,11 @@ import { Navigate, Route, Routes, useLocation } from "react-router";
 
 import { productionBlocked } from "@/src/data/program";
 
+import { cornerIdFromPath } from "./core/corners";
 import { menuOnly } from "./core/mode";
 import { useCopy } from "./i18n";
 import { Celebrate } from "./motion/celebrate";
+import { CornersScreen } from "./screens/corners";
 import { Home } from "./screens/home";
 import { ItemScreen } from "./screens/item";
 import { Landing } from "./screens/landing";
@@ -20,6 +22,13 @@ import { useAccount } from "./state/account";
 import { LensFilter } from "./ui/glass";
 import { TabBar } from "./ui/tabbar";
 import { Toast } from "./ui/toast";
+
+/** `/corner-sura` and `/corners-sura` are the same bar as `/corner/sura`; anything else goes home. */
+function Fallback() {
+  const location = useLocation();
+  const id = cornerIdFromPath(location.pathname);
+  return <Navigate to={id ? { pathname: `/corner/${id}`, search: location.search } : "/"} replace />;
+}
 
 function RequireAccount({ children }: { children: React.ReactElement }) {
   const { ready, account } = useAccount();
@@ -42,7 +51,7 @@ export function App() {
     return <div className="pad pad-top serif" style={{ fontSize: 22 }}>{copy.productionBlocked}</div>;
   }
 
-  const tabbed = !menuOnly && ["/home", "/menu", "/table"].some((path) => location.pathname.startsWith(path));
+  const tabbed = !menuOnly && ["/home", "/menu", "/table"].some((path) => location.pathname.startsWith(path)) && !location.pathname.startsWith("/corner");
 
   if (menuOnly) {
     return (
@@ -53,7 +62,10 @@ export function App() {
             <Route path="/" element={<MenuScreen />} />
             <Route path="/menu" element={<Navigate to={{ pathname: "/", search: location.search }} replace />} />
             <Route path="/item/:id" element={<ItemScreen />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="/corners" element={<CornersScreen />} />
+            <Route path="/corner/:corner" element={<MenuScreen />} />
+            <Route path="/corner/:corner/item/:id" element={<ItemScreen />} />
+            <Route path="*" element={<Fallback />} />
           </Routes>
         </AnimatePresence>
         <Toast note={note} onDismiss={dismissNote} />

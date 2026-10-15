@@ -1,13 +1,14 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 
 import type { MenuItem } from "@/src/data/menu";
 import { pointsForPrice } from "@/src/data/program";
 
 import { Book } from "../book/book";
 import { buildBook, Verso } from "../book/pages";
-import { filterCatalog, type MenuFilter } from "../core/catalog";
+import { catalogFor, filterCatalog, translateCatalog, type MenuFilter } from "../core/catalog";
+import { cornerById, cornerCatalog, cornerPath } from "../core/corners";
 import { haptics } from "../core/haptics";
 import { readVisit } from "../core/market";
 import { menuOnly } from "../core/mode";
@@ -17,7 +18,7 @@ import { LivingPhoto } from "../motion/living-photo";
 import { Product } from "../motion/product";
 import { useAccount } from "../state/account";
 import { useCatalog } from "../state/catalog";
-import { markHintSeen, menuMemory } from "../state/menu-memory";
+import { markHintSeen, menuMemory, useScope } from "../state/menu-memory";
 import { Glass } from "../ui/glass";
 import { Press } from "../ui/press";
 import { Screen } from "../ui/screen";
@@ -40,7 +41,14 @@ export function MenuScreen() {
   const { money, lang, setLang } = useLocale();
   const navigate = useNavigate();
   const visit = readVisit();
-  const catalog = useCatalog();
+  const { corner: cornerParam } = useParams();
+  const corner = cornerById(cornerParam);
+  const cityCatalog = useCatalog();
+  const catalog = useMemo(
+    () => (corner ? cornerCatalog(translateCatalog(catalogFor(corner.cityId), lang), corner) : cityCatalog),
+    [corner, cityCatalog, lang],
+  );
+  useScope(corner ? `corner:${corner.id}` : "menu");
   const { account, dispatch } = useAccount();
   const wide = useWide();
   // Only the book for now; the list stays wired for later.
@@ -79,7 +87,10 @@ export function MenuScreen() {
     return () => node.removeEventListener("scroll", onScroll);
   }, [view]);
 
-  const onItem = useCallback((item: MenuItem) => navigate(`/item/${item.id}`), [navigate]);
+  const onItem = useCallback(
+    (item: MenuItem) => navigate(corner ? `${cornerPath(corner)}/item/${item.id}` : `/item/${item.id}`),
+    [corner, navigate],
+  );
   const onChapter = useCallback((target: number) => {
     haptics.select();
     setPage(wide ? target - (target % 2) : target);
@@ -90,8 +101,19 @@ export function MenuScreen() {
   }, []);
 
   const book = useMemo(
-    () => buildBook({ catalog, copy, money, spread: wide, onItem, onChapter, onOpen, points: !menuOnly }),
-    [catalog, copy, money, wide, onItem, onChapter, onOpen],
+    () =>
+      buildBook({
+        catalog,
+        copy,
+        money,
+        spread: wide,
+        onItem,
+        onChapter,
+        onOpen,
+        points: !menuOnly,
+        ...(corner ? { subtitle: `${copy.corners.kicker} · ${corner.name}`, note: corner.provisional ? copy.corners.provisional : undefined } : {}),
+      }),
+    [catalog, copy, money, wide, onItem, onChapter, onOpen, corner],
   );
 
   useEffect(() => {
@@ -119,7 +141,7 @@ export function MenuScreen() {
           </div>
         ) : (
           <div className="kicker" style={{ minHeight: 38, display: "flex", alignItems: "center" }}>
-            {copy.menu.kicker} · {catalog.city.name}
+            {corner ? `${copy.corners.kicker} · ${corner.name}` : `${copy.menu.kicker} · ${catalog.city.name}`}
             {menuOnly && visit.table ? ` · ${copy.table.title(visit.table)}` : ""}
           </div>
         )}

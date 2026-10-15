@@ -23,6 +23,10 @@ type Deps = {
   copy: Copy;
   /** Show the points each item earns. Off in the menu-only build. */
   points: boolean;
+  /** A line under the logo on the cover, like the corner's name. */
+  subtitle?: string;
+  /** A small note on the cover, like "provisional menu". */
+  note?: string;
   money: (value: number) => string;
   spread: boolean;
   onItem: (item: MenuItem) => void;
@@ -71,7 +75,7 @@ function Folio({ n, total, copy }: { n: number; total: number; copy: Copy }) {
 }
 
 export function buildBook(deps: Deps): BuiltBook {
-  const { catalog, copy, money, spread, onItem, onChapter, onOpen, points } = deps;
+  const { catalog, copy, money, spread, onItem, onChapter, onOpen, points, subtitle, note } = deps;
   const { categories, items } = catalog;
   // Only chapters that this city serves.
   const chapters = categories.filter((category) => category.id !== "extras" && items.some((item) => item.category === category.id && !item.extra));
@@ -87,6 +91,7 @@ export function buildBook(deps: Deps): BuiltBook {
       <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(27,22,18,0.35), rgba(27,22,18,0.15) 35%, rgba(27,22,18,0.25) 60%, rgba(27,22,18,0.88))", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 26, color: "#fff", textAlign: "center" }}>
         <img src={BRAND.isotipoWhite} alt="" style={{ width: 46, height: 46, opacity: 0.9, position: "absolute", top: 22 }} />
         <img src={BRAND.logoWhite} alt={copy.brand} style={{ width: "76%", maxWidth: 300, height: "auto", filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.5))" }} />
+        {subtitle ? <div className="serif" style={{ fontSize: 26, marginTop: 14, lineHeight: 1.1 }}>{subtitle}</div> : null}
         <div style={{ width: 120, height: 1, background: "rgba(255,255,255,0.6)", margin: "18px 0 6px" }} />
         <button
           onClick={onOpen}
@@ -95,6 +100,7 @@ export function buildBook(deps: Deps): BuiltBook {
         >
           {copy.book.open}
         </button>
+        {note ? <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", marginTop: 16, maxWidth: 280, lineHeight: 1.4 }}>{note}</div> : null}
         <div style={{ position: "absolute", bottom: 18, left: 0, right: 0, display: "flex", justifyContent: "space-between", padding: "0 22px", fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "rgba(255,255,255,0.6)" }}>
           <span>Born in Colombia</span>
           <span>Crafted for the world</span>
