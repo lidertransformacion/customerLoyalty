@@ -80,11 +80,11 @@ export function ItemScreen() {
               ) : null}
               <div className="row" style={{ justifyContent: "space-between", marginTop: 18 }}>
                 <div className="serif" style={{ fontSize: 30 }}>{money(item.price)}</div>
-                <div style={{ textAlign: "right", fontSize: 13, color: "var(--roast)", maxWidth: 170, lineHeight: 1.3 }}>{copy.menu.earnsAtCounter(points)}</div>
+                {!menuOnly ? <div style={{ textAlign: "right", fontSize: 13, color: "var(--roast)", maxWidth: 170, lineHeight: 1.3 }}>{copy.menu.earnsAtCounter(points)}</div> : null}
               </div>
             </Glass>
           </motion.div>
-          <div style={{ fontSize: 12, color: "var(--smoke)", marginTop: 12, textAlign: "center" }}>{copy.menu.notCharged}</div>
+          {!menuOnly ? <div style={{ fontSize: 12, color: "var(--smoke)", marginTop: 12, textAlign: "center" }}>{copy.menu.notCharged}</div> : null}
         </div>
       </div>
 

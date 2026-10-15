@@ -21,6 +21,8 @@ export type BuiltBook = {
 type Deps = {
   catalog: Catalog;
   copy: Copy;
+  /** Show the points each item earns. Off in the menu-only build. */
+  points: boolean;
   money: (value: number) => string;
   spread: boolean;
   onItem: (item: MenuItem) => void;
@@ -44,7 +46,7 @@ function ChapterVisual({ category }: { category: Category }) {
   return <LivingPhoto photo={photoForCategory(category.id)} radius={14} style={{ height: 176 }} interactive={false} />;
 }
 
-function Row({ item, money, onItem, copy }: { item: MenuItem; money: (v: number) => string; onItem: (i: MenuItem) => void; copy: Copy }) {
+function Row({ item, money, onItem, copy, points }: { item: MenuItem; money: (v: number) => string; onItem: (i: MenuItem) => void; copy: Copy; points: boolean }) {
   return (
     <button className="book-item" onClick={() => onItem(item)} data-testid={`book-item-${item.id}`}>
       <div className="grow">
@@ -58,7 +60,7 @@ function Row({ item, money, onItem, copy }: { item: MenuItem; money: (v: number)
       <span className="book-leader" />
       <div>
         <div className="price">{money(item.price)}</div>
-        <div className="pts">{copy.menu.earns(pointsForPrice(item.price))}</div>
+        {points ? <div className="pts">{copy.menu.earns(pointsForPrice(item.price))}</div> : null}
       </div>
     </button>
   );
@@ -69,7 +71,7 @@ function Folio({ n, total, copy }: { n: number; total: number; copy: Copy }) {
 }
 
 export function buildBook(deps: Deps): BuiltBook {
-  const { catalog, copy, money, spread, onItem, onChapter, onOpen } = deps;
+  const { catalog, copy, money, spread, onItem, onChapter, onOpen, points } = deps;
   const { categories, items } = catalog;
   // Only chapters that this city serves.
   const chapters = categories.filter((category) => category.id !== "extras" && items.some((item) => item.category === category.id && !item.extra));
@@ -121,7 +123,7 @@ export function buildBook(deps: Deps): BuiltBook {
         </div>
         <div>
           {first.map((item) => (
-            <Row key={item.id} item={item} money={money} onItem={onItem} copy={copy} />
+            <Row key={item.id} item={item} money={money} onItem={onItem} copy={copy} points={points} />
           ))}
         </div>
         {rest.length > 0 ? <div className="serif-italic" style={{ fontSize: 13, color: "var(--smoke)", marginTop: "auto" }}>{copy.book.continues} →</div> : null}
@@ -135,7 +137,7 @@ export function buildBook(deps: Deps): BuiltBook {
           <div className="kicker">{category.name}</div>
           <div>
             {chunk.map((item) => (
-              <Row key={item.id} item={item} money={money} onItem={onItem} copy={copy} />
+              <Row key={item.id} item={item} money={money} onItem={onItem} copy={copy} points={points} />
             ))}
           </div>
           {more ? <div className="serif-italic" style={{ fontSize: 13, color: "var(--smoke)", marginTop: "auto" }}>{copy.book.continues} →</div> : null}
@@ -147,7 +149,7 @@ export function buildBook(deps: Deps): BuiltBook {
   pages.push(
     <div key="colophon" className="book-page-inner" style={{ justifyContent: "center", alignItems: "center", textAlign: "center", gap: 14 }}>
       <Beans profile="LIBRE" size={180} />
-      <div className="serif" style={{ fontSize: 24 }}>{copy.home.earnRule}</div>
+      {points ? <div className="serif" style={{ fontSize: 24 }}>{copy.home.earnRule}</div> : null}
       <div style={{ fontSize: 14, color: "var(--smoke)", maxWidth: 260 }}>{copy.menu.notCharged}</div>
     </div>,
   );
