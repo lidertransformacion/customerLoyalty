@@ -1,11 +1,25 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
-import { catalogFor, cityById, type Catalog, type CityId } from "../core/catalog";
+import { catalogFor, cityById, translateCatalog, type Catalog, type CityId } from "../core/catalog";
 import { cityFromHint, cityFromPosition, fetchIpHint } from "../core/geo";
 import type { LatLng } from "../core/stores";
 import { useLocale } from "../i18n";
 
 const CITY_KEY = "libertario-city-v1";
+
+/** Which city each house belongs to, so a table QR with `?sede=` also picks the menu. */
+const STORE_CITY: Record<string, CityId> = {
+  "zona-g": "bogota",
+  "calle-93": "bogota",
+  "calle-85": "bogota",
+  usaquen: "bogota",
+  bogota: "bogota",
+  medellin: "medellin",
+  provenza: "medellin",
+  laureles: "medellin",
+  cartagena: "cartagena",
+  getsemani: "cartagena",
+};
 
 export type CitySource = "url" | "chosen" | "gps" | "ip" | "default";
 
@@ -23,7 +37,8 @@ type Stored = { id: CityId; source: CitySource };
 
 function readStored(): Stored | null {
   try {
-    const fromUrl = new URLSearchParams(window.location.search).get("ciudad");
+    const params = new URLSearchParams(window.location.search);
+    const fromUrl = params.get("ciudad") ?? STORE_CITY[params.get("sede") ?? ""] ?? null;
     if (fromUrl) {
       const city = cityById(fromUrl);
       const stored: Stored = { id: city.id, source: "url" };
@@ -47,7 +62,7 @@ function readStored(): Stored | null {
 const RANK: Record<CitySource, number> = { chosen: 4, url: 4, gps: 3, ip: 2, default: 1 };
 
 export function CatalogProvider({ children }: { children: ReactNode }) {
-  const { market, setMarket } = useLocale();
+  const { market, setMarket, lang } = useLocale();
   const [state, setState] = useState<Stored>(() => readStored() ?? { id: "bogota", source: "default" });
 
   const setCity = useCallback((id: CityId, source: CitySource = "chosen") => {
@@ -89,8 +104,8 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<Api>(
-    () => ({ catalog: catalogFor(state.id), source: state.source, setCity, placeFromPosition }),
-    [state, setCity, placeFromPosition],
+    () => ({ catalog: translateCatalog(catalogFor(state.id), lang), source: state.source, setCity, placeFromPosition }),
+    [state, lang, setCity, placeFromPosition],
   );
   return <CatalogContext.Provider value={value}>{children}</CatalogContext.Provider>;
 }

@@ -1,6 +1,8 @@
 import { categories as baseCategories, items as baseItems, type Category, type MenuItem } from "@/src/data/menu";
 import { fold } from "@/src/format";
 
+import { CATEGORIES_EN, ITEMS_EN } from "../i18n/menu-en";
+
 /**
  * The catalog a guest sees. Each city prints its own menu: Bogotá and
  * Medellín share one, Cartagena has another. A city catalog is the base
@@ -80,4 +82,20 @@ export function filterCatalog(catalog: Catalog, filter: MenuFilter): MenuItem[] 
 
 export function itemIn(catalog: Catalog, id: string): MenuItem | undefined {
   return catalog.items.find((item) => item.id === id);
+}
+
+/** The same catalog with names and descriptions in English. Spanish stays where there is no translation. */
+export function translateCatalog(catalog: Catalog, lang: "es" | "en"): Catalog {
+  if (lang !== "en") return catalog;
+  return {
+    city: catalog.city,
+    categories: catalog.categories.map((category) => {
+      const text = CATEGORIES_EN[category.id];
+      return text ? { ...category, name: text.name, intro: text.intro } : category;
+    }),
+    items: catalog.items.map((item) => {
+      const text = ITEMS_EN[item.id];
+      return text ? { ...item, name: text.name, description: text.description } : item;
+    }),
+  };
 }
