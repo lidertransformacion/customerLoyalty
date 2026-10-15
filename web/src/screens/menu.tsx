@@ -90,7 +90,7 @@ export function MenuScreen() {
   }, []);
 
   const book = useMemo(
-    () => buildBook({ catalog, copy, money, spread: wide, onItem, onChapter, onOpen }),
+    () => buildBook({ catalog, copy, money, spread: wide, onItem, onChapter, onOpen, points: !menuOnly }),
     [catalog, copy, money, wide, onItem, onChapter, onOpen],
   );
 
