@@ -1,0 +1,143 @@
+/*
+ * Liquid Glass.
+ * Three layers: a tinted, blurred backdrop; a refracting edge (SVG displacement
+ * map on Chromium, highlight rim everywhere); and a specular sheen that follows
+ * the pointer. Content sits above all three.
+ */
+.glass {
+  position: relative;
+  isolation: isolate;
+  border-radius: var(--r-lg);
+  background: var(--glass-tint);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.7);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.7);
+  box-shadow:
+    inset 0 1px 0 var(--glass-edge),
+    inset 0 -1px 0 var(--glass-edge-soft),
+    inset 1px 0 0 rgba(255, 255, 255, 0.45),
+    inset -1px 0 0 rgba(255, 255, 255, 0.25),
+    var(--glass-shadow);
+  transform: translateZ(0);
+}
+
+.glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.2px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.25) 28%,
+    rgba(255, 255, 255, 0.05) 55%,
+    rgba(255, 255, 255, 0.55) 100%
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.glass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(
+      140px 90px at var(--sx, 30%) var(--sy, 0%),
+      rgba(255, 255, 255, 0.55),
+      rgba(255, 255, 255, 0) 70%
+    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 45%);
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 0.4s var(--ease-out);
+}
+
+.glass > * {
+  position: relative;
+  z-index: 3;
+}
+
+.glass.strong {
+  background: var(--glass-tint-strong);
+}
+
+.glass.dark {
+  background: var(--glass-tint-dark);
+  color: #fff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.08),
+    0 24px 60px -20px rgba(0, 0, 0, 0.55);
+}
+
+.glass.dark::before {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(255, 255, 255, 0.12) 30%,
+    rgba(255, 255, 255, 0.02) 60%,
+    rgba(255, 255, 255, 0.3) 100%
+  );
+}
+
+.glass.dark::after {
+  background:
+    radial-gradient(
+      160px 100px at var(--sx, 30%) var(--sy, 0%),
+      rgba(255, 255, 255, 0.28),
+      rgba(255, 255, 255, 0) 70%
+    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0) 50%);
+}
+
+.glass.pill {
+  border-radius: var(--r-pill);
+}
+
+.glass.flat {
+  box-shadow:
+    inset 0 1px 0 var(--glass-edge),
+    inset 0 -1px 0 var(--glass-edge-soft);
+}
+
+/* Chromium: real refraction at the rim through an SVG displacement map. */
+html.lens .glass.lens {
+  -webkit-backdrop-filter: url(#liquid-lens) blur(var(--glass-blur)) saturate(1.7);
+  backdrop-filter: url(#liquid-lens) blur(var(--glass-blur)) saturate(1.7);
+}
+
+/* Glass that sits on photography wants a little more body. */
+.glass.on-photo {
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.glass-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 16px;
+}
+
+.glass-field label {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--smoke);
+}
+
+.glass-field input {
+  font-size: 18px;
+  padding: 2px 0;
+  width: 100%;
+}
+
+.glass-field input::placeholder {
+  color: #b8b2ab;
+}

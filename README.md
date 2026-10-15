@@ -10,7 +10,7 @@ Customer-facing sentences live in `src/i18n/strings.ts`, with English keys. The 
 
 The points still needed for a reward are `cost - balance`. A balance of 898 against the almond croissant (2,000) is 1,102, not a fixed 1,000.
 
-## Web
+## Web (Expo)
 
 ```bash
 npm ci
@@ -28,6 +28,18 @@ npx expo export -p web
 ```
 
 The manifest is `public/manifest.json`. The service worker is not registered on localhost.
+
+## Web (PWA en `web/`)
+
+La app web nueva vive en `web/`: Vite 7 + React 19, PWA instalable, pensada para el teléfono y enmarcada como uno en desktop. Comparte con esta app Expo las reglas del programa, la carta y los textos a través del alias `@`. Tampoco cobra, no llama a Odoo y no se despliega.
+
+```bash
+cd web
+npm install
+npm run dev
+```
+
+Abre en el puerto 5173. Parámetros de URL, promo de llegada, Google sign-in, PWA y el camino a React Native están en [web/README.md](web/README.md).
 
 ## Native
 

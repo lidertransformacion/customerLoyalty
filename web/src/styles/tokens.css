@@ -1,0 +1,53 @@
+/* Libertario design tokens. White is the ground; ink and roast are accents. */
+:root {
+  --white: #ffffff;
+  --ink: #1b1612;
+  --ink-2: #2a221c;
+  --roast: #7a4328;
+  --roast-dark: #3c2418;
+  --roast-soft: #b07a5a;
+  --cream: #f6f1ea;
+  --paper: #fbf8f3;
+  --smoke: #6a6a6a;
+  --line: #e6e6e6;
+  --line-soft: #f0ece7;
+  --green-bean: #9aaf86;
+  --crema: #c48a5a;
+  --milk: #f3e9dc;
+  --matcha: #6f8f4b;
+  --amber: #9c5a2a;
+  --gold: #c4a574;
+
+  --serif: "Fraunces Variable", "Fraunces", Georgia, serif;
+  --sans: "Outfit Variable", "Outfit", system-ui, -apple-system, sans-serif;
+
+  --r-xs: 10px;
+  --r-sm: 14px;
+  --r-md: 20px;
+  --r-lg: 28px;
+  --r-xl: 36px;
+  --r-pill: 999px;
+
+  --gutter: 20px;
+  --tabbar: 84px;
+
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+
+  /* Liquid Glass */
+  --glass-tint: rgba(255, 255, 255, 0.46);
+  --glass-tint-strong: rgba(255, 255, 255, 0.68);
+  --glass-tint-dark: rgba(27, 22, 18, 0.62);
+  --glass-blur: 22px;
+  --glass-edge: rgba(255, 255, 255, 0.85);
+  --glass-edge-soft: rgba(255, 255, 255, 0.28);
+  --glass-shadow: 0 18px 50px -18px rgba(27, 22, 18, 0.28),
+    0 2px 6px -2px rgba(27, 22, 18, 0.08);
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  color-scheme: light;
+}

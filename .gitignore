@@ -39,3 +39,11 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# reference screenshots of other apps (local only)
+referencias-fidelizacion/
+
+# web app
+web/node_modules/
+web/dist/
+web/dev-dist/
