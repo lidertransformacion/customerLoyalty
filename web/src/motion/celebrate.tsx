@@ -1,5 +1,6 @@
-import { useReducedMotion } from "motion/react";
+
 import type { CSSProperties } from "react";
+import { useReduced } from "./prefs";
 
 const BEAN = "M0-7c-2.6 0-4.2 3.2-4.2 7s1.6 7 4.2 7 4.2-3.2 4.2-7-1.6-7-4.2-7Zm0 1.6c.7 1.6.7 9.2 0 10.8";
 
@@ -7,7 +8,7 @@ type Props = { trigger: number };
 
 /** Beans and sparks burst from the middle of the screen when something is earned. One CSS keyframe per piece. */
 export function Celebrate({ trigger }: Props) {
-  const reduced = useReducedMotion();
+  const reduced = useReduced();
   if (reduced || trigger === 0) return null;
   const pieces = Array.from({ length: 22 }, (_, i) => {
     const angle = (i / 22) * Math.PI * 2 + (trigger % 7) * 0.3;

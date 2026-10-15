@@ -1,7 +1,8 @@
-import { motion, useReducedMotion, useTransform } from "motion/react";
+import { motion, useTransform } from "motion/react";
 import type { CSSProperties } from "react";
 
 import { useTilt } from "./tilt";
+import { useReduced } from "./prefs";
 
 type Props = {
   src: string;
@@ -18,7 +19,7 @@ type Props = {
  * floats over its own shadow, and a sheen crosses the pack as it turns.
  */
 export function Product({ src, alt = "", size = 220, style, float = true, testId }: Props) {
-  const reduced = useReducedMotion();
+  const reduced = useReduced();
   const tilt = useTilt(reduced ? 0 : 14);
   const sheenX = useTransform(tilt.px, [0, 1], ["-40%", "140%"]);
   const shadowX = useTransform(tilt.rotateY, [-14, 14], [-10, 10]);

@@ -1,7 +1,8 @@
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import { useEffect, useRef } from "react";
 
 import { copy } from "@/src/i18n/strings";
+import { useReduced } from "./prefs";
 
 type Props = {
   onDone?: () => void;
@@ -22,7 +23,7 @@ const DARK = "#2a1810";
  * crack: sparks fly, smoke rises. It ends when the beans are dark.
  */
 export function Roast({ onDone, line, compact, duration = 2.8 }: Props) {
-  const reduced = useReducedMotion();
+  const reduced = useReduced();
   const done = useRef(onDone);
   done.current = onDone;
   const total = reduced ? 0.4 : duration;

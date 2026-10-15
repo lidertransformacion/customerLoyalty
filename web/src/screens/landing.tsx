@@ -55,7 +55,7 @@ export function Landing() {
           {GOOGLE_CLIENT_ID ? (
             <Press className="ghost-button" style={{ borderColor: "rgba(255,255,255,0.45)", color: "#fff" }} onClick={() => navigate("/signup?via=email")}>{copy.landing.email}</Press>
           ) : null}
-          <Press className="ghost-button" style={{ borderColor: "rgba(255,255,255,0.45)", color: "#fff", backdropFilter: "blur(10px)" }} onClick={() => navigate("/menu")} data-testid="landing-menu">{copy.landing.viewMenu}</Press>
+          <Press className="ghost-button" style={{ borderColor: "rgba(255,255,255,0.45)", color: "#fff", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }} onClick={() => navigate("/menu")} data-testid="landing-menu">{copy.landing.viewMenu}</Press>
         </motion.div>
       </div>
     </Screen>

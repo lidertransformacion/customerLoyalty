@@ -1,5 +1,6 @@
-import { animate, motion, useMotionValue, useReducedMotion, useTransform } from "motion/react";
+import { animate, motion, useMotionValue, useTransform } from "motion/react";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useReduced } from "../motion/prefs";
 
 import "./book.css";
 
@@ -23,7 +24,7 @@ type Turn = { direction: "forward" | "back"; dragging: boolean } | null;
  * spread: the right page folds onto the left, and its back is the next page.
  */
 export function Book({ pages, index, onIndex, spread, verso, nudge = false, command = null }: Props) {
-  const reduced = useReducedMotion();
+  const reduced = useReduced();
   const angle = useMotionValue(0);
   const [turn, setTurn] = useState<Turn>(null);
   const turnRef = useRef<Turn>(null);

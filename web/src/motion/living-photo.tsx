@@ -1,8 +1,9 @@
-import { motion, useReducedMotion, useTransform } from "motion/react";
+import { motion, useTransform } from "motion/react";
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 
 import { Stream, type StreamColor } from "./stream";
 import { useTilt } from "./tilt";
+import { useReduced } from "./prefs";
 
 export type Mood = "cold" | "pour" | "hot" | "fizz" | "still";
 
@@ -79,7 +80,7 @@ function mapper(frame: Frame, focus: string) {
  * any frame.
  */
 export function LivingPhoto({ photo, style, className, children, interactive = true, drift = true, radius = 24, testId, effects = true }: Props) {
-  const reduced = useReducedMotion();
+  const reduced = useReduced();
   const tilt = useTilt(interactive && !reduced ? 6 : 0);
   const shiftX = useTransform(tilt.px, [0, 1], [10, -10]);
   const shiftY = useTransform(tilt.py, [0, 1], [8, -8]);
@@ -95,12 +96,30 @@ export function LivingPhoto({ photo, style, className, children, interactive = t
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-    if (visible && !reduced) {
+    // iOS only autoplays a clip that is muted at the element level, not just through React's property.
+    video.muted = true;
+    video.defaultMuted = true;
+    video.setAttribute("muted", "");
+    video.setAttribute("playsinline", "");
+    const tryPlay = () => {
       const promise = video.play();
       if (promise) promise.catch(() => setVideoOk(false));
-    } else {
-      video.pause();
+    };
+    if (visible && !reduced) {
+      tryPlay();
+      // Low Power Mode blocks autoplay; the first touch anywhere starts it.
+      const onTouch = () => {
+        if (video.paused) tryPlay();
+      };
+      window.addEventListener("touchstart", onTouch, { passive: true, once: true });
+      window.addEventListener("pointerdown", onTouch, { passive: true, once: true });
+      return () => {
+        window.removeEventListener("touchstart", onTouch);
+        window.removeEventListener("pointerdown", onTouch);
+      };
     }
+    video.pause();
+    return undefined;
   }, [visible, reduced, photo.video]);
   const uid = useRef(`lp${Math.random().toString(36).slice(2, 8)}`).current;
 
