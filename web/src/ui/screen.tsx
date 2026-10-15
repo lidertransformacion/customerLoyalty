@@ -1,5 +1,6 @@
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import type { CSSProperties, ReactNode } from "react";
+import { useReduced } from "../motion/prefs";
 
 type Props = {
   children: ReactNode;
@@ -12,7 +13,7 @@ type Props = {
 
 /** A full screen that arrives and leaves the way native screens do. */
 export function Screen({ children, dark, style, direction = "fade", testId, className }: Props) {
-  const reduced = useReducedMotion();
+  const reduced = useReduced();
   const enter =
     direction === "up"
       ? { opacity: 0, y: 28 }

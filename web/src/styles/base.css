@@ -209,14 +209,6 @@ a {
   clip: rect(0 0 0 0);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
-}
 
 /* Tablet: frame the app as a phone so the demo reads like the real thing. */
 @media (min-width: 720px) and (max-width: 1023px) {

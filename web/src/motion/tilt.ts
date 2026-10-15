@@ -1,6 +1,32 @@
 import { useMotionValue, useSpring, type MotionValue } from "motion/react";
 import { useEffect, useRef, type RefObject } from "react";
 
+import { useTiltAllowed } from "./prefs";
+
+type OrientationCtor = typeof DeviceOrientationEvent & { requestPermission?: () => Promise<"granted" | "denied"> };
+
+let tiltAsked = false;
+
+/** iOS 13+ only shares the gyroscope after a tap asks for it. Safe to call anywhere; asks once. */
+export function requestTiltPermission(): void {
+  if (tiltAsked) return;
+  const ctor = (typeof DeviceOrientationEvent !== "undefined" ? DeviceOrientationEvent : null) as OrientationCtor | null;
+  if (!ctor || typeof ctor.requestPermission !== "function") {
+    tiltAsked = true;
+    return;
+  }
+  tiltAsked = true;
+  ctor.requestPermission().catch(() => undefined);
+}
+
+if (typeof window !== "undefined") {
+  const once = () => {
+    requestTiltPermission();
+    window.removeEventListener("pointerdown", once);
+  };
+  window.addEventListener("pointerdown", once, { passive: true });
+}
+
 export type Tilt<T extends HTMLElement = HTMLDivElement> = {
   ref: RefObject<T | null>;
   rotateX: MotionValue<number>;
@@ -14,7 +40,9 @@ export type Tilt<T extends HTMLElement = HTMLDivElement> = {
  * Tilts an element toward the pointer, or with the phone's gyroscope.
  * Springs bring it back to rest when the pointer leaves.
  */
-export function useTilt<T extends HTMLElement = HTMLDivElement>(max = 10): Tilt<T> {
+export function useTilt<T extends HTMLElement = HTMLDivElement>(requested = 10): Tilt<T> {
+  const allowed = useTiltAllowed();
+  const max = allowed ? requested : 0;
   const ref = useRef<T | null>(null);
   const rawX = useMotionValue(0);
   const rawY = useMotionValue(0);
