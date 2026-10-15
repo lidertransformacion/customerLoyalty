@@ -130,6 +130,14 @@ npx wrangler pages deploy dist --project-name libertario-carta --branch main
 
 `public/_redirects` manda toda ruta al `index.html` (SPA) y `functions/api/where.ts` se despliega como Pages Function. Wrangler está instalado como dependencia de desarrollo y usa la sesión de `wrangler login` del equipo.
 
+## Safari e iOS
+
+- El ajuste "Reducir movimiento" del sistema **no** apaga los clips, los efectos ni el paso de página (`motion/prefs.ts`, `MOTION_ALWAYS = true`); solo desactiva la inclinación por giroscopio. Antes sí lo apagaba todo y en iPhone con ese ajuste la carta se veía estática.
+- El clip de la portada va silenciado a nivel del elemento (`muted` como atributo, no solo como propiedad de React), con `playsinline`; si iOS lo bloquea por bajo consumo, arranca al primer toque.
+- iOS 13+ solo comparte el giroscopio tras un toque: `requestTiltPermission()` se pide en el primer `pointerdown`.
+- La refracción del cristal (`backdrop-filter: url(#…)`) es solo Chromium; Safari muestra el desenfoque y el borde.
+- Se prueba con WebKit real: `npx playwright install webkit` y los scripts de recorrido con `webkit.launch()`; con `reducedMotion: "reduce"` en el contexto se emula el ajuste del iPhone.
+
 ## Pruebas
 
 ```bash
