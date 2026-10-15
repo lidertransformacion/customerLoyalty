@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
 
-import { categories, items, type Category, type MenuItem } from "@/src/data/menu";
+import type { Category, MenuItem } from "@/src/data/menu";
 import { pointsForPrice } from "@/src/data/program";
 
+import type { Catalog } from "../core/catalog";
 import { BRAND, CLIPS, PRODUCT_IMAGES } from "../core/photos";
 import { photoForCategory } from "../core/visuals";
 import type { Copy } from "../i18n";
@@ -18,6 +19,7 @@ export type BuiltBook = {
 };
 
 type Deps = {
+  catalog: Catalog;
   copy: Copy;
   money: (value: number) => string;
   spread: boolean;
@@ -67,8 +69,10 @@ function Folio({ n, total, copy }: { n: number; total: number; copy: Copy }) {
 }
 
 export function buildBook(deps: Deps): BuiltBook {
-  const { copy, money, spread, onItem, onChapter, onOpen } = deps;
-  const chapters = categories.filter((category) => category.id !== "extras");
+  const { catalog, copy, money, spread, onItem, onChapter, onOpen } = deps;
+  const { categories, items } = catalog;
+  // Only chapters that this city serves.
+  const chapters = categories.filter((category) => category.id !== "extras" && items.some((item) => item.category === category.id && !item.extra));
   const pages: ReactNode[] = [];
   const chapterPage: Record<string, number> = {};
 
@@ -81,9 +85,7 @@ export function buildBook(deps: Deps): BuiltBook {
       <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(27,22,18,0.35), rgba(27,22,18,0.15) 35%, rgba(27,22,18,0.25) 60%, rgba(27,22,18,0.88))", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 26, color: "#fff", textAlign: "center" }}>
         <img src={BRAND.isotipoWhite} alt="" style={{ width: 46, height: 46, opacity: 0.9, position: "absolute", top: 22 }} />
         <img src={BRAND.logoWhite} alt={copy.brand} style={{ width: "76%", maxWidth: 300, height: "auto", filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.5))" }} />
-        <div style={{ width: 120, height: 1, background: "rgba(255,255,255,0.6)", margin: "16px 0 14px" }} />
-        <div className="serif" style={{ fontSize: 44, lineHeight: 1 }}>{copy.book.cover}</div>
-        <div className="serif-italic" style={{ fontSize: 16, marginTop: 8, color: "rgba(255,255,255,0.85)" }}>{copy.menu.coverLine}</div>
+        <div style={{ width: 120, height: 1, background: "rgba(255,255,255,0.6)", margin: "18px 0 6px" }} />
         <button
           onClick={onOpen}
           style={{ marginTop: 22, padding: "12px 26px", color: "#fff", border: "1px solid rgba(255,255,255,0.7)", borderRadius: 999, fontWeight: 500, letterSpacing: 1, textTransform: "uppercase", fontSize: 13, backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)" }}

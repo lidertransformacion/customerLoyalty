@@ -90,8 +90,8 @@ export function MenuScreen() {
   }, []);
 
   const book = useMemo(
-    () => buildBook({ copy, money, spread: wide, onItem, onChapter, onOpen }),
-    [copy, money, wide, onItem, onChapter, onOpen],
+    () => buildBook({ catalog, copy, money, spread: wide, onItem, onChapter, onOpen }),
+    [catalog, copy, money, wide, onItem, onChapter, onOpen],
   );
 
   useEffect(() => {

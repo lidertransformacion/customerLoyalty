@@ -37,7 +37,7 @@ export function ItemScreen() {
 
   const category = catalog.categories.find((c) => c.id === item.category);
   const visual = visualFor(item);
-  const pairing = item.description.match(/Maridaje:\s*(.+?)\.?$/)?.[1];
+  const pairing = item.description.match(/(?:Maridaje|Pairing):\s*(.+?)\.?$/)?.[1];
   const inOrder = account?.order.find((line) => line.itemId === item.id)?.quantity ?? 0;
   const points = pointsForPrice(item.price);
   const dark = visual.kind === "photo";
@@ -71,7 +71,7 @@ export function ItemScreen() {
                 {item.profile ? <span className="chip" style={{ background: "var(--cream)", minHeight: 30, fontSize: 12 }}>{item.profile}</span> : null}
                 {visual.kind === "photo" && visual.photo.mood === "cold" ? <span className="chip" style={{ background: "rgba(120,180,255,0.18)", color: "#2a5a9a", minHeight: 30, fontSize: 12 }}>❄︎</span> : null}
               </div>
-              <p style={{ fontSize: 16, lineHeight: 1.45, margin: "14px 0 0" }}>{item.description.replace(/\s*Maridaje:.*$/, "")}</p>
+              <p style={{ fontSize: 16, lineHeight: 1.45, margin: "14px 0 0" }}>{item.description.replace(/\s*(?:Maridaje|Pairing):.*$/, "")}</p>
               {pairing ? (
                 <div style={{ marginTop: 12, padding: 12, borderRadius: 14, background: "var(--cream)", fontSize: 14 }}>
                   <span className="kicker" style={{ display: "block", marginBottom: 2 }}>{copy.book.pairing}</span>

@@ -110,6 +110,26 @@ La app lee `VITE_APP_MODE` de `web/.env` (`core/mode.ts`):
 
 Las ramas solo se diferencian en ese archivo: `main` lleva `VITE_APP_MODE=menu` y `loyalty` lleva `VITE_APP_MODE=full`. El código es el mismo, así que para liberar el resto basta con hacer merge de `loyalty` en `main` y cambiar el valor (o dejar `full`). Para probar el otro modo sin tocar el archivo: `VITE_APP_MODE=menu npm run dev`.
 
+## Carta en inglés
+
+Con el idioma en inglés (`?lang=en`, el selector ES/EN o Ajustes) toda la carta cambia: categorías, nombres, descripciones y maridajes salen de `web/src/i18n/menu-en.ts` (tomados de las cartas impresas bilingües donde existen). Lo que no tenga traducción queda en español.
+
+## Ciudad y QR
+
+El catálogo se elige así, de mayor a menor prioridad: el QR o el enlace (`?ciudad=cartagena` o `?sede=getsemani`; las sedes se mapean a ciudad en `state/catalog.tsx`), lo que el invitado eligió en Ajustes, el GPS si lo activó, la ciudad por IP que resuelve Cloudflare en `/api/where`, y por defecto Bogotá. La IP acierta la ciudad casi siempre en WiFi y a veces falla en datos móviles (los operadores suelen salir por Bogotá), por eso el QR de cada sede lleva su ciudad. Los códigos están en `docs/qr/` (PNG y SVG): `carta` (detecta sola), `carta-bogota`, `carta-medellin`, `carta-cartagena`.
+
+## Despliegue (Cloudflare Pages)
+
+Proyecto `libertario-carta` en la cuenta de Cloudflare de lidertransformacion@libertariocoffee.com, URL `https://libertario-carta.pages.dev`. Se publica lo que hay en `main` (modo `menu`):
+
+```bash
+git checkout main
+cd web && npm ci && npm run build
+npx wrangler pages deploy dist --project-name libertario-carta --branch main
+```
+
+`public/_redirects` manda toda ruta al `index.html` (SPA) y `functions/api/where.ts` se despliega como Pages Function. Wrangler está instalado como dependencia de desarrollo y usa la sesión de `wrangler login` del equipo.
+
 ## Pruebas
 
 ```bash
