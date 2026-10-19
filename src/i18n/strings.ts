@@ -431,13 +431,10 @@ export const copy = {
 
   corners: {
     kicker: "Corner",
-    title: "Los corners",
-    lead: "Las barras Libertario dentro de otras casas. Cada una tiene su carta.",
-    at: (company: string) => `En ${company}`,
-    open: "Ver la carta",
+    scanTitle: "Escanea el código de tu corner",
+    scanLead: "Cada corner tiene su propia carta. El código está en la barra.",
     provisional: "Carta provisional. Los precios y las piezas de este corner están por confirmar.",
-    notFound: "Ese corner no está en la lista.",
-    all: "Todos los corners",
+    notFound: "Ese corner no existe. Revisa el código de la barra.",
   },
 
   months: [

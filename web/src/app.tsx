@@ -5,16 +5,16 @@ import { Navigate, Route, Routes, useLocation } from "react-router";
 import { productionBlocked } from "@/src/data/program";
 
 import { cornerIdFromPath } from "./core/corners";
-import { menuOnly } from "./core/mode";
+import { cornerOnly, menuOnly } from "./core/mode";
 import { useCopy } from "./i18n";
 import { Celebrate } from "./motion/celebrate";
-import { CornersScreen } from "./screens/corners";
 import { Home } from "./screens/home";
 import { ItemScreen } from "./screens/item";
 import { Landing } from "./screens/landing";
 import { MenuScreen } from "./screens/menu";
 import { Opening } from "./screens/opening";
 import { OrderScreen } from "./screens/order";
+import { ScanScreen } from "./screens/scan";
 import { SettingsScreen } from "./screens/settings";
 import { SignupScreen } from "./screens/signup";
 import { WalletScreen } from "./screens/wallet";
@@ -27,7 +27,9 @@ import { Toast } from "./ui/toast";
 function Fallback() {
   const location = useLocation();
   const id = cornerIdFromPath(location.pathname);
-  return <Navigate to={id ? { pathname: `/corner/${id}`, search: location.search } : "/"} replace />;
+  if (id) return <Navigate to={{ pathname: `/corner/${id}`, search: location.search }} replace />;
+  if (cornerOnly) return location.pathname === "/" ? <ScanScreen /> : <Navigate to="/" replace />;
+  return <Navigate to="/" replace />;
 }
 
 function RequireAccount({ children }: { children: React.ReactElement }) {
@@ -53,6 +55,22 @@ export function App() {
 
   const tabbed = !menuOnly && ["/home", "/menu", "/table"].some((path) => location.pathname.startsWith(path)) && !location.pathname.startsWith("/corner");
 
+  if (cornerOnly) {
+    return (
+      <>
+        <LensFilter />
+        <AnimatePresence mode="wait" initial={false}>
+          <Routes location={location} key={location.pathname.split("/")[1] ?? ""}>
+            <Route path="/corner/:corner" element={<MenuScreen />} />
+            <Route path="/corner/:corner/item/:id" element={<ItemScreen />} />
+            <Route path="*" element={<Fallback />} />
+          </Routes>
+        </AnimatePresence>
+        <Toast note={note} onDismiss={dismissNote} />
+      </>
+    );
+  }
+
   if (menuOnly) {
     return (
       <>
@@ -62,7 +80,6 @@ export function App() {
             <Route path="/" element={<MenuScreen />} />
             <Route path="/menu" element={<Navigate to={{ pathname: "/", search: location.search }} replace />} />
             <Route path="/item/:id" element={<ItemScreen />} />
-            <Route path="/corners" element={<CornersScreen />} />
             <Route path="/corner/:corner" element={<MenuScreen />} />
             <Route path="/corner/:corner/item/:id" element={<ItemScreen />} />
             <Route path="*" element={<Fallback />} />

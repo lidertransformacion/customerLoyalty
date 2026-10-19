@@ -106,6 +106,7 @@ El script de Google Identity Services se carga bajo demanda (`core/google.ts`). 
 La app lee `VITE_APP_MODE` de `web/.env` (`core/mode.ts`):
 
 - `menu`: solo la carta. El QR o el enlace abren el libro en `/` (con `?sede=`, `?mesa=`, `?ciudad=`, `?lang=`), la ficha de cada producto se abre y se vuelve; no hay barra inferior, cuenta, pedido ni saldo. Es lo que se lanza primero.
+- `corner`: solo los corners (rama `corners`, sitio aparte `https://libertario-corners.pages.dev`). Cada corner se abre únicamente por su enlace `/corner/<id>` (atajo `/corner-<id>`); la raíz y cualquier otra ruta muestran "escanea el código de tu corner", sin lista de corners ni carta general, para que desde un corner no se vean los precios de otro. Los corners y sus precios están en `core/corners.ts`, tomados de la hoja "Menús corners" de operaciones; los QR en `docs/qr/corners/` y la hoja imprimible en `docs/qr/corners.html`. Deploy: `npx wrangler pages deploy dist --project-name libertario-corners --branch corners`.
 - `full`: todo: arranque, registro, Casa, promo de llegada, pedido, saldo y ajustes.
 
 Las ramas solo se diferencian en ese archivo: `main` lleva `VITE_APP_MODE=menu` y `loyalty` lleva `VITE_APP_MODE=full`. El código es el mismo, así que para liberar el resto basta con hacer merge de `loyalty` en `main` y cambiar el valor (o dejar `full`). Para probar el otro modo sin tocar el archivo: `VITE_APP_MODE=menu npm run dev`.

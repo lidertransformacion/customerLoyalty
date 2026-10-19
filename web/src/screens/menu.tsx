@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { Navigate, useNavigate, useParams } from "react-router";
 
 import type { MenuItem } from "@/src/data/menu";
 import { pointsForPrice } from "@/src/data/program";
@@ -12,7 +12,7 @@ import { CORNER_ITEMS, cornerById, cornerCatalog, cornerPath } from "../core/cor
 import { ITEMS_EN } from "../i18n/menu-en";
 import { haptics } from "../core/haptics";
 import { readVisit } from "../core/market";
-import { menuOnly } from "../core/mode";
+import { cornerOnly, menuOnly } from "../core/mode";
 import { visualFor } from "../core/visuals";
 import { useCopy, useLocale } from "../i18n";
 import { LivingPhoto } from "../motion/living-photo";
@@ -44,6 +44,7 @@ export function MenuScreen() {
   const visit = readVisit();
   const { corner: cornerParam } = useParams();
   const corner = cornerById(cornerParam);
+  const unknownCorner = cornerOnly && !corner;
   const cityCatalog = useCatalog();
   const catalog = useMemo(
     () =>
@@ -130,6 +131,8 @@ export function MenuScreen() {
 
   const results = useMemo(() => filterCatalog(catalog, filter), [catalog, filter]);
   const chapters = catalog.categories.filter((c) => c.id !== "extras");
+
+  if (unknownCorner) return <Navigate to="/" replace />;
 
   return (
     <Screen testId="menu" className="full">

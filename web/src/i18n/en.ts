@@ -336,13 +336,10 @@ export const en: CopyOverride = {
 
   corners: {
     kicker: "Corner",
-    title: "The corners",
-    lead: "Libertario bars inside other houses. Each one has its own menu.",
-    at: (company: string) => `At ${company}`,
-    open: "See the menu",
+    scanTitle: "Scan your corner's code",
+    scanLead: "Each corner has its own menu. The code is at the bar.",
     provisional: "Provisional menu. Prices and items for this corner are still to be confirmed.",
-    notFound: "That corner is not on the list.",
-    all: "All corners",
+    notFound: "That corner does not exist. Check the code at the bar.",
   },
 
   settings: {
