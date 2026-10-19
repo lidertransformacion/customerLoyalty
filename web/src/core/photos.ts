@@ -66,7 +66,7 @@ export const PHOTOS: Record<string, PhotoSpec> = {
     fizz: [{ x: 8, y: 52, w: 20, h: 26 }, { x: 38, y: 36, w: 24, h: 18 }, { x: 74, y: 46, w: 16, h: 32 }],
     sweat: [{ x: 8, y: 50, w: 20, h: 30 }, { x: 74, y: 44, w: 16, h: 36 }],
   },
-  "bar.jpg": { src: photoUrl("bar.jpg"), mood: "fizz", focus: "50% 55%", fizz: [{ x: 35, y: 45, w: 30, h: 30 }] },
+  "bar.jpg": { src: photoUrl("bar.jpg"), mood: "fizz", focus: "50% 55%", fizz: [{ x: 70, y: 46, w: 20, h: 26 }], sweat: [{ x: 8, y: 62, w: 22, h: 24 }], glints: [{ x: 50, y: 48 }, { x: 80, y: 42 }, { x: 18, y: 66 }] },
   "espresso.jpg": {
     src: photoUrl("espresso.jpg"),
     mood: "hot",
@@ -74,11 +74,13 @@ export const PHOTOS: Record<string, PhotoSpec> = {
     steam: [{ x: 26, y: 20 }, { x: 66, y: 10 }, { x: 66, y: 33 }, { x: 26, y: 47 }, { x: 68, y: 59 }, { x: 24, y: 73 }, { x: 68, y: 87 }],
   },
   "brunch.jpg": { src: photoUrl("brunch.jpg"), mood: "hot", focus: "50% 55%", steam: [{ x: 46, y: 20 }, { x: 52, y: 26 }, { x: 68, y: 78 }, { x: 74, y: 84 }] },
-  "bread.jpg": { src: photoUrl("bread.jpg"), mood: "hot", focus: "50% 55%", steam: [{ x: 74, y: 84 }, { x: 28, y: 54 }, { x: 64, y: 30 }, { x: 16, y: 10 }] },
-  "sandwiches.jpg": { src: photoUrl("sandwiches.jpg"), mood: "hot", focus: "50% 55%", steam: [{ x: 40, y: 42 }, { x: 58, y: 48 }] },
-  "cakes.jpg": { src: photoUrl("cakes.jpg"), mood: "still", focus: "50% 50%" },
-  "sweet.jpg": { src: photoUrl("sweet.jpg"), mood: "still", focus: "50% 55%" },
-  "bowls.jpg": { src: photoUrl("bowls.jpg"), mood: "still", focus: "50% 55%" },
+  "bread.jpg": { src: photoUrl("bread.jpg"), mood: "hot", focus: "50% 55%", steam: [{ x: 74, y: 84 }, { x: 28, y: 54 }, { x: 64, y: 30 }, { x: 16, y: 10 }], sweep: true },
+  "sandwiches.jpg": { src: photoUrl("sandwiches.jpg"), mood: "hot", focus: "50% 55%", steam: [{ x: 40, y: 42 }, { x: 58, y: 48 }], glints: [{ x: 62, y: 46 }, { x: 36, y: 60 }], sweep: true },
+  "cakes.jpg": { src: photoUrl("cakes.jpg"), mood: "still", focus: "50% 50%", glints: [{ x: 44, y: 28 }, { x: 80, y: 30 }, { x: 60, y: 70 }, { x: 72, y: 62 }], sweep: true },
+  "sweet.jpg": { src: photoUrl("sweet.jpg"), mood: "still", focus: "50% 55%", glints: [{ x: 16, y: 48 }, { x: 55, y: 44 }, { x: 86, y: 38 }, { x: 60, y: 56 }], sweep: true },
+  "cookies.jpg": { src: photoUrl("cookies.jpg"), mood: "still", focus: "50% 50%", glints: [{ x: 70, y: 16 }, { x: 36, y: 46 }, { x: 66, y: 82 }], sweep: true },
+  "granola.jpg": { src: photoUrl("granola.jpg"), mood: "still", focus: "50% 50%", glints: [{ x: 60, y: 22 }, { x: 40, y: 64 }, { x: 72, y: 70 }], sweep: true },
+  "bowls.jpg": { src: photoUrl("bowls.jpg"), mood: "still", focus: "50% 55%", glints: [{ x: 70, y: 20 }, { x: 42, y: 70 }, { x: 78, y: 92 }], sweep: true },
 };
 
 /** Brand clips from the Libertario site, cut to short square loops in /public/video. */

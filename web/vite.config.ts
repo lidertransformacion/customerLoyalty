@@ -57,6 +57,8 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,png,jpg,woff2}"],
+        // the sharper copies and the clips load on demand, not at install
+        globIgnores: ["**/*@2x.jpg", "**/video/*", "**/products/*"],
         navigateFallback: "/index.html",
       },
       devOptions: { enabled: false },
