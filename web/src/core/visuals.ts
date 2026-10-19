@@ -33,6 +33,7 @@ const PHOTO_BY_CATEGORY: Record<string, string> = {
 };
 
 export function visualFor(item: MenuItem): Visual {
+  if (item.image) return { kind: "product", src: item.image, profile: item.profile ?? "" };
   if (item.category === "coffee") {
     const profile = item.profile ?? "PAZ";
     return { kind: "product", src: PRODUCT_IMAGES[profile] ?? PRODUCT_IMAGES.PAZ!, profile };

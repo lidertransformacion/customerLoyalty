@@ -2,7 +2,8 @@ import { motion } from "motion/react";
 import { useNavigate, useParams } from "react-router";
 
 import { catalogFor, translateCatalog } from "../core/catalog";
-import { cornerById, cornerCatalog } from "../core/corners";
+import { CORNER_ITEMS, cornerById, cornerCatalog } from "../core/corners";
+import { ITEMS_EN } from "../i18n/menu-en";
 
 import { pointsForPrice } from "@/src/data/program";
 
@@ -26,7 +27,13 @@ export function ItemScreen() {
   const { lang } = useLocale();
   const cityCatalog = useCatalog();
   const corner = cornerById(cornerParam);
-  const catalog = corner ? cornerCatalog(translateCatalog(catalogFor(corner.cityId), lang), corner) : cityCatalog;
+  const catalog = corner
+    ? cornerCatalog(
+        translateCatalog(catalogFor(corner.cityId), lang),
+        corner,
+        lang === "en" ? CORNER_ITEMS.map((entry) => (ITEMS_EN[entry.id] ? { ...entry, ...ITEMS_EN[entry.id] } : entry)) : CORNER_ITEMS,
+      )
+    : cityCatalog;
   const { account, dispatch } = useAccount();
   const item = catalog.items.find((entry) => entry.id === id);
 

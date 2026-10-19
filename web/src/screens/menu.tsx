@@ -8,7 +8,8 @@ import { pointsForPrice } from "@/src/data/program";
 import { Book } from "../book/book";
 import { buildBook, Verso } from "../book/pages";
 import { catalogFor, filterCatalog, translateCatalog, type MenuFilter } from "../core/catalog";
-import { cornerById, cornerCatalog, cornerPath } from "../core/corners";
+import { CORNER_ITEMS, cornerById, cornerCatalog, cornerPath } from "../core/corners";
+import { ITEMS_EN } from "../i18n/menu-en";
 import { haptics } from "../core/haptics";
 import { readVisit } from "../core/market";
 import { menuOnly } from "../core/mode";
@@ -45,7 +46,14 @@ export function MenuScreen() {
   const corner = cornerById(cornerParam);
   const cityCatalog = useCatalog();
   const catalog = useMemo(
-    () => (corner ? cornerCatalog(translateCatalog(catalogFor(corner.cityId), lang), corner) : cityCatalog),
+    () =>
+      corner
+        ? cornerCatalog(
+            translateCatalog(catalogFor(corner.cityId), lang),
+            corner,
+            lang === "en" ? CORNER_ITEMS.map((entry) => (ITEMS_EN[entry.id] ? { ...entry, ...ITEMS_EN[entry.id] } : entry)) : CORNER_ITEMS,
+          )
+        : cityCatalog,
     [corner, cityCatalog, lang],
   );
   useScope(corner ? `corner:${corner.id}` : "menu");

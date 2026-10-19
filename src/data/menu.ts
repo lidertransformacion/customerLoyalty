@@ -17,6 +17,8 @@ export type MenuItem = {
   price: number;
   description: string;
   profile?: string;
+  /** A product render to show instead of the chapter photo (packs, kits, capsules). */
+  image?: string;
   vegan: boolean;
   nuts: boolean;
   extra: boolean;
@@ -24,7 +26,8 @@ export type MenuItem = {
 
 type RawMenu = {
   categories: Category[];
-  items: (Omit<MenuItem, "vegan" | "nuts" | "extra"> & {
+  items: (Omit<MenuItem, "vegan" | "nuts" | "extra" | "image"> & {
+    image?: string;
     vegan?: boolean;
     nuts?: boolean;
     extra?: boolean;
@@ -42,6 +45,7 @@ export const items: MenuItem[] = data.items.map((item) => ({
   price: item.price,
   description: item.description,
   ...(item.profile ? { profile: item.profile } : {}),
+  ...(item.image ? { image: item.image } : {}),
   vegan: item.vegan ?? false,
   nuts: item.nuts ?? false,
   extra: item.extra ?? false,
