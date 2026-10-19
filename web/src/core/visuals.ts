@@ -27,7 +27,7 @@ const PHOTO_BY_CATEGORY: Record<string, string> = {
   sandwiches: "sandwiches.jpg",
   bowls: "bowls.jpg",
   cakes: "cakes.jpg",
-  cookies: "sweet.jpg",
+  cookies: "cookies.jpg",
   cocktails: "bar.jpg",
   extras: "coffee.jpg",
 };

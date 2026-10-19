@@ -28,7 +28,16 @@ export type PhotoSpec = {
   sweat?: Region[];
   /** Where bubbles rise. */
   fizz?: Region[];
+  /** Glossy spots that catch the light now and then. */
+  glints?: Point[];
+  /** A soft light that crosses the photograph every few seconds. */
+  sweep?: boolean;
 };
+
+/** The sharper copy of a photograph, for dense screens: name.jpg → name@2x.jpg. */
+export function retina(src: string): string {
+  return src.replace(/\.jpg$/, "@2x.jpg");
+}
 
 type Props = {
   photo: PhotoSpec;
@@ -158,8 +167,10 @@ export function LivingPhoto({ photo, style, className, children, interactive = t
         <motion.img
           ref={imgRef}
           src={photo.src}
+          srcSet={/\.jpg$/.test(photo.src) ? `${photo.src} 1x, ${retina(photo.src)} 2x` : undefined}
           alt=""
           draggable={false}
+          decoding="async"
           style={{ position: "absolute", inset: "-6%", width: "112%", maxWidth: "none", height: "112%", objectFit: "cover", objectPosition: photo.focus ?? "50% 50%" }}
           animate={drift && !reduced && !videoOk ? { scale: [1, 1.05, 1] } : { scale: 1 }}
           transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
@@ -193,6 +204,8 @@ export function LivingPhoto({ photo, style, className, children, interactive = t
               <Stream key={`p${i}`} uid={`${uid}p${i}`} spec={{ from: map.px(pour.from), to: map.px(pour.to), width: Math.max(2.5, map.len(pour.width)), color: pour.color, spiral: map.len(pour.spiral ?? 0), body: pour.body ?? true, ...(pour.speed !== undefined ? { speed: pour.speed } : {}) }} />
             ))}
             {photo.steam?.map((point, i) => <Steam key={`st${i}`} at={map.px(point)} size={map.len(9)} index={i} />)}
+            {photo.glints?.length ? <Glints points={photo.glints.map((point) => map.px(point))} size={map.len(1.6)} /> : null}
+            {photo.sweep ? <Sweep /> : null}
           </>
         ) : null}
         {photo.mood === "cold" && live ? <ColdAir /> : null}
@@ -311,5 +324,32 @@ function Fizz({ region, map }: { region: Region; map: Map }) {
         <motion.path key={`g${i}`} d="M0-4 L0.9-0.9 L4 0 L0.9 0.9 L0 4 L-0.9 0.9 L-4 0 L-0.9-0.9 Z" fill="#fff" transform={`translate(${glint.x * w} ${glint.y * hh})`} initial={{ opacity: 0 }} animate={{ opacity: [0, 0.9, 0], scale: [0.3, 1, 0.3] }} transition={{ duration: 1.8, delay: glint.delay, repeat: Infinity, repeatDelay: 2.2, ease: "easeInOut" }} style={{ transformBox: "fill-box", transformOrigin: "center" }} />
       ))}
     </svg>
+  );
+}
+
+/** Light catching glaze, honey, berries or glass: a star that blooms and fades, each in its own rhythm. */
+function Glints({ points, size }: { points: Point[]; size: number }) {
+  return (
+    <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", overflow: "visible", pointerEvents: "none" }}>
+      {points.map((point, i) => (
+        <motion.g key={i} transform={`translate(${point.x} ${point.y})`} style={{ transformBox: "fill-box", transformOrigin: "center" }} initial={{ opacity: 0, scale: 0.3 }} animate={{ opacity: [0, 0.95, 0], scale: [0.3, 1, 0.4], rotate: [0, 25] }} transition={{ duration: 2.4, delay: (i * 1.1) % 5, repeat: Infinity, repeatDelay: 2.6 + (i % 3), ease: "easeInOut" }}>
+          <path d={`M0 ${-size * 4} L${size * 0.8} ${-size * 0.8} L${size * 4} 0 L${size * 0.8} ${size * 0.8} L0 ${size * 4} L${-size * 0.8} ${size * 0.8} L${-size * 4} 0 L${-size * 0.8} ${-size * 0.8} Z`} fill="#fff" opacity="0.9" />
+          <circle r={size * 1.6} fill="#fff" opacity="0.6" style={{ filter: "blur(2px)" }} />
+        </motion.g>
+      ))}
+    </svg>
+  );
+}
+
+/** A soft window light that slides across the plate every few seconds. */
+function Sweep() {
+  return (
+    <motion.div
+      aria-hidden="true"
+      style={{ position: "absolute", top: "-20%", bottom: "-20%", width: "45%", pointerEvents: "none", background: "linear-gradient(100deg, rgba(255,255,255,0) 0%, rgba(255,250,240,0.32) 45%, rgba(255,255,255,0) 100%)", mixBlendMode: "soft-light", filter: "blur(6px)" }}
+      initial={{ left: "-50%" }}
+      animate={{ left: ["-50%", "110%"] }}
+      transition={{ duration: 3.6, repeat: Infinity, repeatDelay: 4.5, ease: "easeInOut" }}
+    />
   );
 }
