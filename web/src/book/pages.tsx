@@ -5,7 +5,7 @@ import { pointsForPrice } from "@/src/data/program";
 
 import type { Catalog } from "../core/catalog";
 import { BRAND, CLIPS, PRODUCT_IMAGES } from "../core/photos";
-import { isPackChapter, photoForCategory } from "../core/visuals";
+import { isPackChapter, photoForCategory, visualFor } from "../core/visuals";
 import type { Copy } from "../i18n";
 import { Beans } from "../motion/beans";
 import { LivingPhoto } from "../motion/living-photo";
@@ -40,20 +40,38 @@ type Deps = {
 const BOTTOM = 76;
 function roomFor(frame: Frame, title: string) {
   const titleLines = Math.ceil(title.length / Math.max(10, (frame.width - 44) / 15));
-  return { first: frame.height - (277 + titleLines * 32) - BOTTOM, next: frame.height - 54 - BOTTOM };
+  return { first: frame.height - (277 + titleLines * 32) - BOTTOM, next: frame.height - 54 - BOTTOM - 160 };
 }
 
 function ChapterVisual({ category }: { category: Category }) {
   if (isPackChapter(category.id)) {
     return (
-      <div style={{ display: "flex", justifyContent: "center", gap: 4 }}>
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 4, height: "100%" }}>
         {["PAZ", "LIBRE", "ROCK"].map((profile) => (
           <Product key={profile} src={PRODUCT_IMAGES[profile] ?? PRODUCT_IMAGES.PAZ!} size={84} float={false} />
         ))}
       </div>
     );
   }
-  return <LivingPhoto photo={photoForCategory(category.id, category.photo)} radius={14} style={{ height: 176 }} interactive={false} />;
+  return <LivingPhoto photo={photoForCategory(category.id, category.photo)} radius={14} style={{ height: "100%", minHeight: 176 }} interactive={false} />;
+}
+
+/** A page of rows still shows what it serves: the photograph of one of its products, filling the spare height. */
+function PageVisual({ rows, category }: { rows: MenuItem[]; category: Category }) {
+  const visual = rows.map((item) => visualFor(item)).find((v) => v.kind === "photo" && v.photo.src !== photoForCategory(category.id, category.photo).src) ?? visualFor(rows[0]!);
+  return (
+    <div style={{ flex: "1 1 150px", minHeight: 150, display: "flex", marginTop: 8 }} data-testid="page-visual">
+      {visual.kind === "product" ? (
+        <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center", gap: 6 }}>
+          {[...new Set(rows.map((item) => item.profile).filter(Boolean))].slice(0, 3).map((profile) => (
+            <Product key={profile} src={PRODUCT_IMAGES[profile!] ?? PRODUCT_IMAGES.PAZ!} size={84} float={false} />
+          ))}
+        </div>
+      ) : (
+        <LivingPhoto photo={visual.photo} radius={14} style={{ flex: 1, minHeight: 150 }} interactive={false} />
+      )}
+    </div>
+  );
 }
 
 function Row({ item, money, onItem, copy, points }: { item: MenuItem; money: (v: number) => string; onItem: (i: MenuItem) => void; copy: Copy; points: boolean }) {
@@ -158,7 +176,7 @@ export function buildBook(deps: Deps): BuiltBook {
         <div className="kicker">{copy.book.chapter(i + 1)}</div>
         <div className="serif" style={{ fontSize: 30, lineHeight: 1.05 }}>{category.name}</div>
         <div className="serif-italic" style={{ fontSize: 15, color: "var(--smoke)", marginTop: -4 }}>{category.intro}</div>
-        <div style={{ margin: "4px 0 2px" }}>
+        <div style={{ margin: "4px 0 2px", flex: "1 1 176px", minHeight: 176, display: "flex", flexDirection: "column" }}>
           <ChapterVisual category={category} />
         </div>
         <div>
@@ -179,6 +197,7 @@ export function buildBook(deps: Deps): BuiltBook {
               <Row key={item.id} item={item} money={money} onItem={onItem} copy={copy} points={points} />
             ))}
           </div>
+          <PageVisual rows={chunk} category={category} />
           {more ? <div className="serif-italic" style={{ fontSize: 13, color: "var(--smoke)", marginTop: "auto", marginBottom: 18 }}>{copy.book.continues} →</div> : null}
         </div>,
       );
@@ -212,11 +231,16 @@ export function buildBook(deps: Deps): BuiltBook {
               data-testid={`index-${category.id}`}
               style={{ textAlign: "left", borderRadius: 14, padding: compact ? "6px 10px 5px" : "10px 12px 9px", background: "rgba(255,255,255,0.75)", boxShadow: "0 6px 18px -10px rgba(27,22,18,0.35), inset 0 1px 0 rgba(255,255,255,0.9)", display: "flex", flexDirection: "column", gap: compact ? 1 : 3, minHeight: cardHeight }}
             >
-              <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                <span style={{ fontSize: 10, color: "var(--smoke)", minWidth: 14 }}>{i + 1}</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <img
+                  src={isPackChapter(category.id) ? PRODUCT_IMAGES.PAZ! : photoForCategory(category.id, category.photo).src}
+                  alt=""
+                  loading="lazy"
+                  style={{ width: compact ? 28 : 34, height: compact ? 28 : 34, borderRadius: "50%", objectFit: isPackChapter(category.id) ? "contain" : "cover", flexShrink: 0, background: "var(--cream)", boxShadow: "0 3px 8px -4px rgba(27,22,18,0.45)" }}
+                />
                 <span className="serif" style={{ fontSize: compact ? 13.5 : 15, lineHeight: 1.1 }}>{category.name}</span>
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10.5, color: "var(--smoke)", paddingLeft: 20 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10.5, color: "var(--smoke)", paddingLeft: compact ? 36 : 42 }}>
                 <span>{copy.book.items(count)}</span>
                 <span style={{ color: "var(--roast)" }}>{page + 1}</span>
               </div>

@@ -1,0 +1,39 @@
+/* The Chile menu speaks in its print's type and colours: Perfectly Nineties for titles, Manrope for text, navy on cream. */
+@font-face {
+  font-family: "Perfectly Nineties";
+  src: url("/fonts/PerfectlyNineties-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Perfectly Nineties";
+  src: url("/fonts/PerfectlyNineties-Italic.otf") format("opentype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+:root[data-menu="cl"] {
+  --serif: "Perfectly Nineties", Georgia, serif;
+  --sans: "Manrope Variable", "Manrope", system-ui, -apple-system, sans-serif;
+  --ink: #1d2e54;
+  --paper: #ffffff;
+  --cream: #f1ece3;
+  --smoke: #5d6579;
+  --roast: #8a4a2c;
+}
+
+:root[data-menu="cl"] body {
+  font-family: var(--sans);
+  color: var(--ink);
+}
+
+:root[data-menu="cl"] .serif,
+:root[data-menu="cl"] .serif-italic,
+:root[data-menu="cl"] .book-item .name,
+:root[data-menu="cl"] .book-item .price {
+  font-weight: 400;
+  font-variation-settings: normal;
+  letter-spacing: -0.005em;
+}

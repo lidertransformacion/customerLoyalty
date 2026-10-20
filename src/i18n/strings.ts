@@ -232,6 +232,8 @@ export const copy = {
   },
 
   book: {
+    zoom: "Ampliar la página",
+    start: "Iniciar",
     cover: "La carta",
     open: "Abrir la carta",
     index: "Índice",

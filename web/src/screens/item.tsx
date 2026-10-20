@@ -40,13 +40,26 @@ export function ItemScreen() {
   const pairing = item.description.match(/(?:Maridaje|Pairing):\s*(.+?)\.?$/)?.[1];
   const inOrder = account?.order.find((line) => line.itemId === item.id)?.quantity ?? 0;
   const points = pointsForPrice(item.price);
-  const dark = visual.kind === "photo";
+  // A plate without ground, or a photograph the print has few pixels of, sits whole on the paper
+  // at a size it can hold sharp, instead of being stretched across the screen.
+  const onPaper = visual.kind === "photo" && (!!visual.photo.cutout || (visual.photo.native ?? 9999) < 1100);
+  const dark = visual.kind === "photo" && !onPaper;
+  const sharpWidth = visual.kind === "photo" ? Math.round((visual.photo.native ?? 1200) / 1.6) : 0;
 
   return (
     <Screen direction="up" testId="item" className="full">
       <div className="scroll" style={{ paddingBottom: 140 }}>
         <div style={{ position: "relative", height: visual.kind === "photo" ? "58dvh" : "50dvh", minHeight: 360, maxHeight: 620 }}>
-          {visual.kind === "photo" ? (
+          {visual.kind === "photo" && onPaper ? (
+            <div style={{ position: "absolute", inset: 0, background: "var(--paper)", display: "grid", placeItems: "center", padding: "calc(var(--sat) + 70px) 20px 56px" }}>
+              <LivingPhoto
+                photo={{ ...visual.photo, cutout: true }}
+                radius={18}
+                style={{ width: `min(100%, ${sharpWidth}px)`, height: "100%" }}
+                testId={`living-${visual.photo.mood}`}
+              />
+            </div>
+          ) : visual.kind === "photo" ? (
             <LivingPhoto photo={visual.photo} radius={0} style={{ position: "absolute", inset: 0 }} testId={`living-${visual.photo.mood}`}>
               <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(27,22,18,0.35), rgba(27,22,18,0) 30%, rgba(27,22,18,0) 70%, rgba(255,255,255,1) 100%)" }} />
             </LivingPhoto>

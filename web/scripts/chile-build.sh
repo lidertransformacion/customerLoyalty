@@ -11,6 +11,8 @@ WORK="${TMPDIR:-/tmp}/chile-menu-build"
 rm -rf "$WORK" && mkdir -p "$WORK" print/chile/pages print/chile/img
 node scripts/chile-extract.mjs "$PDF" "$WORK"
 "$PY" scripts/chile-images.py "$WORK" print/chile/img
+"$PY" scripts/chile-images.py "$WORK" print/chile/img-full full
+mkdir -p public/chile && cp -R print/chile/pages print/chile/img public/chile/
 node -e '
 const fs = require("fs"), path = require("path");
 const [work, out] = process.argv.slice(1);

@@ -196,6 +196,8 @@ export const en: CopyOverride = {
   },
 
   book: {
+    zoom: "Zoom the page",
+    start: "Start",
     cover: "The menu",
     open: "Open the menu",
     index: "Contents",

@@ -113,6 +113,11 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
     if (chosen.market !== market.id && (state.source === "url" || state.source === "chosen")) setMarket(chosen.market);
   }, [chosen.market, market.id, setMarket, state.source]);
 
+  // Chile's menu has its own type and colours (styles/chile.css)
+  useEffect(() => {
+    document.documentElement.dataset.menu = cityById(cityId).market === "CL" ? "cl" : "co";
+  }, [cityId]);
+
   const value = useMemo<Api>(
     () => ({ catalog: translateCatalog(catalogFor(cityId), lang), source: state.source, setCity, placeFromPosition }),
     [cityId, state.source, lang, setCity, placeFromPosition],

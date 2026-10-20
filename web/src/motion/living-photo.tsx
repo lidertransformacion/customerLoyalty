@@ -32,11 +32,17 @@ export type PhotoSpec = {
   glints?: Point[];
   /** A soft light that crosses the photograph every few seconds. */
   sweep?: boolean;
+  /** The photograph itself flows: silk that waves, liquid that drifts. */
+  flow?: "silk" | "liquid";
+  /** Plates without a ground: drawn whole on the page, no frame. */
+  cutout?: boolean;
+  /** Real pixels across the photograph; it is never shown much larger than this. */
+  native?: number;
 };
 
 /** The sharper copy of a photograph, for dense screens: name.jpg → name@2x.jpg. */
 export function retina(src: string): string {
-  return src.replace(/\.jpg$/, "@2x.jpg");
+  return src.replace(/\.(jpg|webp)$/, "@2x.$1");
 }
 
 type Props = {
@@ -53,6 +59,16 @@ type Props = {
 };
 
 type Frame = { w: number; h: number; nw: number; nh: number };
+
+/** Maps photo percentages to frame pixels for a cut-out drawn whole (object-fit: contain, centred). */
+function containMapper(frame: Frame) {
+  const a = frame.nw / frame.nh;
+  const dw = a > frame.w / frame.h ? frame.w : frame.h * a;
+  const dh = dw / a;
+  const ox = (frame.w - dw) / 2;
+  const oy = (frame.h - dh) / 2;
+  return { px: (p: Point) => ({ x: ox + (p.x / 100) * dw, y: oy + (p.y / 100) * dh }), len: (pct: number) => (pct / 100) * dw };
+}
 
 /** Maps photo percentages to frame pixels, honoring object-fit: cover, the focus and the 12% zoom. */
 function mapper(frame: Frame, focus: string) {
@@ -153,7 +169,7 @@ export function LivingPhoto({ photo, style, className, children, interactive = t
     };
   }, [tilt.ref]);
 
-  const map = frame ? mapper(frame, photo.focus ?? "50% 50%") : null;
+  const map = frame ? (photo.cutout ? containMapper(frame) : mapper(frame, photo.focus ?? "50% 50%")) : null;
   const live = effects && !reduced && visible && map !== null;
 
   return (
@@ -161,18 +177,19 @@ export function LivingPhoto({ photo, style, className, children, interactive = t
       ref={tilt.ref}
       className={className}
       data-testid={testId}
-      style={{ position: "relative", overflow: "hidden", borderRadius: radius, transformPerspective: 1000, rotateX: tilt.rotateX, rotateY: tilt.rotateY, transformStyle: "preserve-3d", background: "#1b1612", ...style }}
+      style={{ position: "relative", overflow: photo.cutout ? "visible" : "hidden", borderRadius: photo.cutout ? 0 : radius, transformPerspective: 1000, rotateX: tilt.rotateX, rotateY: tilt.rotateY, transformStyle: "preserve-3d", background: photo.cutout ? "transparent" : "#1b1612", ...style }}
     >
+      {photo.flow && effects && !reduced ? <FlowFilters /> : null}
       <motion.div style={{ position: "absolute", inset: 0, x: shiftX, y: shiftY }}>
         <motion.img
           ref={imgRef}
           src={photo.src}
-          srcSet={/\.jpg$/.test(photo.src) ? `${photo.src} 1x, ${retina(photo.src)} 2x` : undefined}
+          srcSet={/\.(jpg|webp)$/.test(photo.src) ? `${photo.src} 1x, ${retina(photo.src)} 2x` : undefined}
           alt=""
           draggable={false}
           decoding="async"
-          style={{ position: "absolute", inset: "-6%", width: "112%", maxWidth: "none", height: "112%", objectFit: "cover", objectPosition: photo.focus ?? "50% 50%" }}
-          animate={drift && !reduced && !videoOk ? { scale: [1, 1.05, 1] } : { scale: 1 }}
+          style={{ position: "absolute", ...(photo.cutout ? { inset: 0, width: "100%", height: "100%", objectFit: "contain" } : { inset: "-6%", width: "112%", height: "112%", objectFit: "cover", objectPosition: photo.focus ?? "50% 50%" }), maxWidth: "none", ...(photo.flow && effects && !reduced ? { filter: `url(#lp-flow-${photo.flow})` } : {}) }}
+          animate={drift && !reduced && !videoOk ? (photo.cutout ? { y: [0, -3, 0] } : { scale: [1, 1.05, 1] }) : { scale: 1 }}
           transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
         />
         {photo.video && effects && !reduced ? (
@@ -351,5 +368,32 @@ function Sweep() {
       animate={{ left: ["-50%", "110%"] }}
       transition={{ duration: 3.6, repeat: Infinity, repeatDelay: 4.5, ease: "easeInOut" }}
     />
+  );
+}
+
+/**
+ * Noise that drifts and the photograph displaced along it: silk waves, liquid
+ * swirls. Units are CSS pixels of the image.
+ */
+function FlowFilters() {
+  return (
+    <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden="true">
+      <filter id="lp-flow-silk" x="-5%" y="-5%" width="110%" height="110%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.0026 0.008" numOctaves="1" seed="4" result="noise" />
+        <feOffset in="noise" result="moved">
+          <animate attributeName="dx" values="0;90;0" dur="20s" repeatCount="indefinite" />
+          <animate attributeName="dy" values="0;24;0" dur="15s" repeatCount="indefinite" />
+        </feOffset>
+        <feDisplacementMap in="SourceGraphic" in2="moved" scale="16" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+      <filter id="lp-flow-liquid" x="-5%" y="-5%" width="110%" height="110%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.006 0.008" numOctaves="1" seed="11" result="noise" />
+        <feOffset in="noise" result="moved">
+          <animate attributeName="dx" values="0;-50;0" dur="17s" repeatCount="indefinite" />
+          <animate attributeName="dy" values="0;-70;0" dur="13s" repeatCount="indefinite" />
+        </feOffset>
+        <feDisplacementMap in="SourceGraphic" in2="moved" scale="14" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+    </svg>
   );
 }

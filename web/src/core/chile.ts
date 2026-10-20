@@ -38,10 +38,16 @@ function linesOf(source: ChileSource): { line: Line; price: number }[] {
 const categories: Category[] = CHILE_CHAPTERS.map((chapter) => ({ id: chapter.id, name: chapter.name, photo: chapter.photo, intro: chapter.intro }));
 
 const items: MenuItem[] = [];
+/** The first line (size or blend) of each printed product, by its id in chile-data. */
+export const FIRST_LINE: Record<string, string> = {};
+/** Every line (size or blend) of each printed product. */
+export const LINES_OF: Record<string, string[]> = {};
 const itemsEn: Record<string, { name: string; description: string }> = {};
 for (const source of CHILE_SOURCE) {
-  const photo = source.focus ? focusKey(source.focus) : undefined;
+  const photo = source.photo ?? (source.focus ? focusKey(source.focus) : undefined);
   for (const { line, price } of linesOf(source)) {
+    FIRST_LINE[source.id] ??= line.id;
+    (LINES_OF[source.id] ??= []).push(line.id);
     const description = `${source.description ?? ""}${source.pairing ? ` Maridaje: ${source.pairing}.` : ""}`.trim();
     items.push({
       id: line.id,

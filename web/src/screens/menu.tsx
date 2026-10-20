@@ -6,6 +6,13 @@ import type { MenuItem } from "@/src/data/menu";
 import { pointsForPrice } from "@/src/data/program";
 
 import { Book } from "../book/book";
+import { FIRST_LINE } from "../core/chile";
+import { buildSheetBook } from "../sheets/book";
+import "../sheets/chile.css";
+import { catalogLine, CHAPTER_PAGE, PAGE, type ChileItem } from "../sheets/data";
+import { ChileCover, ChapterBar } from "../sheets/app";
+import { ChileDefs } from "../sheets/effects";
+import { ZoomStage, type ZoomHandle } from "../sheets/zoom";
 import { buildBook, Verso } from "../book/pages";
 import { filterCatalog, type MenuFilter } from "../core/catalog";
 import { haptics } from "../core/haptics";
@@ -107,10 +114,51 @@ export function MenuScreen() {
     return () => observer.disconnect();
   }, []);
 
-  const book = useMemo(
-    () => buildBook({ catalog, copy, money, spread: wide, onItem, onChapter, onOpen, points: !menuOnly, ...(frame ? { pageHeight: frame.height, pageWidth: frame.width } : {}) }),
-    [catalog, copy, money, wide, onItem, onChapter, onOpen, frame],
+  // Chile reads as its print: the sheets of the PDF, alive
+  const sheets = catalog.city.market === "CL";
+  const pageOfRef = useRef<(printed: number) => number>(() => 0);
+  const onRow = useCallback(
+    (row: ChileItem) => {
+      const id = catalogLine(row.id, FIRST_LINE);
+      if (id) navigate(`/item/${id}`);
+    },
+    [navigate],
   );
+  const onPrinted = useCallback((printed: number) => {
+    haptics.select();
+    setPage(pageOfRef.current(printed));
+  }, []);
+  const sheetBook = useMemo(() => (sheets ? buildSheetBook({ wide, copy, catalog, onRow, onPrinted, onItem, money }) : null), [sheets, wide, copy, catalog, onRow, onPrinted, onItem, money]);
+  if (sheetBook) pageOfRef.current = sheetBook.pageOf;
+  const zoomRef = useRef<ZoomHandle>(null);
+  const [zoomed, setZoomed] = useState(false);
+  const [fit, setFit] = useState<{ w: number; h: number } | null>(null);
+  useEffect(() => {
+    const node = stageRef.current;
+    if (!node || !sheets) return;
+    const measure = () => {
+      const style = getComputedStyle(node);
+      const W = node.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+      const H = node.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
+      if (!wide) {
+        setFit({ w: Math.floor(W), h: Math.floor(H) });
+        return;
+      }
+      const ratio = (PAGE.width * 2) / PAGE.height;
+      const w = Math.min(W, H * ratio);
+      setFit({ w: Math.floor(w), h: Math.floor(w / ratio) });
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [sheets, wide, page === 0]);
+
+  const colombianBook = useMemo(
+    () => sheets ? null : buildBook({ catalog, copy, money, spread: wide, onItem, onChapter, onOpen, points: !menuOnly, ...(frame ? { pageHeight: frame.height, pageWidth: frame.width } : {}) }),
+    [sheets, catalog, copy, money, wide, onItem, onChapter, onOpen, frame],
+  );
+  const book = (sheetBook ?? colombianBook)!;
 
   useEffect(() => {
     if (page > book.total - 1) setPage(0);
@@ -119,19 +167,61 @@ export function MenuScreen() {
   const results = useMemo(() => filterCatalog(catalog, filter), [catalog, filter]);
   const chapters = catalog.categories.filter((c) => c.id !== "extras");
 
+  // Chile on a phone is an app: a full-screen cover, then the book under a bar of chapters
+  if (sheets && !wide && sheetBook) {
+    const chapter = sheetBook.chapterAt(page);
+    return (
+      <Screen testId="menu" className="full">
+        <ChileDefs />
+        {page === 0 ? (
+          <ChileCover copy={copy} lang={lang} setLang={setLang} onStart={() => { haptics.select(); setPage(sheetBook.indexPage); }} />
+        ) : (
+          <>
+            <ChapterBar
+              copy={copy}
+              catalog={catalog}
+              active={page === sheetBook.indexPage ? "index" : chapter}
+              lang={lang}
+              setLang={setLang}
+              onHome={() => { haptics.select(); setPage(0); }}
+              onIndex={() => { haptics.select(); setPage(sheetBook.indexPage); }}
+              onChapter={(id) => onPrinted(CHAPTER_PAGE[id]!)}
+            />
+            <div ref={stageRef} className="ch-app-stage">
+              {fit ? (
+                <ZoomStage ref={zoomRef} width={fit.w} height={fit.h} onZoomed={setZoomed}>
+                  <Book pages={book.pages} index={page} onIndex={setPage} spread={false} verso={() => <div style={{ position: "absolute", inset: 0, background: "#fff" }} />} command={command} className="chile app" />
+                </ZoomStage>
+              ) : null}
+            </div>
+          </>
+        )}
+      </Screen>
+    );
+  }
+
   return (
     <Screen testId="menu" className="full">
       <div className="pad pad-top row" style={{ justifyContent: "space-between", paddingBottom: 8 }}>
-        {view === "book" && page > 0 ? (
+        {view === "book" && (page > 0 || sheets) ? (
           <div className="row" style={{ gap: 6 }}>
-            <button onClick={() => { haptics.select(); setPage(0); }} className="chip" style={{ background: "var(--cream)", minHeight: 38, paddingLeft: 12, paddingRight: 12 }} data-testid="book-to-cover" aria-label={copy.book.toCover}>
+            {page > 0 ? <button onClick={() => { haptics.select(); setPage(0); }} className="chip" style={{ background: "var(--cream)", minHeight: 38, paddingLeft: 12, paddingRight: 12 }} data-testid="book-to-cover" aria-label={copy.book.toCover}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 11.5 12 5l8 6.5" /><path d="M6.5 10.5V19h11v-8.5" /></svg>
               {copy.book.toCover}
-            </button>
+            </button> : null}
             {page !== book.indexPage ? (
               <button onClick={() => { haptics.select(); setPage(book.indexPage); }} className="chip" style={{ background: "var(--cream)", minHeight: 38, paddingLeft: 12, paddingRight: 12 }} data-testid="book-to-index">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 6h16M4 12h16M4 18h10" /></svg>
                 {copy.book.toIndex}
+              </button>
+            ) : null}
+            {sheets ? (
+              <button onClick={() => zoomRef.current?.toggle()} className="chip" aria-pressed={zoomed} aria-label={copy.book.zoom} style={{ background: zoomed ? "var(--ink)" : "var(--cream)", color: zoomed ? "var(--cream)" : undefined, minHeight: 38, width: 38, padding: 0, justifyContent: "center" }} data-testid="book-zoom">
+                {zoomed ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" /></svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><circle cx="11" cy="11" r="6.5" /><path d="m20 20-4.2-4.2M11 8v6M8 11h6" /></svg>
+                )}
               </button>
             ) : null}
           </div>
@@ -156,7 +246,27 @@ export function MenuScreen() {
         {view === "book" ? (
           <motion.div key="book" style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }} initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} transition={{ duration: 0.2 }}>
             <div ref={stageRef} style={{ flex: 1, minHeight: 0, padding: `0 ${wide ? 24 : 14}px calc(var(--tabbar) + var(--sab) + 10px)` }}>
-              <Book pages={book.pages} index={page} onIndex={setPage} spread={wide} verso={() => <Verso copy={copy} />} nudge={hint && page <= 1} command={command} />
+              {sheets ? (
+                fit ? (
+                  <div style={{ height: "100%", display: "grid", placeItems: "center" }}>
+                    <ChileDefs />
+                    <ZoomStage ref={zoomRef} width={fit.w} height={fit.h} onZoomed={setZoomed}>
+                      <Book
+                        pages={book.pages}
+                        index={page}
+                        onIndex={setPage}
+                        spread={wide}
+                        verso={() => <div style={{ position: "absolute", inset: 0, background: "#e9dfcb" }} />}
+                        nudge={hint && page === 0}
+                        command={command}
+                        className={`chile${page === 0 || page >= book.total - (wide ? 2 : 1) ? " alone" : ""}`}
+                      />
+                    </ZoomStage>
+                  </div>
+                ) : null
+              ) : (
+                <Book pages={book.pages} index={page} onIndex={setPage} spread={wide} verso={() => <Verso copy={copy} />} nudge={hint && page <= 1} command={command} />
+              )}
             </div>
             <AnimatePresence>
               {hint && page <= 1 ? (
