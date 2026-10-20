@@ -637,3 +637,44 @@
 .mn-sheet {
   padding-top: calc(var(--sat) + 84px);
 }
+
+/* ===== the Colombian page: a sheet with a margin, rounded corners and a shadow ===== */
+.mn .mn-stage {
+  position: absolute;
+  top: calc(var(--sat) + 64px);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 10px max(14px, var(--sar)) calc(var(--sab) + 14px) max(14px, var(--sal));
+}
+
+.mn-book .book-page,
+.mn-book .book-face {
+  border-radius: 6px 22px 22px 6px;
+  background: #fff;
+  background-image: linear-gradient(90deg, rgba(27, 22, 18, 0.06), rgba(27, 22, 18, 0) 14px);
+  box-shadow: 0 2px 0 rgba(255, 255, 255, 0.6) inset, 0 18px 40px -24px rgba(27, 22, 18, 0.45), 0 0 0 1px rgba(27, 22, 18, 0.04);
+}
+
+.mn-book .book-face.back {
+  border-radius: 22px 6px 6px 22px;
+}
+
+.mn-sheet {
+  padding-top: 20px;
+  padding-left: 22px;
+  padding-right: 20px;
+}
+
+.mn-bar.glass {
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: none;
+}
+
+.mn-bar.glass .mn-top {
+  min-height: 60px;
+}
+
+.mn-bar .mn-top {
+  max-width: 628px;
+}

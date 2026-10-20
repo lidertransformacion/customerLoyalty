@@ -147,12 +147,12 @@ export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { c
           className="mn-book"
         />
       </div>
-      <motion.header className="mn-bar glass lens strong" initial={false} animate={{ opacity: onCover ? 0 : 1, y: onCover ? -12 : 0 }} transition={{ duration: 0.3 }} style={{ pointerEvents: onCover ? "none" : "auto" }}>
+      <header className="mn-bar glass lens strong">
         <div className="mn-top">
           <button className="mn-home" onClick={() => setPage(0)} aria-label={copy.book.toCover} data-testid="book-to-cover">
             <img src="/chile/brujula-azul.svg" alt="" width={28} height={28} />
           </button>
-          {onIndex ? (
+          {onIndex || onCover ? (
             <LangSwitch lang={lang} setLang={setLang} />
           ) : (
             <span className="mn-count" aria-live="polite">
@@ -166,7 +166,7 @@ export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { c
         <div className="mn-progress" aria-hidden="true">
           <motion.span animate={{ width: `${(Math.max(0, page - 1) / chapters.length) * 100}%` }} transition={{ type: "spring", stiffness: 200, damping: 30 }} />
         </div>
-      </motion.header>
+      </header>
     </div>
   );
 }
@@ -177,10 +177,6 @@ function CoverSheet({ copy, lang, setLang, onStart }: { copy: Copy; lang: Lang; 
     <div className="mn-cover" data-testid="book-cover">
       <div className="mn-cover-art">
         <ChileSpread n={1} view="full" label={copy.brand} />
-      </div>
-      <div className="mn-top on-dark mn-cover-top">
-        <span />
-        <LangSwitch lang={lang} setLang={setLang} dark />
       </div>
       <div className="mn-start-wrap">
         <motion.button className="mn-start glass dark pill lens" onClick={onStart} data-testid="book-open" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.6, ease: [0.22, 1, 0.36, 1] }} whileTap={{ scale: 0.97 }}>
@@ -254,7 +250,7 @@ function ChapterPage({
   const products = productsOf(catalog, category.id);
   const hero = heroOf(products, category.id);
   // four bags across the sheet, a little overlapped
-  const bag = Math.round(Math.min(132, (Math.min(window.innerWidth, 600) - 48) / 3.1));
+  const bag = Math.round(Math.min(132, (Math.min(window.innerWidth, 600) - 76) / 3.1));
   return (
     <section className="book-page-inner mn-sheet mn-page" data-testid={`chapter-${category.id}`} aria-label={category.name}>
       <div className="mn-hero">
