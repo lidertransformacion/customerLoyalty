@@ -47,3 +47,6 @@ referencias-fidelizacion/
 web/node_modules/
 web/dist/
 web/dev-dist/
+
+# Chile print spreads, regenerated from the PDF by web/scripts/chile-build.sh
+web/print/

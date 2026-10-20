@@ -5,7 +5,7 @@ import { pointsForPrice } from "@/src/data/program";
 
 import type { Catalog } from "../core/catalog";
 import { BRAND, CLIPS, PRODUCT_IMAGES } from "../core/photos";
-import { photoForCategory } from "../core/visuals";
+import { isPackChapter, photoForCategory } from "../core/visuals";
 import type { Copy } from "../i18n";
 import { Beans } from "../motion/beans";
 import { LivingPhoto } from "../motion/living-photo";
@@ -28,13 +28,23 @@ type Deps = {
   onItem: (item: MenuItem) => void;
   onChapter: (page: number) => void;
   onOpen: () => void;
+  /** A page's size in CSS pixels, measured on screen; sets how many rows each page holds. */
+  pageHeight?: number;
+  pageWidth?: number;
 };
 
-const FIRST_PAGE_ROWS = 5;
-const NEXT_PAGE_ROWS = 9;
+/**
+ * Room for rows on a chapter's first page (under its title and photo) and on
+ * the pages after it. The bottom keeps space for "continues" and the folio.
+ */
+const BOTTOM = 76;
+function roomFor(frame: Frame, title: string) {
+  const titleLines = Math.ceil(title.length / Math.max(10, (frame.width - 44) / 15));
+  return { first: frame.height - (277 + titleLines * 32) - BOTTOM, next: frame.height - 54 - BOTTOM };
+}
 
 function ChapterVisual({ category }: { category: Category }) {
-  if (category.id === "coffee") {
+  if (isPackChapter(category.id)) {
     return (
       <div style={{ display: "flex", justifyContent: "center", gap: 4 }}>
         {["PAZ", "LIBRE", "ROCK"].map((profile) => (
@@ -43,27 +53,55 @@ function ChapterVisual({ category }: { category: Category }) {
       </div>
     );
   }
-  return <LivingPhoto photo={photoForCategory(category.id)} radius={14} style={{ height: 176 }} interactive={false} />;
+  return <LivingPhoto photo={photoForCategory(category.id, category.photo)} radius={14} style={{ height: 176 }} interactive={false} />;
 }
 
 function Row({ item, money, onItem, copy, points }: { item: MenuItem; money: (v: number) => string; onItem: (i: MenuItem) => void; copy: Copy; points: boolean }) {
   return (
     <button className="book-item" onClick={() => onItem(item)} data-testid={`book-item-${item.id}`}>
-      <div className="grow">
+      <div className="book-item-head">
         <div className="name">
           {item.name}
           {item.vegan ? <span className="book-badge">{copy.menu.plant}</span> : null}
           {item.nuts ? <span className="book-badge nuts">{copy.menu.noNuts.replace(/^sin |^no /i, "")}</span> : null}
         </div>
-        {item.description ? <div className="desc">{item.description}</div> : null}
-      </div>
-      <span className="book-leader" />
-      <div>
+        <span className="book-leader" />
         <div className="price">{money(item.price)}</div>
-        {points ? <div className="pts">{copy.menu.earns(pointsForPrice(item.price))}</div> : null}
       </div>
+      {item.description ? <div className="desc">{item.description}</div> : null}
+      {points ? <div className="pts">{copy.menu.earns(pointsForPrice(item.price))}</div> : null}
     </button>
   );
+}
+
+/** Page geometry measured on screen, in CSS pixels; rows are laid out against it. */
+type Frame = { width: number; height: number };
+
+/** The height a row takes, from the widths measured on the page: name in the serif, description in the sans. */
+function rowHeight(item: MenuItem, frame: Frame, points: boolean): number {
+  const nameChars = Math.max(12, (frame.width - 144) / 8.1) - (item.vegan || item.nuts ? 8 : 0);
+  const descChars = Math.max(20, (frame.width - 48) / 6.55);
+  const nameLines = Math.ceil(item.name.length / nameChars);
+  const descLines = item.description ? Math.ceil(item.description.length / descChars) : 0;
+  return 26 + nameLines * 20.6 + descLines * 16.4 + (points ? 15 : 0);
+}
+
+/** Splits rows into pages by the room they take, not by a fixed count. */
+function paginate(rows: MenuItem[], first: number, next: number, frame: Frame, points: boolean): MenuItem[][] {
+  const pages: MenuItem[][] = [[]];
+  let room = first;
+  for (const row of rows) {
+    const height = rowHeight(row, frame, points);
+    const page = pages[pages.length - 1]!;
+    if (page.length > 0 && height > room) {
+      pages.push([row]);
+      room = next - height;
+    } else {
+      page.push(row);
+      room -= height;
+    }
+  }
+  return pages;
 }
 
 function Folio({ n, total, copy }: { n: number; total: number; copy: Copy }) {
@@ -71,7 +109,8 @@ function Folio({ n, total, copy }: { n: number; total: number; copy: Copy }) {
 }
 
 export function buildBook(deps: Deps): BuiltBook {
-  const { catalog, copy, money, spread, onItem, onChapter, onOpen, points } = deps;
+  const { catalog, copy, money, spread, onItem, onChapter, onOpen, points, pageHeight = 772, pageWidth = spread ? 566 : 362 } = deps;
+  const frame: Frame = { width: pageWidth, height: pageHeight };
   const { categories, items } = catalog;
   // Only chapters that this city serves.
   const chapters = categories.filter((category) => category.id !== "extras" && items.some((item) => item.category === category.id && !item.extra));
@@ -109,8 +148,9 @@ export function buildBook(deps: Deps): BuiltBook {
 
   for (const [i, category] of chapters.entries()) {
     const all = items.filter((item) => item.category === category.id && !item.extra);
-    const first = all.slice(0, FIRST_PAGE_ROWS);
-    const rest = all.slice(FIRST_PAGE_ROWS);
+    const room = roomFor(frame, category.name);
+    const [first = [], ...restPages] = paginate(all, room.first, room.next, frame, points);
+    const rest = restPages.flat();
     chapterPage[category.id] = pages.length;
     indexEntries.push({ category, page: pages.length });
     pages.push(
@@ -126,21 +166,20 @@ export function buildBook(deps: Deps): BuiltBook {
             <Row key={item.id} item={item} money={money} onItem={onItem} copy={copy} points={points} />
           ))}
         </div>
-        {rest.length > 0 ? <div className="serif-italic" style={{ fontSize: 13, color: "var(--smoke)", marginTop: "auto" }}>{copy.book.continues} →</div> : null}
+        {rest.length > 0 ? <div className="serif-italic" style={{ fontSize: 13, color: "var(--smoke)", marginTop: "auto", marginBottom: 18 }}>{copy.book.continues} →</div> : null}
       </div>,
     );
-    for (let start = 0; start < rest.length; start += NEXT_PAGE_ROWS) {
-      const chunk = rest.slice(start, start + NEXT_PAGE_ROWS);
-      const more = start + NEXT_PAGE_ROWS < rest.length;
+    for (const [n, chunk] of restPages.entries()) {
+      const more = n < restPages.length - 1;
       pages.push(
-        <div key={`${category.id}-${start}`} className="book-page-inner">
+        <div key={`${category.id}-${n}`} className="book-page-inner">
           <div className="kicker">{category.name}</div>
           <div>
             {chunk.map((item) => (
               <Row key={item.id} item={item} money={money} onItem={onItem} copy={copy} points={points} />
             ))}
           </div>
-          {more ? <div className="serif-italic" style={{ fontSize: 13, color: "var(--smoke)", marginTop: "auto" }}>{copy.book.continues} →</div> : null}
+          {more ? <div className="serif-italic" style={{ fontSize: 13, color: "var(--smoke)", marginTop: "auto", marginBottom: 18 }}>{copy.book.continues} →</div> : null}
         </div>,
       );
     }
@@ -155,11 +194,15 @@ export function buildBook(deps: Deps): BuiltBook {
   );
 
   const total = pages.length;
+  // index cards shrink on short pages so every chapter fits without scrolling
+  const indexRows = Math.ceil(indexEntries.length / 2);
+  const cardHeight = Math.max(40, Math.min(58, (pageHeight - 150) / indexRows - 8));
+  const compact = cardHeight < 54;
   pages[indexPage] = (
     <div key="index" className="book-page-inner" data-testid="book-index">
       <div className="kicker">{copy.brand}</div>
       <div className="serif" style={{ fontSize: 32, lineHeight: 1 }}>{copy.book.index}</div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 10 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: compact ? 6 : 8, marginTop: compact ? 6 : 10 }}>
         {indexEntries.map(({ category, page }, i) => {
           const count = items.filter((item) => item.category === category.id && !item.extra).length;
           return (
@@ -167,11 +210,11 @@ export function buildBook(deps: Deps): BuiltBook {
               key={category.id}
               onClick={() => onChapter(page)}
               data-testid={`index-${category.id}`}
-              style={{ textAlign: "left", borderRadius: 14, padding: "10px 12px 9px", background: "rgba(255,255,255,0.75)", boxShadow: "0 6px 18px -10px rgba(27,22,18,0.35), inset 0 1px 0 rgba(255,255,255,0.9)", display: "flex", flexDirection: "column", gap: 3, minHeight: 58 }}
+              style={{ textAlign: "left", borderRadius: 14, padding: compact ? "6px 10px 5px" : "10px 12px 9px", background: "rgba(255,255,255,0.75)", boxShadow: "0 6px 18px -10px rgba(27,22,18,0.35), inset 0 1px 0 rgba(255,255,255,0.9)", display: "flex", flexDirection: "column", gap: compact ? 1 : 3, minHeight: cardHeight }}
             >
               <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
                 <span style={{ fontSize: 10, color: "var(--smoke)", minWidth: 14 }}>{i + 1}</span>
-                <span className="serif" style={{ fontSize: 15, lineHeight: 1.1 }}>{category.name}</span>
+                <span className="serif" style={{ fontSize: compact ? 13.5 : 15, lineHeight: 1.1 }}>{category.name}</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10.5, color: "var(--smoke)", paddingLeft: 20 }}>
                 <span>{copy.book.items(count)}</span>

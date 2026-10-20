@@ -89,9 +89,27 @@ export function MenuScreen() {
     setCommand({ id: Date.now(), direction: "forward" });
   }, []);
 
+  // the page's real height decides how many rows fit; steps of 24 px keep rebuilds rare
+  const stageRef = useRef<HTMLDivElement>(null);
+  const [frame, setFrame] = useState<{ height: number; width: number } | null>(null);
+  useEffect(() => {
+    const node = stageRef.current;
+    if (!node) return;
+    const measure = () => {
+      const page = node.querySelector<HTMLElement>(".book-page.right");
+      if (!page || page.clientHeight === 0) return;
+      const next = { height: Math.round(page.clientHeight / 8) * 8, width: Math.round(page.clientWidth / 8) * 8 };
+      setFrame((current) => (current && current.height === next.height && current.width === next.width ? current : next));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
   const book = useMemo(
-    () => buildBook({ catalog, copy, money, spread: wide, onItem, onChapter, onOpen, points: !menuOnly }),
-    [catalog, copy, money, wide, onItem, onChapter, onOpen],
+    () => buildBook({ catalog, copy, money, spread: wide, onItem, onChapter, onOpen, points: !menuOnly, ...(frame ? { pageHeight: frame.height, pageWidth: frame.width } : {}) }),
+    [catalog, copy, money, wide, onItem, onChapter, onOpen, frame],
   );
 
   useEffect(() => {
@@ -137,7 +155,7 @@ export function MenuScreen() {
       <AnimatePresence mode="wait" initial={false}>
         {view === "book" ? (
           <motion.div key="book" style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }} initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} transition={{ duration: 0.2 }}>
-            <div style={{ flex: 1, minHeight: 0, padding: `0 ${wide ? 24 : 14}px calc(var(--tabbar) + var(--sab) + 10px)` }}>
+            <div ref={stageRef} style={{ flex: 1, minHeight: 0, padding: `0 ${wide ? 24 : 14}px calc(var(--tabbar) + var(--sab) + 10px)` }}>
               <Book pages={book.pages} index={page} onIndex={setPage} spread={wide} verso={() => <Verso copy={copy} />} nudge={hint && page <= 1} command={command} />
             </div>
             <AnimatePresence>

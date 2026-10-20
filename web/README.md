@@ -140,22 +140,25 @@ npx wrangler pages deploy dist --project-name libertario-carta --branch main
 
 ## Carta Chile
 
-La carta de Chile es la carta impresa (`Menú_nuevo_Chile_libertario_2026.pdf`, 21 páginas) hecha libro digital, idéntica: el texto son los propios contornos de las fuentes del PDF (Perfectly Nineties, Manrope, PP Eiko), las fotos son las originales en su posición, y encima van las animaciones. Se abre en `/chile`, y la raíz la muestra sola cuando el visitante está en Chile (teléfono con zona horaria o región de Chile, ciudad por IP en Chile, o `?pais=CL`).
+Chile usa el mismo libro que Colombia (portada, índice en tarjetas, capítulos con foto viva, fichas, español e inglés) con su propia carta: es la ciudad `santiago` (mercado `CL`) del catálogo, con productos, precios en pesos chilenos, maridajes y fotos sacados de la carta impresa `Menú_nuevo_Chile_libertario_2026.pdf`.
 
-- `src/chile/data.ts`: los 95 productos con precios en pesos chilenos tal como están impresos, descripciones, maridajes y dónde está la foto de cada uno (para el zoom de la ficha).
-- `src/chile/spread.tsx`: dibuja cada página desde sus capas (vector, foto, vector...) y mete las animaciones justo encima de cada foto y debajo del texto. Cada mitad solo dibuja lo que cae en ella.
-- `src/chile/effects.tsx` + `chile.css`: vapor en tazas, sartenes y tostadas; burbujas y gotas de condensación en los vasos fríos; el chorro del V60 con su brillo, las ondas donde cae, el anillo que gira como el pulso del hervidor y el bloom del café; destellos sobre frutas, glaseados y vidrio; barridos de luz; la seda de portada y contraportada, el cold brew y el matcha fluyen (filtro de desplazamiento con ruido que se mueve). Todo en las coordenadas del PDF.
-- `src/chile/screen.tsx`: el libro (una página en el teléfono, doble en escritorio, portada y contraportada solas), índice tocable, ficha de producto con zoom vivo a su plato y maridaje que abre la bebida.
-- `src/chile/zoom.tsx`: pellizco, arrastre y lupa para leer la letra impresa en el teléfono. Mientras está ampliado no se pasa de página por accidente.
+- Se abre en `/chile`, con `?pais=CL` o `?ciudad=santiago`, y sola cuando el visitante está en Chile (zona horaria o región del teléfono, ciudad por IP). La ciudad sigue al país: en Chile nunca sale una carta colombiana, y al revés.
+- `src/core/chile-data.ts`: la carta tal como está impresa, con inglés por producto y el punto del PDF donde está su foto. Para cambiar un precio o un plato se edita aquí.
+- `src/core/chile.ts`: la convierte en catálogo. Cada tamaño (200/340/454 g, 1/2/3 tazas) y cada Single Origin es una línea, como en Colombia; el maridaje va al final de la descripción.
+- `public/menu/cl/`: la foto de cada capítulo y la de cada producto, recortadas del PDF sin el texto, en 900 px y `@2x` de 1500 px. `src/core/chile-photos.ts` (generado) dice cómo vive cada una: vapor, burbujas, condensación, el chorro del V60, destellos y barridos de luz, en las mismas posiciones que en la carta impresa.
+- La app instalable no descarga esas fotos de antemano; las guarda a medida que se ven.
 
-Para regenerarla si cambia el PDF (necesita poppler y Python con Pillow):
+Para regenerar las fotos si cambia el PDF (necesita poppler, Playwright y Python con Pillow):
 
 ```bash
 sh scripts/chile-build.sh "/ruta/Menú_nuevo_Chile_libertario_2026.pdf" /ruta/python-con-pillow
-node scripts/chile-hotspots.mjs
 ```
 
-Si cambian precios o productos, se edita `src/chile/data.ts`. Si se mueven fotos en el diseño, se revisan las coordenadas de `EFFECTS` y los `focus` (son puntos del PDF; `pdftoppm -r 72` da una imagen donde 1 píxel = 1 punto).
+Extrae cada doble página en capas a `print/chile/` (no se publica ni se versiona), recorta las fotos con `scripts/chile-photos.ts` y reescribe `chile-photos.ts`. Los encuadres de capítulo están en ese script; las animaciones, en coordenadas del PDF, en `scripts/chile-print-effects.ts` (`pdftoppm -r 72` da una imagen donde 1 píxel = 1 punto).
+
+## Paginación del libro
+
+Las filas se reparten según el alto y el ancho reales de la página (medidos en pantalla), así una descripción larga no se sale de la hoja ni deja medio vacía la siguiente, en cualquier teléfono.
 
 ## Pruebas
 

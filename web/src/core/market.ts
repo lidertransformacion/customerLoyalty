@@ -60,6 +60,7 @@ function isMarketId(value: unknown): value is MarketId {
 /** URL `?pais=CL`, then what was chosen before, then the phone's region and clock. */
 export function detectMarket(): MarketId {
   try {
+    if (window.location.pathname.replace(/\/+$/, "") === "/chile") return "CL";
     const fromUrl = new URLSearchParams(window.location.search).get("pais")?.toUpperCase();
     if (isMarketId(fromUrl)) {
       window.localStorage.setItem(MARKET_KEY, fromUrl);

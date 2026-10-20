@@ -38,7 +38,8 @@ type Stored = { id: CityId; source: CitySource };
 function readStored(): Stored | null {
   try {
     const params = new URLSearchParams(window.location.search);
-    const fromUrl = params.get("ciudad") ?? STORE_CITY[params.get("sede") ?? ""] ?? null;
+    const onChilePath = window.location.pathname.replace(/\/+$/, "") === "/chile";
+    const fromUrl = params.get("ciudad") ?? STORE_CITY[params.get("sede") ?? ""] ?? (onChilePath ? "santiago" : null);
     if (fromUrl) {
       const city = cityById(fromUrl);
       const stored: Stored = { id: city.id, source: "url" };
@@ -103,9 +104,18 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // The menu belongs to the country: a guest in Chile never gets a Colombian city, and the other way round.
+  const chosen = cityById(state.id);
+  const cityId: CityId = chosen.market === market.id ? chosen.id : market.id === "CL" ? "santiago" : "bogota";
+
+  // a QR or a choice of a Chilean city also switches the money and the legal text to Chile
+  useEffect(() => {
+    if (chosen.market !== market.id && (state.source === "url" || state.source === "chosen")) setMarket(chosen.market);
+  }, [chosen.market, market.id, setMarket, state.source]);
+
   const value = useMemo<Api>(
-    () => ({ catalog: translateCatalog(catalogFor(state.id), lang), source: state.source, setCity, placeFromPosition }),
-    [state, lang, setCity, placeFromPosition],
+    () => ({ catalog: translateCatalog(catalogFor(cityId), lang), source: state.source, setCity, placeFromPosition }),
+    [cityId, state.source, lang, setCity, placeFromPosition],
   );
   return <CatalogContext.Provider value={value}>{children}</CatalogContext.Provider>;
 }

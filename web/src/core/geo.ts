@@ -20,6 +20,7 @@ export const CITY_CENTERS: readonly CityCenter[] = [
   { id: "bogota", market: "CO", lat: 4.711, lng: -74.0721, names: ["bogota", "bogotá", "bogota d.c.", "soacha", "chia", "chía"] },
   { id: "medellin", market: "CO", lat: 6.2442, lng: -75.5812, names: ["medellin", "medellín", "envigado", "sabaneta", "itagui", "itagüí", "bello"] },
   { id: "cartagena", market: "CO", lat: 10.391, lng: -75.4794, names: ["cartagena", "cartagena de indias"] },
+  { id: "santiago", market: "CL", lat: -33.4489, lng: -70.6693, names: ["santiago", "santiago de chile", "providencia", "las condes", "vitacura", "nunoa", "ñuñoa", "lo barnechea", "la reina", "recoleta", "independencia", "estacion central", "macul", "san miguel"] },
 ];
 
 export const CITY_RADIUS_METERS = 60_000;

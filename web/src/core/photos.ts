@@ -1,4 +1,5 @@
 import type { PhotoSpec } from "../motion/living-photo";
+import { CHILE_PHOTOS } from "./chile-photos";
 
 /** Category photography, served from /public/menu. The native app bundles the same files. */
 export function photoUrl(name: string): string {
@@ -90,5 +91,5 @@ export const CLIPS: Record<string, PhotoSpec> = {
 };
 
 export function photoSpec(name: string): PhotoSpec {
-  return PHOTOS[name] ?? { src: photoUrl(name), mood: "still" };
+  return PHOTOS[name] ?? CHILE_PHOTOS[name] ?? { src: photoUrl(name), mood: "still" };
 }

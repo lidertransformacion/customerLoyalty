@@ -32,11 +32,14 @@ const PHOTO_BY_CATEGORY: Record<string, string> = {
   extras: "coffee.jpg",
 };
 
+const PACKS = new Set(["coffee", "cl-coffee"]);
+
 export function visualFor(item: MenuItem): Visual {
-  if (item.category === "coffee") {
+  if (PACKS.has(item.category)) {
     const profile = item.profile ?? "PAZ";
     return { kind: "product", src: PRODUCT_IMAGES[profile] ?? PRODUCT_IMAGES.PAZ!, profile };
   }
+  if (item.photo) return { kind: "photo", photo: photoSpec(item.photo) };
   const name = PHOTO_BY_CATEGORY[item.category] ?? "coffee.jpg";
   const base = photoSpec(name);
   // Iced espresso drinks are cold, not hot.
@@ -46,6 +49,11 @@ export function visualFor(item: MenuItem): Visual {
   return { kind: "photo", photo: base };
 }
 
-export function photoForCategory(categoryId: string): PhotoSpec {
-  return photoSpec(PHOTO_BY_CATEGORY[categoryId] ?? "coffee.jpg");
+/** A chapter's photograph: the Colombian chapters by id, any other menu by its own photo key. */
+export function photoForCategory(categoryId: string, photo?: string): PhotoSpec {
+  return photoSpec(PHOTO_BY_CATEGORY[categoryId] ?? photo ?? "coffee.jpg");
+}
+
+export function isPackChapter(categoryId: string): boolean {
+  return PACKS.has(categoryId);
 }

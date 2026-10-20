@@ -9,7 +9,7 @@ import { CATEGORIES_EN, ITEMS_EN } from "../i18n/menu-en";
  * (Bogotá) with price and availability overrides; what is not overridden
  * is the same product at the same price.
  */
-export type CityId = "bogota" | "medellin" | "cartagena";
+export type CityId = "bogota" | "medellin" | "cartagena" | "santiago";
 
 export type City = { id: CityId; name: string; market: "CO" | "CL" };
 
@@ -17,6 +17,7 @@ export const CITIES: readonly City[] = [
   { id: "bogota", name: "Bogotá", market: "CO" },
   { id: "medellin", name: "Medellín", market: "CO" },
   { id: "cartagena", name: "Cartagena", market: "CO" },
+  { id: "santiago", name: "Santiago", market: "CL" },
 ];
 
 export type CityOverride = {
@@ -34,6 +35,22 @@ export type Catalog = { city: City; categories: Category[]; items: MenuItem[] };
 
 const OVERRIDES: Partial<Record<CityId, CityOverride>> = {};
 
+/** Cities whose menu is not the Colombian base at all (Chile prints its own). */
+const OWN: Partial<Record<CityId, { categories: Category[]; items: MenuItem[] }>> = {};
+
+export function registerCatalog(id: CityId, menu: { categories: Category[]; items: MenuItem[] }): void {
+  OWN[id] = menu;
+}
+
+const EXTRA_CATEGORIES_EN: Record<string, { name: string; intro: string }> = {};
+const EXTRA_ITEMS_EN: Record<string, { name: string; description: string }> = {};
+
+/** English for a city's own menu. */
+export function registerTranslations(categories: Record<string, { name: string; intro: string }>, items: Record<string, { name: string; description: string }>): void {
+  Object.assign(EXTRA_CATEGORIES_EN, categories);
+  Object.assign(EXTRA_ITEMS_EN, items);
+}
+
 export function registerCity(id: CityId, override: CityOverride): void {
   OVERRIDES[id] = override;
 }
@@ -44,6 +61,8 @@ export function cityById(id: string | null | undefined): City {
 
 export function catalogFor(cityId: CityId): Catalog {
   const city = cityById(cityId);
+  const own = OWN[cityId];
+  if (own) return { city, categories: own.categories, items: own.items };
   const override = OVERRIDES[cityId];
   if (!override) return { city, categories: baseCategories, items: baseItems };
   const hidden = new Set(override.hidden ?? []);
@@ -90,11 +109,11 @@ export function translateCatalog(catalog: Catalog, lang: "es" | "en"): Catalog {
   return {
     city: catalog.city,
     categories: catalog.categories.map((category) => {
-      const text = CATEGORIES_EN[category.id];
+      const text = CATEGORIES_EN[category.id] ?? EXTRA_CATEGORIES_EN[category.id];
       return text ? { ...category, name: text.name, intro: text.intro } : category;
     }),
     items: catalog.items.map((item) => {
-      const text = ITEMS_EN[item.id];
+      const text = ITEMS_EN[item.id] ?? EXTRA_ITEMS_EN[item.id];
       return text ? { ...item, name: text.name, description: text.description } : item;
     }),
   };

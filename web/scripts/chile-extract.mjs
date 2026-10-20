@@ -71,6 +71,7 @@ for (let n = 1; n <= pages; n += 1) {
         layers.push({ t: "v", svg: pending });
         pending = "";
       }
+      let layerRoot = child;
       for (const use of uses) {
         count += 1;
         const key = `p${prefix.slice(1, -1)}-${count}`;
@@ -93,9 +94,11 @@ for (let n = 1; n <= pages; n += 1) {
         g.appendChild(image);
         const target = maskId ? use.parentElement : use;
         target.replaceWith(g);
+        // the whole top-level element was the photo: keep the replacement
+        if (target === layerRoot) layerRoot = g;
         photos.push({ key, source, mask: maskId ? maskSource[maskId] : null, w: im.w, h: im.h, ptW: im.w * scale, ptH: im.h * scale, matrix: nums });
       }
-      layers.push({ t: "i", keys: uses.length, svg: ser.serializeToString(child) });
+      layers.push({ t: "i", keys: uses.length, svg: ser.serializeToString(layerRoot) });
     }
     if (pending) layers.push({ t: "v", svg: pending });
     return { defs: ser.serializeToString(defs), layers, photos, images: Object.fromEntries(Object.entries(images).map(([id, v]) => [id, v.href])) };

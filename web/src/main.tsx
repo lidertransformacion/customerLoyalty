@@ -12,6 +12,7 @@ import { registerSW } from "virtual:pwa-register";
 
 import { App } from "./app";
 import "./core/cities";
+import "./core/chile";
 import { LocaleProvider } from "./i18n";
 import { AccountProvider } from "./state/account";
 import { CatalogProvider } from "./state/catalog";

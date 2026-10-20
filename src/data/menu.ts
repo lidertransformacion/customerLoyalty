@@ -17,6 +17,8 @@ export type MenuItem = {
   price: number;
   description: string;
   profile?: string;
+  /** Its own photograph, when the menu has one (key of a living photo). */
+  photo?: string;
   vegan: boolean;
   nuts: boolean;
   extra: boolean;

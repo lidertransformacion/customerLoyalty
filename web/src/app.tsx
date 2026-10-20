@@ -4,9 +4,8 @@ import { Navigate, Route, Routes, useLocation } from "react-router";
 
 import { productionBlocked } from "@/src/data/program";
 
-import { ChileMenuScreen } from "./chile/screen";
 import { menuOnly } from "./core/mode";
-import { useCopy, useLocale } from "./i18n";
+import { useCopy } from "./i18n";
 import { Celebrate } from "./motion/celebrate";
 import { Home } from "./screens/home";
 import { ItemScreen } from "./screens/item";
@@ -21,12 +20,6 @@ import { useAccount } from "./state/account";
 import { LensFilter } from "./ui/glass";
 import { TabBar } from "./ui/tabbar";
 import { Toast } from "./ui/toast";
-
-/** The menu for wherever the guest is: Chile has its own printed menu. */
-function MenuForMarket() {
-  const { market } = useLocale();
-  return market.id === "CL" ? <ChileMenuScreen /> : <MenuScreen />;
-}
 
 function RequireAccount({ children }: { children: React.ReactElement }) {
   const { ready, account } = useAccount();
@@ -57,8 +50,8 @@ export function App() {
         <LensFilter />
         <AnimatePresence mode="wait" initial={false}>
           <Routes location={location} key={location.pathname.split("/")[1] ?? ""}>
-            <Route path="/" element={<MenuForMarket />} />
-            <Route path="/chile" element={<ChileMenuScreen />} />
+            <Route path="/" element={<MenuScreen />} />
+            <Route path="/chile" element={<MenuScreen />} />
             <Route path="/menu" element={<Navigate to={{ pathname: "/", search: location.search }} replace />} />
             <Route path="/item/:id" element={<ItemScreen />} />
             <Route path="*" element={<Navigate to="/" replace />} />
@@ -79,7 +72,7 @@ export function App() {
           <Route path="/signup" element={<SignupScreen />} />
           <Route path="/home" element={<RequireAccount><Home /></RequireAccount>} />
           <Route path="/menu" element={<MenuScreen />} />
-          <Route path="/chile" element={<ChileMenuScreen />} />
+          <Route path="/chile" element={<MenuScreen />} />
           <Route path="/item/:id" element={<ItemScreen />} />
           <Route path="/table" element={<OrderScreen />} />
           <Route path="/settings" element={<SettingsScreen />} />

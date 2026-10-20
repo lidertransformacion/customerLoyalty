@@ -58,14 +58,14 @@ export default defineConfig({
       workbox: {
         globPatterns: ["**/*.{js,css,html,png,jpg,woff2}"],
         // the sharper copies and the clips load on demand, not at install
-        globIgnores: ["**/*@2x.jpg", "**/video/*", "**/products/*"],
+        globIgnores: ["**/*@2x.jpg", "**/video/*", "**/products/*", "**/menu/cl/**"],
         navigateFallback: "/index.html",
-        // the Chile menu pages and photos are kept once seen, so a second visit opens offline
+        // the Chile photographs are kept once seen, so a second visit opens offline
         runtimeCaching: [
           {
-            urlPattern: ({ url }) => url.pathname.startsWith("/chile/"),
+            urlPattern: ({ url }) => url.pathname.startsWith("/menu/cl/"),
             handler: "CacheFirst",
-            options: { cacheName: "chile-menu-v1", expiration: { maxEntries: 120 } },
+            options: { cacheName: "chile-photos-v1", expiration: { maxEntries: 200 } },
           },
         ],
       },

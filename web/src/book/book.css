@@ -116,8 +116,9 @@
 
 .book-item {
   display: flex;
-  align-items: baseline;
-  gap: 10px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
   width: 100%;
   text-align: left;
   padding: 9px 0;
@@ -128,7 +129,14 @@
   border-top: 0;
 }
 
+.book-item-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
 .book-item .name {
+  min-width: 0;
   font-family: var(--serif);
   font-weight: 500;
   font-size: 17px;
