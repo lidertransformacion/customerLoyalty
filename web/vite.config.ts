@@ -60,6 +60,14 @@ export default defineConfig({
         // the sharper copies and the clips load on demand, not at install
         globIgnores: ["**/*@2x.jpg", "**/video/*", "**/products/*"],
         navigateFallback: "/index.html",
+        // the Chile menu pages and photos are kept once seen, so a second visit opens offline
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.pathname.startsWith("/chile/"),
+            handler: "CacheFirst",
+            options: { cacheName: "chile-menu-v1", expiration: { maxEntries: 120 } },
+          },
+        ],
       },
       devOptions: { enabled: false },
     }),

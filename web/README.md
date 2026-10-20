@@ -138,6 +138,25 @@ npx wrangler pages deploy dist --project-name libertario-carta --branch main
 - La refracción del cristal (`backdrop-filter: url(#…)`) es solo Chromium; Safari muestra el desenfoque y el borde.
 - Se prueba con WebKit real: `npx playwright install webkit` y los scripts de recorrido con `webkit.launch()`; con `reducedMotion: "reduce"` en el contexto se emula el ajuste del iPhone.
 
+## Carta Chile
+
+La carta de Chile es la carta impresa (`Menú_nuevo_Chile_libertario_2026.pdf`, 21 páginas) hecha libro digital, idéntica: el texto son los propios contornos de las fuentes del PDF (Perfectly Nineties, Manrope, PP Eiko), las fotos son las originales en su posición, y encima van las animaciones. Se abre en `/chile`, y la raíz la muestra sola cuando el visitante está en Chile (teléfono con zona horaria o región de Chile, ciudad por IP en Chile, o `?pais=CL`).
+
+- `src/chile/data.ts`: los 95 productos con precios en pesos chilenos tal como están impresos, descripciones, maridajes y dónde está la foto de cada uno (para el zoom de la ficha).
+- `src/chile/spread.tsx`: dibuja cada página desde sus capas (vector, foto, vector...) y mete las animaciones justo encima de cada foto y debajo del texto. Cada mitad solo dibuja lo que cae en ella.
+- `src/chile/effects.tsx` + `chile.css`: vapor en tazas, sartenes y tostadas; burbujas y gotas de condensación en los vasos fríos; el chorro del V60 con su brillo, las ondas donde cae, el anillo que gira como el pulso del hervidor y el bloom del café; destellos sobre frutas, glaseados y vidrio; barridos de luz; la seda de portada y contraportada, el cold brew y el matcha fluyen (filtro de desplazamiento con ruido que se mueve). Todo en las coordenadas del PDF.
+- `src/chile/screen.tsx`: el libro (una página en el teléfono, doble en escritorio, portada y contraportada solas), índice tocable, ficha de producto con zoom vivo a su plato y maridaje que abre la bebida.
+- `src/chile/zoom.tsx`: pellizco, arrastre y lupa para leer la letra impresa en el teléfono. Mientras está ampliado no se pasa de página por accidente.
+
+Para regenerarla si cambia el PDF (necesita poppler y Python con Pillow):
+
+```bash
+sh scripts/chile-build.sh "/ruta/Menú_nuevo_Chile_libertario_2026.pdf" /ruta/python-con-pillow
+node scripts/chile-hotspots.mjs
+```
+
+Si cambian precios o productos, se edita `src/chile/data.ts`. Si se mueven fotos en el diseño, se revisan las coordenadas de `EFFECTS` y los `focus` (son puntos del PDF; `pdftoppm -r 72` da una imagen donde 1 píxel = 1 punto).
+
 ## Pruebas
 
 ```bash

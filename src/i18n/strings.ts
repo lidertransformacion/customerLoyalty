@@ -429,6 +429,20 @@ export const copy = {
       "Demo: no se cobra ni se llama a ningún banco. El flujo real va por un proveedor PSE (Wompi o PayU) desde el backend.",
   },
 
+  chile: {
+    title: "Carta Libertario Chile",
+    cover: "Portada",
+    index: "Índice",
+    open: "Abrir la carta",
+    turnHint: "Desliza para pasar la página",
+    pairing: "Maridaje recomendado",
+    close: "Cerrar",
+    prices: "Precios",
+    loading: "Abriendo la carta…",
+    zoom: "Ampliar la página",
+    fit: "Ver la página completa",
+  },
+
   months: [
     "ene",
     "feb",
