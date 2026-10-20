@@ -126,7 +126,7 @@
   display: none;
 }
 
-.mn-page {
+.mn-page-old {
   flex: 0 0 100%;
   scroll-snap-align: start;
   scroll-snap-stop: always;
@@ -421,4 +421,40 @@
 
 @media (prefers-reduced-motion: reduce) {
   .mn-card-art img { animation: none; }
+}
+
+/* the book: full-bleed white sheets */
+.mn-stage {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.mn-book .book-page,
+.mn-book .book-face {
+  border-radius: 0;
+  background: #fff;
+  background-image: none;
+  box-shadow: none;
+}
+
+.mn-sheet {
+  background: #fff;
+  padding: 8px max(24px, var(--sar)) calc(var(--sab) + 40px) max(24px, var(--sal));
+  gap: 0;
+}
+
+.mn-sheet.mn-page {
+  display: block;
+}
+
+.mn-sheet .mn-cards {
+  padding: 0 0 calc(var(--sab) + 28px);
+}
+
+.mn-sheet .mn-index-title {
+  margin: 10px 0 16px;
 }

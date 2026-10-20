@@ -1,5 +1,7 @@
-import { AnimatePresence, motion } from "motion/react";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { motion } from "motion/react";
+
+import { Book } from "../book/book";
+import { useCallback, useMemo, useState } from "react";
 
 import type { MenuItem } from "@/src/data/menu";
 
@@ -70,46 +72,49 @@ function heroOf(products: MenuItem[][], chapterId: string) {
 }
 
 /**
- * The Chile menu, minimal: a full-screen cover, then one chapter per screen,
- * swiped sideways. Each chapter shows one product floating alive, its title in
- * the print's type, and a quiet list of names and prices.
+ * The Chile menu, minimal: a full-screen cover, then a book. Its first page is
+ * the index of chapters as cards; every chapter after it is one sheet, turned
+ * with the thumb like the Colombian book, with one product floating alive, its
+ * title in the print's type and a quiet list of names and prices.
  */
 export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { catalog: Catalog; copy: Copy; money: (value: number) => string; lang: Lang; setLang: (lang: Lang) => void; onItem: (item: MenuItem) => void }) {
   const chapters = catalog.categories.filter((category) => productsOf(catalog, category.id).length > 0);
   const [started, setStarted] = useState(memory.started);
-  const [current, setCurrent] = useState(memory.chapter);
-  const [index, setIndex] = useState(false);
-  const rail = useRef<HTMLDivElement>(null);
+  const [page, setPageState] = useState(memory.chapter);
+  const [command, setCommand] = useState<{ id: number; direction: "forward" | "back" } | null>(null);
 
-  const go = useCallback((n: number, smooth = true) => {
-    const node = rail.current;
-    if (!node) return;
-    node.scrollTo({ left: n * node.clientWidth, behavior: smooth ? "smooth" : "auto" });
+  const setPage = useCallback((next: number) => {
+    memory.chapter = next;
+    setPageState(next);
   }, []);
-
-  // back from a product: the same chapter
-  useLayoutEffect(() => {
-    if (started) go(memory.chapter, false);
-  }, [started, go]);
-
-  useEffect(() => {
-    const node = rail.current;
-    if (!node) return;
-    const onScroll = () => {
-      const n = Math.round(node.scrollLeft / Math.max(1, node.clientWidth));
-      if (n !== memory.chapter) {
-        memory.chapter = n;
-        setCurrent(n);
-      }
-    };
-    node.addEventListener("scroll", onScroll, { passive: true });
-    return () => node.removeEventListener("scroll", onScroll);
-  }, [started]);
 
   const start = () => {
     memory.started = true;
+    memory.chapter = 0;
+    setPageState(0);
     setStarted(true);
   };
+
+  const pages = useMemo(
+    () => [
+      <IndexCards key="index" chapters={chapters} catalog={catalog} copy={copy} lang={lang} current={page - 1} onOpen={(i) => setPage(i + 1)} />,
+      ...chapters.map((category, i) => (
+        <ChapterPage
+          key={category.id}
+          category={category}
+          catalog={catalog}
+          money={money}
+          lang={lang}
+          live={Math.abs(i + 1 - page) <= 1}
+          next={chapters[i + 1]?.name}
+          onNext={() => setCommand({ id: Date.now(), direction: "forward" })}
+          onItem={onItem}
+        />
+      )),
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [chapters.map((c) => c.id + c.name).join(), catalog, copy, money, lang, page, onItem, setPage],
+  );
 
   if (!started) {
     return (
@@ -122,130 +127,141 @@ export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { c
           <LangSwitch lang={lang} setLang={setLang} dark />
         </div>
         <div className="mn-start-wrap">
-        <motion.button className="mn-start" onClick={start} data-testid="book-open" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.6, ease: [0.22, 1, 0.36, 1] }} whileTap={{ scale: 0.97 }}>
-          {copy.book.start}
-        </motion.button>
+          <motion.button className="mn-start" onClick={start} data-testid="book-open" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.6, ease: [0.22, 1, 0.36, 1] }} whileTap={{ scale: 0.97 }}>
+            {copy.book.start}
+          </motion.button>
         </div>
       </div>
     );
   }
 
-  const chapter = chapters[current];
+  const onIndex = page === 0;
   return (
     <div className="mn" data-testid="minimal-menu">
       <header className="mn-top">
         <button className="mn-home" onClick={() => { memory.started = false; setStarted(false); }} aria-label={copy.book.toCover} data-testid="book-to-cover">
           <img src="/chile/brujula-azul.svg" alt="" width={28} height={28} />
         </button>
-        <span className="mn-count" aria-live="polite">
-          {String(current + 1).padStart(2, "0")} <span>/ {String(chapters.length).padStart(2, "0")}</span>
-        </span>
-        <button className="mn-index-button" onClick={() => setIndex(true)} data-testid="book-to-index">
+        {onIndex ? (
+          <LangSwitch lang={lang} setLang={setLang} />
+        ) : (
+          <span className="mn-count" aria-live="polite">
+            {String(page).padStart(2, "0")} <span>/ {String(chapters.length).padStart(2, "0")}</span>
+          </span>
+        )}
+        <button className="mn-index-button" onClick={() => setPage(0)} data-testid="book-to-index" disabled={onIndex} style={{ visibility: onIndex ? "hidden" : "visible" }}>
           {copy.book.toIndex}
         </button>
       </header>
       <div className="mn-progress" aria-hidden="true">
-        <motion.span animate={{ width: `${((current + 1) / chapters.length) * 100}%` }} transition={{ type: "spring", stiffness: 200, damping: 30 }} />
+        <motion.span animate={{ width: `${(page / chapters.length) * 100}%` }} transition={{ type: "spring", stiffness: 200, damping: 30 }} />
       </div>
+      <div className="mn-stage">
+        <Book pages={pages} index={page} onIndex={setPage} spread={false} verso={() => <div style={{ position: "absolute", inset: 0, background: "#fff" }} />} command={command} className="mn-book" />
+      </div>
+    </div>
+  );
+}
 
-      <div className="mn-rail" ref={rail}>
+function IndexCards({ chapters, catalog, copy, lang, current, onOpen }: { chapters: Catalog["categories"]; catalog: Catalog; copy: Copy; lang: Lang; current: number; onOpen: (i: number) => void }) {
+  return (
+    <div className="book-page-inner mn-sheet" data-testid="book-index">
+      <h1 className="mn-index-title">{copy.book.index}</h1>
+      <div className="mn-cards">
         {chapters.map((category, i) => {
           const products = productsOf(catalog, category.id);
           const hero = heroOf(products, category.id);
-          const near = Math.abs(i - current) <= 1;
+          const coffee = category.id === "cl-coffee";
           return (
-            <section key={category.id} className="mn-page" data-testid={`chapter-${category.id}`} aria-label={category.name}>
-              <div className="mn-hero">
-                {near ? (
-                  category.id === "cl-coffee" ? (
-                    <div className="mn-packs">
-                      {["PAZ", "LIBRE", "ROCK", "PUNK"].map((profile) => (
-                        <Product key={profile} src={PRODUCT_IMAGES[profile]!} size={84} float />
-                      ))}
-                    </div>
-                  ) : hero ? (
-                    <LivingPhoto photo={{ ...hero, cutout: true }} radius={20} interactive={i === current} style={{ width: "100%", height: "100%" }} />
-                  ) : null
+            <motion.button
+              key={category.id}
+              className={`mn-card${i === current ? " on" : ""}${i === 0 ? " wide" : ""}`}
+              style={{ background: TINT[category.id] ?? "#f4f1ec" }}
+              initial={{ opacity: 0, y: 18, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ delay: 0.035 * i, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => onOpen(i)}
+              data-testid={`index-${category.id}`}
+            >
+              <span className="mn-card-n">{String(i + 1).padStart(2, "0")}</span>
+              <span className="mn-card-art">
+                {coffee ? (
+                  ["PAZ", "LIBRE", "ROCK", "PUNK"].map((profile, k) => <img key={profile} src={PRODUCT_IMAGES[profile]} alt="" style={{ animationDelay: `${k * 0.4}s` }} />)
+                ) : hero ? (
+                  <img src={hero.src} srcSet={`${hero.src} 1x, ${hero.src.replace(/\.(webp|jpg)$/, "@2x.$1")} 2x`} alt="" className={hero.cutout ? "cut" : "photo"} style={{ animationDelay: `${(i % 4) * 0.5}s` }} />
                 ) : null}
-              </div>
-              <h1 className="mn-title">{category.name}</h1>
-              {category.intro ? <p className="mn-intro">{category.intro}</p> : null}
-              <ul className="mn-list">
-                {products.map((lines) => {
-                  const first = lines[0]!;
-                  const name = first.name.split(" · ")[0];
-                  return (
-                    <li key={first.id}>
-                      <button className="mn-row" onClick={() => onItem(first)} data-testid={`book-item-${first.id}`}>
-                        <span className="mn-name">{name}</span>
-                        <span className="mn-price">{money(Math.min(...lines.map((line) => line.price)))}</span>
-                        {lines.length > 1 ? <span className="mn-sizes">{lines.length} {lang === "en" ? "options" : "opciones"}</span> : null}
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-              {i < chapters.length - 1 ? (
-                <button className="mn-next" onClick={() => go(i + 1)} data-testid={`next-${category.id}`}>
-                  {chapters[i + 1]!.name} →
-                </button>
-              ) : null}
-            </section>
+              </span>
+              <span className="mn-card-name">{category.name}</span>
+              <span className="mn-card-count">
+                {products.length} {lang === "en" ? (products.length === 1 ? "item" : "items") : products.length === 1 ? "producto" : "productos"}
+              </span>
+            </motion.button>
           );
         })}
       </div>
-
-      <AnimatePresence>
-        {index ? (
-          <motion.div className="mn-index" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }} data-testid="book-index">
-            <div className="mn-top">
-              <LangSwitch lang={lang} setLang={setLang} />
-              <button className="mn-index-button" onClick={() => setIndex(false)} data-testid="index-close">
-                {copy.web.close}
-              </button>
-            </div>
-            <h1 className="mn-index-title">{copy.book.index}</h1>
-            <div className="mn-cards">
-              {chapters.map((category, i) => {
-                const products = productsOf(catalog, category.id);
-                const hero = heroOf(products, category.id);
-                const coffee = category.id === "cl-coffee";
-                return (
-                  <motion.button
-                    key={category.id}
-                    className={`mn-card${i === current ? " on" : ""}${i === 0 ? " wide" : ""}`}
-                    style={{ background: TINT[category.id] ?? "#f4f1ec" }}
-                    initial={{ opacity: 0, y: 18, scale: 0.97 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    transition={{ delay: 0.035 * i, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                    whileTap={{ scale: 0.97 }}
-                    onClick={() => {
-                      setIndex(false);
-                      go(i, false);
-                    }}
-                    data-testid={`index-${category.id}`}
-                  >
-                    <span className="mn-card-n">{String(i + 1).padStart(2, "0")}</span>
-                    <span className="mn-card-art">
-                      {coffee ? (
-                        ["PAZ", "LIBRE", "ROCK", "PUNK"].map((profile, k) => (
-                          <img key={profile} src={PRODUCT_IMAGES[profile]} alt="" style={{ animationDelay: `${k * 0.4}s` }} />
-                        ))
-                      ) : hero ? (
-                        <img src={hero.src} srcSet={`${hero.src} 1x, ${hero.src.replace(/\.(webp|jpg)$/, "@2x.$1")} 2x`} alt="" className={hero.cutout ? "cut" : "photo"} style={{ animationDelay: `${(i % 4) * 0.5}s` }} />
-                      ) : null}
-                    </span>
-                    <span className="mn-card-name">{category.name}</span>
-                    <span className="mn-card-count">{products.length} {lang === "en" ? (products.length === 1 ? "item" : "items") : products.length === 1 ? "producto" : "productos"}</span>
-                  </motion.button>
-                );
-              })}
-            </div>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
-      {chapter ? null : null}
     </div>
+  );
+}
+
+function ChapterPage({
+  category,
+  catalog,
+  money,
+  lang,
+  live,
+  next,
+  onNext,
+  onItem,
+}: {
+  category: Catalog["categories"][number];
+  catalog: Catalog;
+  money: (value: number) => string;
+  lang: Lang;
+  live: boolean;
+  next: string | undefined;
+  onNext: () => void;
+  onItem: (item: MenuItem) => void;
+}) {
+  const products = productsOf(catalog, category.id);
+  const hero = heroOf(products, category.id);
+  return (
+    <section className="book-page-inner mn-sheet mn-page" data-testid={`chapter-${category.id}`} aria-label={category.name}>
+      <div className="mn-hero">
+        {live ? (
+          category.id === "cl-coffee" ? (
+            <div className="mn-packs">
+              {["PAZ", "LIBRE", "ROCK", "PUNK"].map((profile) => (
+                <Product key={profile} src={PRODUCT_IMAGES[profile]!} size={84} float />
+              ))}
+            </div>
+          ) : hero ? (
+            <LivingPhoto photo={{ ...hero, cutout: true }} radius={20} interactive={false} style={{ width: "100%", height: "100%" }} />
+          ) : null
+        ) : null}
+      </div>
+      <h1 className="mn-title">{category.name}</h1>
+      {category.intro ? <p className="mn-intro">{category.intro}</p> : null}
+      <ul className="mn-list">
+        {products.map((lines) => {
+          const first = lines[0]!;
+          return (
+            <li key={first.id}>
+              <button className="mn-row" onClick={() => onItem(first)} data-testid={`book-item-${first.id}`}>
+                <span className="mn-name">{first.name.split(" · ")[0]}</span>
+                <span className="mn-price">{money(Math.min(...lines.map((line) => line.price)))}</span>
+                {lines.length > 1 ? <span className="mn-sizes">{lines.length} {lang === "en" ? "options" : "opciones"}</span> : null}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      {next ? (
+        <button className="mn-next" onClick={onNext} data-testid={`next-${category.id}`}>
+          {next} →
+        </button>
+      ) : null}
+    </section>
   );
 }
 
