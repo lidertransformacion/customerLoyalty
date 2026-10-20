@@ -25,6 +25,25 @@ function productsOf(catalog: Catalog, chapterId: string): MenuItem[][] {
     .filter((lines) => lines.length > 0);
 }
 
+/** A soft ground for each chapter's card, taken from what it serves. */
+const TINT: Record<string, string> = {
+  "cl-coffee": "#efe8dc",
+  "cl-filter": "#e9eef4",
+  "cl-espresso": "#f3ebe1",
+  "cl-cold": "#f1e6dc",
+  "cl-matcha": "#eaf0e1",
+  "cl-signature": "#f8e9dc",
+  "cl-other": "#f4ece4",
+  "cl-eggs": "#f6eee0",
+  "cl-parfait": "#f6e6ea",
+  "cl-cakes": "#f4e8e6",
+  "cl-bakery": "#f5ecdc",
+  "cl-cookies": "#efe7df",
+  "cl-sandwiches": "#eef0e4",
+  "cl-toast": "#f6ece0",
+  "cl-bowls": "#e8f0e6",
+};
+
 /** Chapters whose star is a cut-out from the print rather than their first product. */
 const HERO: Record<string, string> = {
   "cl-espresso": "cl-6-1235-335-95",
@@ -185,23 +204,43 @@ export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { c
                 {copy.web.close}
               </button>
             </div>
-            <ol className="mn-index-list">
-              {chapters.map((category, i) => (
-                <motion.li key={category.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.03 * i, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}>
-                  <button
-                    className={i === current ? "on" : ""}
+            <h1 className="mn-index-title">{copy.book.index}</h1>
+            <div className="mn-cards">
+              {chapters.map((category, i) => {
+                const products = productsOf(catalog, category.id);
+                const hero = heroOf(products, category.id);
+                const coffee = category.id === "cl-coffee";
+                return (
+                  <motion.button
+                    key={category.id}
+                    className={`mn-card${i === current ? " on" : ""}${i === 0 ? " wide" : ""}`}
+                    style={{ background: TINT[category.id] ?? "#f4f1ec" }}
+                    initial={{ opacity: 0, y: 18, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ delay: 0.035 * i, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                    whileTap={{ scale: 0.97 }}
                     onClick={() => {
                       setIndex(false);
                       go(i, false);
                     }}
                     data-testid={`index-${category.id}`}
                   >
-                    <span className="mn-index-n">{String(i + 1).padStart(2, "0")}</span>
-                    <span className="mn-index-name">{category.name}</span>
-                  </button>
-                </motion.li>
-              ))}
-            </ol>
+                    <span className="mn-card-n">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="mn-card-art">
+                      {coffee ? (
+                        ["PAZ", "LIBRE", "ROCK", "PUNK"].map((profile, k) => (
+                          <img key={profile} src={PRODUCT_IMAGES[profile]} alt="" style={{ animationDelay: `${k * 0.4}s` }} />
+                        ))
+                      ) : hero ? (
+                        <img src={hero.src} srcSet={`${hero.src} 1x, ${hero.src.replace(/\.(webp|jpg)$/, "@2x.$1")} 2x`} alt="" className={hero.cutout ? "cut" : "photo"} style={{ animationDelay: `${(i % 4) * 0.5}s` }} />
+                      ) : null}
+                    </span>
+                    <span className="mn-card-name">{category.name}</span>
+                    <span className="mn-card-count">{products.length} {lang === "en" ? (products.length === 1 ? "item" : "items") : products.length === 1 ? "producto" : "productos"}</span>
+                  </motion.button>
+                );
+              })}
+            </div>
           </motion.div>
         ) : null}
       </AnimatePresence>
