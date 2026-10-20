@@ -324,7 +324,7 @@
 .mn-cards {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 14px;
   padding: 0 max(16px, var(--sar)) calc(var(--sab) + 28px) max(16px, var(--sal));
   max-width: 720px;
   width: 100%;
@@ -342,12 +342,53 @@
   border-radius: 26px;
   color: #1d2e54;
   overflow: hidden;
-  box-shadow: inset 0 0 0 1px rgba(29, 46, 84, 0.04);
-  transition: box-shadow 0.25s;
+  /* depth: a soft lift from the page, a light edge on top, a shade at the foot */
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 45%, rgba(29, 24, 18, 0.04) 100%);
+  box-shadow:
+    0 1px 2px rgba(29, 24, 18, 0.06),
+    0 6px 14px -6px rgba(29, 24, 18, 0.14),
+    0 20px 36px -18px rgba(29, 24, 18, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    inset 0 -1px 0 rgba(29, 24, 18, 0.05);
+  transform: translateZ(0);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+@media (hover: hover) {
+  .mn-card:hover {
+    transform: translateY(-3px);
+    box-shadow:
+      0 2px 4px rgba(29, 24, 18, 0.06),
+      0 12px 22px -8px rgba(29, 24, 18, 0.18),
+      0 30px 48px -22px rgba(29, 24, 18, 0.34),
+      inset 0 1px 0 rgba(255, 255, 255, 0.85),
+      inset 0 -1px 0 rgba(29, 24, 18, 0.05);
+  }
 }
 
 .mn-card.on {
-  box-shadow: inset 0 0 0 2px #1d2e54;
+  box-shadow:
+    0 0 0 2px #1d2e54,
+    0 6px 14px -6px rgba(29, 24, 18, 0.14),
+    0 20px 36px -18px rgba(29, 24, 18, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+/* the product casts its own shadow on the card */
+.mn-card-art {
+  position: relative;
+}
+
+.mn-card-art::after {
+  content: "";
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  bottom: 2px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(29, 24, 18, 0.22), rgba(29, 24, 18, 0));
+  pointer-events: none;
 }
 
 .mn-card.wide {
@@ -452,7 +493,7 @@
 }
 
 .mn-sheet .mn-cards {
-  padding: 0 0 calc(var(--sab) + 28px);
+  padding: 4px 2px calc(var(--sab) + 28px);
 }
 
 .mn-sheet .mn-index-title {
