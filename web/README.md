@@ -140,6 +140,9 @@ npx wrangler pages deploy dist --project-name libertario-carta --branch main
 
 ## Carta Chile
 
+**Diseño actual (minimal):** `web/src/sheets/minimal.tsx` + `minimal.css`. Portada a pantalla completa con la portada impresa de Chile viva y un botón "Iniciar"; luego una sección por pantalla, deslizando de lado, con contador "05 / 15" y línea de progreso. Cada sección: un producto protagonista recortado flotando con su animación (`HERO` elige cuál), el título en Perfectly Nineties y una lista simple de nombre y precio desde. Tocar abre la ficha del producto. "Índice" abre la lista de secciones a pantalla completa. Al volver de una ficha se regresa a la misma sección. Las versiones anteriores (hojas del PDF y app con barra de categorías) siguen en `sheets/book.tsx`, `sheets/phone.tsx` y `sheets/app.tsx`.
+
+
 Chile usa el mismo libro que Colombia (portada, índice en tarjetas, capítulos con foto viva, fichas, español e inglés) con su propia carta: es la ciudad `santiago` (mercado `CL`) del catálogo, con productos, precios en pesos chilenos, maridajes y fotos sacados de la carta impresa `Menú_nuevo_Chile_libertario_2026.pdf`.
 
 - Se abre en `/chile`, con `?pais=CL` o `?ciudad=santiago`, y sola cuando el visitante está en Chile (zona horaria o región del teléfono, ciudad por IP). La ciudad sigue al país: en Chile nunca sale una carta colombiana, y al revés.

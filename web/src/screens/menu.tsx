@@ -11,6 +11,8 @@ import { buildSheetBook } from "../sheets/book";
 import "../sheets/chile.css";
 import { catalogLine, CHAPTER_PAGE, PAGE, type ChileItem } from "../sheets/data";
 import { ChileCover, ChapterBar } from "../sheets/app";
+import { MinimalMenu } from "../sheets/minimal";
+import "../sheets/minimal.css";
 import { ChileDefs } from "../sheets/effects";
 import { ZoomStage, type ZoomHandle } from "../sheets/zoom";
 import { buildBook, Verso } from "../book/pages";
@@ -167,7 +169,17 @@ export function MenuScreen() {
   const results = useMemo(() => filterCatalog(catalog, filter), [catalog, filter]);
   const chapters = catalog.categories.filter((c) => c.id !== "extras");
 
-  // Chile on a phone is an app: a full-screen cover, then the book under a bar of chapters
+  // Chile: minimal and clean, one chapter per screen
+  if (sheets) {
+    return (
+      <Screen testId="menu" className="full">
+        <ChileDefs />
+        <MinimalMenu catalog={catalog} copy={copy} money={money} lang={lang} setLang={setLang} onItem={onItem} />
+      </Screen>
+    );
+  }
+
+  // (previous Chile app layout, kept for reference)
   if (sheets && !wide && sheetBook) {
     const chapter = sheetBook.chapterAt(page);
     return (
