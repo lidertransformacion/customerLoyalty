@@ -154,15 +154,20 @@ export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { c
             <span className="mn-city">{catalog.city.name === "Santiago" ? "Santiago de Chile" : catalog.city.name}</span>
           </button>
           {onIndex || onCover ? (
-            <span />
+            <span className="mn-spacer" />
           ) : (
             <span className="mn-count" aria-live="polite">
               {String(Math.max(1, page - 1)).padStart(2, "0")} <span>/ {String(chapters.length).padStart(2, "0")}</span>
             </span>
           )}
-          <button className="mn-index-button glass pill flat" onClick={() => setPage(1)} data-testid="book-to-index" style={{ visibility: onIndex ? "hidden" : "visible" }}>
-            {copy.book.toIndex}
-          </button>
+          <div className="mn-right">
+            <LangSwitch lang={lang} setLang={setLang} />
+            {onIndex ? null : (
+              <button className="mn-index-button glass pill flat" onClick={() => setPage(1)} data-testid="book-to-index">
+                {copy.book.toIndex}
+              </button>
+            )}
+          </div>
         </div>
         <div className="mn-progress" aria-hidden="true">
           <motion.span animate={{ width: `${(Math.max(0, page - 1) / chapters.length) * 100}%` }} transition={{ type: "spring", stiffness: 200, damping: 30 }} />
@@ -179,9 +184,6 @@ function CoverSheet({ copy, lang, setLang, onStart }: { copy: Copy; lang: Lang; 
       <div className="mn-cover-art">
         <ChileSpread n={1} view="full" label={copy.brand} />
       </div>
-      <div className="mn-cover-lang">
-        <LangSwitch lang={lang} setLang={setLang} dark />
-      </div>
       <div className="mn-start-wrap">
         <motion.button className="mn-start glass dark pill lens" onClick={onStart} data-testid="book-open" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.6, ease: [0.22, 1, 0.36, 1] }} whileTap={{ scale: 0.97 }}>
           {copy.book.start}
@@ -194,10 +196,7 @@ function CoverSheet({ copy, lang, setLang, onStart }: { copy: Copy; lang: Lang; 
 function IndexCards({ chapters, catalog, copy, lang, setLang, current, onOpen }: { chapters: Catalog["categories"]; catalog: Catalog; copy: Copy; lang: Lang; setLang: (lang: Lang) => void; current: number; onOpen: (i: number) => void }) {
   return (
     <div className="book-page-inner mn-sheet" data-testid="book-index">
-      <div className="mn-index-head">
-        <h1 className="mn-index-title">{copy.book.index}</h1>
-        <LangSwitch lang={lang} setLang={setLang} />
-      </div>
+      <h1 className="mn-index-title">{copy.book.index}</h1>
       <div className="mn-cards">
         {chapters.map((category, i) => {
           const products = productsOf(catalog, category.id);
