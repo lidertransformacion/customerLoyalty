@@ -12,6 +12,7 @@ import { photoSpec, PRODUCT_IMAGES } from "../core/photos";
 import { visualFor } from "../core/visuals";
 import type { Copy } from "../i18n";
 import { LivingPhoto } from "../motion/living-photo";
+import { Beans } from "../motion/beans";
 import { Product } from "../motion/product";
 import { ChileSpread } from "./spread";
 
@@ -99,7 +100,7 @@ function heroOf(products: MenuItem[][], chapterId: string) {
  */
 export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { catalog: Catalog; copy: Copy; money: (value: number) => string; lang: Lang; setLang: (lang: Lang) => void; onItem: (item: MenuItem) => void }) {
   const chapters = catalog.categories.filter((category) => productsOf(catalog, category.id).length > 0);
-  const total = chapters.length + 2;
+  const total = chapters.length + 3;
   const [page, setPageState] = useState(() => Math.min(memory.page, total - 1));
   const [command, setCommand] = useState<{ id: number; direction: "forward" | "back" } | null>(null);
 
@@ -126,6 +127,11 @@ export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { c
           onItem={onItem}
         />
       )),
+      // the last sheet says what the Colombian menu says on its last page
+      <div key="colophon" className="book-page-inner mn-sheet mn-colophon" data-testid="book-colophon">
+        <Beans profile="LIBRE" size={180} />
+        <p>{copy.menu.notCharged}</p>
+      </div>,
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [chapters.map((c) => c.id + c.name).join(), catalog, copy, money, lang, page, onItem, setPage, setLang],
@@ -133,6 +139,7 @@ export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { c
 
   const onCover = page === 0;
   const onIndex = page === 1;
+  const onEnd = page === total - 1;
   return (
     <div className="mn" data-testid="minimal-menu">
       <div className="mn-stage">
@@ -153,7 +160,7 @@ export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { c
             <img src="/chile/brujula-azul.svg" alt="" width={28} height={28} />
             <span className="mn-city">{catalog.city.name === "Santiago" ? "Santiago de Chile" : catalog.city.name}</span>
           </button>
-          {onIndex || onCover ? (
+          {onIndex || onCover || onEnd ? (
             <span className="mn-spacer" />
           ) : (
             <span className="mn-count" aria-live="polite">

@@ -809,3 +809,20 @@
   mix-blend-mode: normal;
   background: linear-gradient(90deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.18) 22%, rgba(255, 225, 190, 0.1) 34%, rgba(0, 0, 0, 0) 100%);
 }
+
+.mn-colophon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 14px;
+}
+
+.mn-colophon p {
+  margin: 0;
+  max-width: 260px;
+  font-size: 15px;
+  line-height: 1.45;
+  color: #6b7387;
+}
