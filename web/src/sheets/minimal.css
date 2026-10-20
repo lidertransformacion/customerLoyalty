@@ -826,3 +826,10 @@
   line-height: 1.45;
   color: #6b7387;
 }
+
+.mn-card-art img.fade-v60 {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 9%, #000 88%, transparent 100%), linear-gradient(to left, transparent 0, #000 7%);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to bottom, transparent 0, #000 9%, #000 88%, transparent 100%), linear-gradient(to left, transparent 0, #000 7%);
+  mask-composite: intersect;
+}

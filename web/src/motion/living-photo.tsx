@@ -38,6 +38,8 @@ export type PhotoSpec = {
   cutout?: boolean;
   /** Real pixels across the photograph; it is never shown much larger than this. */
   native?: number;
+  /** Edges where the photograph was cut straight: they fade into the page. */
+  fade?: { top?: number; right?: number; bottom?: number; left?: number };
 };
 
 /** The sharper copy of a photograph, for dense screens: name.jpg → name@2x.jpg. */
@@ -188,7 +190,7 @@ export function LivingPhoto({ photo, style, className, children, interactive = t
           alt=""
           draggable={false}
           decoding="async"
-          style={{ position: "absolute", ...(photo.cutout ? { inset: 0, width: "100%", height: "100%", objectFit: "contain" } : { inset: "-6%", width: "112%", height: "112%", objectFit: "cover", objectPosition: photo.focus ?? "50% 50%" }), maxWidth: "none", ...(photo.flow && effects && !reduced ? { filter: `url(#lp-flow-${photo.flow})` } : {}) }}
+          style={{ position: "absolute", ...(photo.fade ? fadeMask(photo.fade) : {}), ...(photo.cutout ? { inset: 0, width: "100%", height: "100%", objectFit: "contain" } : { inset: "-6%", width: "112%", height: "112%", objectFit: "cover", objectPosition: photo.focus ?? "50% 50%" }), maxWidth: "none", ...(photo.flow && effects && !reduced ? { filter: `url(#lp-flow-${photo.flow})` } : {}) }}
           animate={drift && !reduced && !videoOk ? (photo.cutout ? { y: [0, -3, 0] } : { scale: [1, 1.05, 1] }) : { scale: 1 }}
           transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
         />
@@ -396,4 +398,11 @@ function FlowFilters() {
       </filter>
     </svg>
   );
+}
+
+/** A mask that fades the given edges (percent of the image) to nothing. */
+function fadeMask(fade: { top?: number; right?: number; bottom?: number; left?: number }): CSSProperties {
+  const edge = (dir: string, size = 0) => (size ? `linear-gradient(to ${dir}, transparent 0, #000 ${size}%)` : "linear-gradient(#000, #000)");
+  const mask = [edge("bottom", fade.top), edge("left", fade.right), edge("top", fade.bottom), edge("right", fade.left)].join(", ");
+  return { maskImage: mask, WebkitMaskImage: mask, maskComposite: "intersect", WebkitMaskComposite: "source-in" } as CSSProperties;
 }

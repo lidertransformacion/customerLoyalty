@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router";
 import { pointsForPrice } from "@/src/data/program";
 
 import { menuOnly } from "../core/mode";
+import { photoSpec } from "../core/photos";
 import { visualFor } from "../core/visuals";
 import { useCopy, useLocale } from "../i18n";
 import { LivingPhoto } from "../motion/living-photo";
@@ -50,7 +51,11 @@ export function ItemScreen() {
     <Screen direction="up" testId="item" className="full">
       <div className="scroll" style={{ paddingBottom: 140 }}>
         <div style={{ position: "relative", height: visual.kind === "photo" ? "58dvh" : "50dvh", minHeight: 360, maxHeight: 620 }}>
-          {visual.kind === "photo" && onPaper ? (
+          {item.category === "cl-filter" ? (
+            <div style={{ position: "absolute", inset: 0, background: "#fff", display: "grid", placeItems: "center", padding: "calc(var(--sat) + 60px) 20px 50px" }}>
+              <LivingPhoto photo={photoSpec("real-v60")} radius={0} style={{ width: "min(100%, 420px)", height: "100%" }} testId="living-pour" />
+            </div>
+          ) : visual.kind === "photo" && onPaper ? (
             <div style={{ position: "absolute", inset: 0, background: "var(--paper)", display: "grid", placeItems: "center", padding: "calc(var(--sat) + 70px) 20px 56px" }}>
               <LivingPhoto
                 photo={{ ...visual.photo, cutout: true }}

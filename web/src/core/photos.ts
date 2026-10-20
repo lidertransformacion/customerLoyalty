@@ -32,6 +32,16 @@ export const BRAND = {
  * leaves the cup whatever the size of the card.
  */
 export const PHOTOS: Record<string, PhotoSpec> = {
+  /** Libertario's own V60 pour, cut out on white (Bogotá print, background removed with BiRefNet). */
+  "real-v60": {
+    src: "/menu/cl/real-v60.webp",
+    mood: "pour",
+    cutout: true,
+    native: 745,
+    fade: { top: 9, right: 7, bottom: 12, left: 4 },
+    pours: [{ from: { x: 61, y: 33 }, to: { x: 66, y: 68 }, width: 1.3, color: "water", spiral: 4.5, body: false }],
+    steam: [{ x: 58, y: 63 }, { x: 78, y: 64 }, { x: 69, y: 66 }],
+  },
   "filter.jpg": {
     src: photoUrl("filter.jpg"),
     mood: "pour",

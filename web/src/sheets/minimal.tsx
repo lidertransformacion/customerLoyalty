@@ -225,6 +225,8 @@ function IndexCards({ chapters, catalog, copy, lang, setLang, current, onOpen }:
               <span className="mn-card-art">
                 {coffee ? (
                   ["PAZ", "LIBRE", "ROCK", "PUNK"].map((profile, k) => <img key={profile} src={PRODUCT_IMAGES[profile]} alt="" style={{ animationDelay: `${k * 0.4}s` }} />)
+                ) : category.id === "cl-filter" ? (
+                  <img src="/menu/cl/real-v60.webp" alt="" className="cut fade-v60" />
                 ) : hero ? (
                   <img src={hero.src} srcSet={`${hero.src} 1x, ${hero.src.replace(/\.(webp|jpg)$/, "@2x.$1")} 2x`} alt="" className={hero.cutout ? "cut" : "photo"} style={{ animationDelay: `${(i % 4) * 0.5}s` }} />
                 ) : null}
@@ -268,7 +270,9 @@ function ChapterPage({
     <section className="book-page-inner mn-sheet mn-page" data-testid={`chapter-${category.id}`} aria-label={category.name}>
       <div className="mn-hero">
         {live ? (
-          category.id === "cl-coffee" ? (
+          category.id === "cl-filter" ? (
+            <LivingPhoto photo={photoSpec("real-v60")} radius={0} interactive={false} style={{ width: "100%", height: "100%" }} />
+          ) : category.id === "cl-coffee" ? (
             <div className="mn-packs">
               {["PAZ", "LIBRE", "ROCK", "PUNK"].map((profile) => (
                 <Product key={profile} src={PRODUCT_IMAGES[profile]!} size={bag} float style={{ margin: `0 ${-Math.round(bag * 0.13)}px` }} />
