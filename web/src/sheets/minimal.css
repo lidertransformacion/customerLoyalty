@@ -148,15 +148,21 @@
 
 .mn-hero {
   height: min(38vh, 320px);
+  overflow: visible;
   display: grid;
   place-items: center;
   margin-top: 8px;
 }
 
+/* the four bags, larger and slightly overlapping, like on a shelf */
 .mn-packs {
   display: flex;
-  gap: 4px;
   align-items: center;
+  justify-content: center;
+}
+
+.mn-packs > *:nth-child(even) {
+  transform: translateY(14px);
 }
 
 .mn-title {

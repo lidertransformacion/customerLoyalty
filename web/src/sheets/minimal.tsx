@@ -253,6 +253,8 @@ function ChapterPage({
 }) {
   const products = productsOf(catalog, category.id);
   const hero = heroOf(products, category.id);
+  // four bags across the sheet, a little overlapped
+  const bag = Math.round(Math.min(132, (Math.min(window.innerWidth, 600) - 48) / 3.1));
   return (
     <section className="book-page-inner mn-sheet mn-page" data-testid={`chapter-${category.id}`} aria-label={category.name}>
       <div className="mn-hero">
@@ -260,7 +262,7 @@ function ChapterPage({
           category.id === "cl-coffee" ? (
             <div className="mn-packs">
               {["PAZ", "LIBRE", "ROCK", "PUNK"].map((profile) => (
-                <Product key={profile} src={PRODUCT_IMAGES[profile]!} size={84} float />
+                <Product key={profile} src={PRODUCT_IMAGES[profile]!} size={bag} float style={{ margin: `0 ${-Math.round(bag * 0.13)}px` }} />
               ))}
             </div>
           ) : hero ? (
