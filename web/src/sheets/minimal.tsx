@@ -17,8 +17,28 @@ import { ChileSpread } from "./spread";
 
 type Lang = "es" | "en";
 
-/** Where the guest was, kept while the app is open, so coming back from a product lands in place. */
-const memory = { started: false, chapter: 0 };
+/**
+ * The page the guest is on (0 cover, 1 index, then chapters). Kept in the tab,
+ * so coming back from a product or reloading lands on the same sheet.
+ */
+const PAGE_KEY = "libertario-cl-page";
+const memory = {
+  page: (() => {
+    try {
+      return Number(window.sessionStorage.getItem(PAGE_KEY)) || 0;
+    } catch {
+      return 0;
+    }
+  })(),
+};
+function rememberPage(page: number) {
+  memory.page = page;
+  try {
+    window.sessionStorage.setItem(PAGE_KEY, String(page));
+  } catch {
+    /* the tab forgets; nothing breaks */
+  }
+}
 
 /** One product per printed product, with every size or blend it is sold in. */
 function productsOf(catalog: Catalog, chapterId: string): MenuItem[][] {
@@ -79,25 +99,20 @@ function heroOf(products: MenuItem[][], chapterId: string) {
  */
 export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { catalog: Catalog; copy: Copy; money: (value: number) => string; lang: Lang; setLang: (lang: Lang) => void; onItem: (item: MenuItem) => void }) {
   const chapters = catalog.categories.filter((category) => productsOf(catalog, category.id).length > 0);
-  const [started, setStarted] = useState(memory.started);
-  const [page, setPageState] = useState(memory.chapter);
+  const total = chapters.length + 2;
+  const [page, setPageState] = useState(() => Math.min(memory.page, total - 1));
   const [command, setCommand] = useState<{ id: number; direction: "forward" | "back" } | null>(null);
 
   const setPage = useCallback((next: number) => {
-    memory.chapter = next;
+    rememberPage(next);
     setPageState(next);
   }, []);
-
-  const start = () => {
-    memory.started = true;
-    memory.chapter = 0;
-    setPageState(0);
-    setStarted(true);
-  };
+  const turn = (direction: "forward" | "back") => setCommand({ id: Date.now(), direction });
 
   const pages = useMemo(
     () => [
-      <IndexCards key="index" chapters={chapters} catalog={catalog} copy={copy} lang={lang} current={page - 1} onOpen={(i) => setPage(i + 1)} />,
+      <CoverSheet key="cover" copy={copy} lang={lang} setLang={setLang} onStart={() => turn("forward")} />,
+      <IndexCards key="index" chapters={chapters} catalog={catalog} copy={copy} lang={lang} current={page - 2} onOpen={(i) => setPage(i + 2)} />,
       ...chapters.map((category, i) => (
         <ChapterPage
           key={category.id}
@@ -105,59 +120,72 @@ export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { c
           catalog={catalog}
           money={money}
           lang={lang}
-          live={Math.abs(i + 1 - page) <= 1}
+          live={Math.abs(i + 2 - page) <= 1}
           next={chapters[i + 1]?.name}
-          onNext={() => setCommand({ id: Date.now(), direction: "forward" })}
+          onNext={() => turn("forward")}
           onItem={onItem}
         />
       )),
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [chapters.map((c) => c.id + c.name).join(), catalog, copy, money, lang, page, onItem, setPage],
+    [chapters.map((c) => c.id + c.name).join(), catalog, copy, money, lang, page, onItem, setPage, setLang],
   );
 
-  if (!started) {
-    return (
-      <div className="mn-cover" data-testid="book-cover">
-        <div className="mn-cover-art">
-          <ChileSpread n={1} view="full" label={copy.brand} />
-        </div>
-        <div className="mn-top on-dark">
-          <span />
-          <LangSwitch lang={lang} setLang={setLang} dark />
-        </div>
-        <div className="mn-start-wrap">
-          <motion.button className="mn-start" onClick={start} data-testid="book-open" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.6, ease: [0.22, 1, 0.36, 1] }} whileTap={{ scale: 0.97 }}>
-            {copy.book.start}
-          </motion.button>
-        </div>
-      </div>
-    );
-  }
-
-  const onIndex = page === 0;
+  const onCover = page === 0;
+  const onIndex = page === 1;
   return (
     <div className="mn" data-testid="minimal-menu">
-      <header className="mn-top">
-        <button className="mn-home" onClick={() => { memory.started = false; setStarted(false); }} aria-label={copy.book.toCover} data-testid="book-to-cover">
-          <img src="/chile/brujula-azul.svg" alt="" width={28} height={28} />
-        </button>
-        {onIndex ? (
-          <LangSwitch lang={lang} setLang={setLang} />
-        ) : (
-          <span className="mn-count" aria-live="polite">
-            {String(page).padStart(2, "0")} <span>/ {String(chapters.length).padStart(2, "0")}</span>
-          </span>
-        )}
-        <button className="mn-index-button" onClick={() => setPage(0)} data-testid="book-to-index" disabled={onIndex} style={{ visibility: onIndex ? "hidden" : "visible" }}>
-          {copy.book.toIndex}
-        </button>
-      </header>
-      <div className="mn-progress" aria-hidden="true">
-        <motion.span animate={{ width: `${(page / chapters.length) * 100}%` }} transition={{ type: "spring", stiffness: 200, damping: 30 }} />
-      </div>
       <div className="mn-stage">
-        <Book pages={pages} index={page} onIndex={setPage} spread={false} verso={() => <div style={{ position: "absolute", inset: 0, background: "#fff" }} />} command={command} className="mn-book" />
+        <Book
+          pages={pages}
+          index={page}
+          onIndex={setPage}
+          spread={false}
+          verso={() => <div style={{ position: "absolute", inset: 0, background: "#fff" }} />}
+          command={command}
+          nudge={onCover}
+          className="mn-book"
+        />
+      </div>
+      <motion.header className="mn-bar glass lens strong" initial={false} animate={{ opacity: onCover ? 0 : 1, y: onCover ? -12 : 0 }} transition={{ duration: 0.3 }} style={{ pointerEvents: onCover ? "none" : "auto" }}>
+        <div className="mn-top">
+          <button className="mn-home" onClick={() => setPage(0)} aria-label={copy.book.toCover} data-testid="book-to-cover">
+            <img src="/chile/brujula-azul.svg" alt="" width={28} height={28} />
+          </button>
+          {onIndex ? (
+            <LangSwitch lang={lang} setLang={setLang} />
+          ) : (
+            <span className="mn-count" aria-live="polite">
+              {String(Math.max(1, page - 1)).padStart(2, "0")} <span>/ {String(chapters.length).padStart(2, "0")}</span>
+            </span>
+          )}
+          <button className="mn-index-button glass pill flat" onClick={() => setPage(1)} data-testid="book-to-index" style={{ visibility: onIndex ? "hidden" : "visible" }}>
+            {copy.book.toIndex}
+          </button>
+        </div>
+        <div className="mn-progress" aria-hidden="true">
+          <motion.span animate={{ width: `${(Math.max(0, page - 1) / chapters.length) * 100}%` }} transition={{ type: "spring", stiffness: 200, damping: 30 }} />
+        </div>
+      </motion.header>
+    </div>
+  );
+}
+
+/** The print's cover as the book's first sheet: Start turns it like a page. */
+function CoverSheet({ copy, lang, setLang, onStart }: { copy: Copy; lang: Lang; setLang: (lang: Lang) => void; onStart: () => void }) {
+  return (
+    <div className="mn-cover" data-testid="book-cover">
+      <div className="mn-cover-art">
+        <ChileSpread n={1} view="full" label={copy.brand} />
+      </div>
+      <div className="mn-top on-dark mn-cover-top">
+        <span />
+        <LangSwitch lang={lang} setLang={setLang} dark />
+      </div>
+      <div className="mn-start-wrap">
+        <motion.button className="mn-start glass dark pill lens" onClick={onStart} data-testid="book-open" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.6, ease: [0.22, 1, 0.36, 1] }} whileTap={{ scale: 0.97 }}>
+          {copy.book.start}
+        </motion.button>
       </div>
     </div>
   );
@@ -257,7 +285,7 @@ function ChapterPage({
         })}
       </ul>
       {next ? (
-        <button className="mn-next" onClick={onNext} data-testid={`next-${category.id}`}>
+        <button className="mn-next glass pill" onClick={onNext} data-testid={`next-${category.id}`}>
           {next} →
         </button>
       ) : null}
@@ -267,7 +295,7 @@ function ChapterPage({
 
 function LangSwitch({ lang, setLang, dark = false }: { lang: Lang; setLang: (lang: Lang) => void; dark?: boolean }) {
   return (
-    <div className={`mn-lang${dark ? " dark" : ""}`}>
+    <div className={`mn-lang glass pill flat${dark ? " dark" : ""}`}>
       {(["es", "en"] as const).map((option) => (
         <button key={option} onClick={() => setLang(option)} aria-pressed={lang === option} data-testid={`lang-${option}`}>
           {option.toUpperCase()}

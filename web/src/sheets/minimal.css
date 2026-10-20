@@ -499,3 +499,126 @@
 .mn-sheet .mn-index-title {
   margin: 10px 0 16px;
 }
+
+/* the book fills the screen; the bar floats over the sheets */
+.mn .mn-stage {
+  position: absolute;
+  inset: 0;
+  max-width: none;
+}
+
+.mn-book {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.mn-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 6;
+  background: rgba(255, 255, 255, 0.92);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.mn-bar .mn-top,
+.mn-bar .mn-progress {
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.mn-bar .mn-progress {
+  margin-left: max(20px, var(--sar));
+  margin-right: max(20px, var(--sar));
+}
+
+@media (min-width: 640px) {
+  .mn-bar .mn-progress {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* sheets start under the bar */
+.mn-sheet {
+  padding-top: calc(var(--sat) + 76px);
+}
+
+.mn-cover .mn-cover-top {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+}
+
+/* ===== liquid glass ===== */
+.mn-bar.glass {
+  top: calc(var(--sat) + 8px);
+  left: 10px;
+  right: 10px;
+  max-width: 580px;
+  margin: 0 auto;
+  border-radius: 26px;
+  padding-bottom: 8px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.mn-bar.glass .mn-top {
+  padding: 8px 10px 6px 12px;
+}
+
+.mn-bar.glass .mn-progress {
+  margin: 0 18px;
+  background: rgba(29, 46, 84, 0.08);
+}
+
+.mn-index-button.glass {
+  text-decoration: none;
+  padding: 0 16px;
+  min-height: 38px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.mn-lang.glass {
+  padding: 3px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.mn-lang.glass button[aria-pressed="true"] {
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 2px 8px -4px rgba(29, 24, 18, 0.35);
+}
+
+.mn-lang.glass.dark {
+  background: rgba(27, 13, 8, 0.28);
+}
+
+.mn-lang.glass.dark button[aria-pressed="true"] {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  box-shadow: none;
+}
+
+.mn-start.glass {
+  border: 0;
+  background: rgba(27, 13, 8, 0.22);
+  color: #fff8ee;
+  padding: 18px 44px;
+}
+
+.mn-next.glass {
+  display: inline-flex;
+  margin-top: 30px;
+  padding: 14px 24px;
+  background: rgba(244, 240, 233, 0.7);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 12px 26px -16px rgba(29, 24, 18, 0.45);
+}
+
+/* sheets clear the floating glass bar */
+.mn-sheet {
+  padding-top: calc(var(--sat) + 92px);
+}
