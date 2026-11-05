@@ -24,7 +24,8 @@ export function Carousel({ children, gap = 12, padding = 20, testId }: Props) {
   }, [children]);
 
   return (
-    <div ref={viewport} style={{ overflow: "hidden", margin: `0 -${padding}px`, padding: `6px 0 10px` }} data-testid={testId}>
+    // Room below for the cards' shadow, pulled back with a negative margin so the rhythm between sections stays.
+    <div ref={viewport} style={{ overflow: "hidden", margin: `0 -${padding}px -26px`, padding: `8px 0 36px` }} data-testid={testId}>
       <motion.div
         ref={track}
         drag="x"

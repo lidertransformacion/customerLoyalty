@@ -73,7 +73,8 @@
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.35),
     inset 0 -1px 0 rgba(255, 255, 255, 0.08),
-    0 24px 60px -20px rgba(0, 0, 0, 0.55);
+    0 28px 70px -24px rgba(0, 0, 0, 0.62),
+    0 6px 14px -6px rgba(0, 0, 0, 0.2);
 }
 
 .glass.dark::before {
@@ -100,10 +101,39 @@
   border-radius: var(--r-pill);
 }
 
+/* Flat glass is the everyday card: no blur drama, but it still sits a little above the page. */
 .glass.flat {
   box-shadow:
     inset 0 1px 0 var(--glass-edge),
-    inset 0 -1px 0 var(--glass-edge-soft);
+    inset 0 -1px 0 var(--glass-edge-soft),
+    var(--shadow-card);
+}
+
+/* Segmented pills and fields are controls, not cards: just a hint of depth. */
+.glass.pill.flat,
+.glass.flat.glass-field {
+  box-shadow:
+    inset 0 1px 0 var(--glass-edge),
+    inset 0 -1px 0 var(--glass-edge-soft),
+    0 6px 16px -10px rgba(27, 22, 18, 0.22);
+}
+
+/* A sheet or a receipt that floats over the screen. */
+.glass.lift {
+  box-shadow:
+    inset 0 1px 0 var(--glass-edge),
+    inset 0 -1px 0 var(--glass-edge-soft),
+    inset 1px 0 0 rgba(255, 255, 255, 0.45),
+    inset -1px 0 0 rgba(255, 255, 255, 0.25),
+    var(--shadow-lift);
+}
+
+.glass.dark.lift {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.08),
+    0 36px 90px -30px rgba(0, 0, 0, 0.7),
+    0 8px 18px -8px rgba(0, 0, 0, 0.24);
 }
 
 /* Chromium: real refraction at the rim through an SVG displacement map. */

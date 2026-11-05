@@ -161,7 +161,7 @@ export function LivingPhoto({ photo, style, className, children, interactive = t
       ref={tilt.ref}
       className={className}
       data-testid={testId}
-      style={{ position: "relative", overflow: "hidden", borderRadius: radius, transformPerspective: 1000, rotateX: tilt.rotateX, rotateY: tilt.rotateY, transformStyle: "preserve-3d", background: "#1b1612", ...style }}
+      style={{ position: "relative", overflow: "hidden", borderRadius: radius, transformPerspective: 1000, rotateX: tilt.rotateX, rotateY: tilt.rotateY, transformStyle: "preserve-3d", background: "#1b1612", ...(radius > 0 ? { boxShadow: "var(--shadow-float)" } : {}), ...style }}
     >
       <motion.div style={{ position: "absolute", inset: 0, x: shiftX, y: shiftY }}>
         <motion.img

@@ -48,7 +48,7 @@ export function Sheet({ open, onClose, children, title, kicker, dark }: Props) {
             transition={{ type: "spring", stiffness: 320, damping: 34 }}
             style={{ position: "relative", width: "100%", padding: "0 10px calc(var(--sab) + 10px)" }}
           >
-            <Glass strong dark={dark} style={{ borderRadius: 32, maxHeight: "78dvh", display: "flex", flexDirection: "column" }}>
+            <Glass strong dark={dark} className="lift" style={{ borderRadius: 32, maxHeight: "78dvh", display: "flex", flexDirection: "column" }}>
               <div style={{ display: "grid", placeItems: "center", paddingTop: 10 }}>
                 <span style={{ width: 40, height: 5, borderRadius: 3, background: dark ? "rgba(255,255,255,0.4)" : "rgba(27,22,18,0.18)" }} />
               </div>
