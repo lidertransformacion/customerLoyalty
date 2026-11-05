@@ -92,6 +92,8 @@ export function Book({ pages, index, onIndex, spread, verso, nudge = false, comm
   // Pointer handling: horizontal drags turn, vertical ones scroll the page, taps go through.
   const onPointerDown = (event: React.PointerEvent) => {
     if (event.pointerType === "mouse" && event.button !== 0) return;
+    // A rail that scrolls sideways or a field that takes typing keeps its own drag.
+    if ((event.target as HTMLElement).closest("[data-no-turn]")) return;
     gesture.current = { x: event.clientX, y: event.clientY, id: event.pointerId, started: false, moved: false, last: event.clientX, time: performance.now(), velocity: 0 };
   };
 

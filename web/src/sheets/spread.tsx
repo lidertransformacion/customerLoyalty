@@ -1,8 +1,10 @@
-import { memo, useEffect, useState, type ReactNode } from "react";
+import { lazy, memo, Suspense, useEffect, useState, type ReactNode } from "react";
 
-import { CHILE_INDEX, CHILE_ITEMS, PAGE, TRIM, type ChileItem } from "./data";
+import { PAGE, TRIM, type ChileItem } from "./data";
 import { EffectLayer, EFFECTS, FLOW, STILL } from "./effects";
-import hotspots from "./hotspots.json";
+
+/** The tap targets over the print's products and index lines, with their data; only the page layouts that take taps load them. */
+const SpreadHotspots = lazy(() => import("./hotspots").then((m) => ({ default: m.SpreadHotspots })));
 
 type Layer = { t: "v" | "i"; svg: string };
 type Photo = { key: string; alpha: boolean; w: number; h: number; matrix: number[] };
@@ -95,8 +97,6 @@ type Props = {
   label?: string;
 };
 
-const SPOTS = hotspots as Record<string, { spread: number; x: number; y: number; w: number; h: number }>;
-
 /** One printed page (or spread, or a zoom of it), drawn from the PDF's own layers. */
 export const ChileSpread = memo(function ChileSpread({ n, view, onItem, onIndex, quiet = false, photosOnly = false, label }: Props) {
   const data = useSpread(n);
@@ -114,8 +114,6 @@ export const ChileSpread = memo(function ChileSpread({ n, view, onItem, onIndex,
     });
     if (!quiet) layers.push(<EffectLayer key="fx-top" effects={EFFECTS[`s${n}`]} scope={`${scope}-top`} view={[x, y, w, h]} />);
   }
-  const inView = (spot: { x: number; y: number; w: number; h: number }) => spot.x + spot.w / 2 > x && spot.x + spot.w / 2 < x + w && spot.y + spot.h / 2 > y && spot.y + spot.h / 2 < y + h;
-  const items = !quiet && !photosOnly && onItem ? CHILE_ITEMS.filter((item) => item.spread === n && SPOTS[item.id] && inView(SPOTS[item.id]!)) : [];
   return (
     <svg className="ch-page" viewBox={`${x} ${y} ${w} ${h}`} preserveAspectRatio="xMidYMid slice" role="img" aria-label={label} data-testid={`ch-spread-${n}`}>
       <rect x={0} y={0} width={1400} height={800} fill="#ffffff" />
@@ -124,50 +122,11 @@ export const ChileSpread = memo(function ChileSpread({ n, view, onItem, onIndex,
         <rect x={TRIM.x} y={TRIM.y} width={SINGLE.has(n) ? PAGE.width : PAGE.width * 2} height={PAGE.height} />
       </clipPath>
       <g clipPath={`url(#${scope}-trim)`}>{layers}</g>
-      {items.map((item) => {
-        const spot = SPOTS[item.id];
-        if (!spot) return null;
-        return (
-          <rect
-            key={item.id}
-            className="ch-hot"
-            x={spot.x}
-            y={spot.y}
-            width={spot.w}
-            height={spot.h}
-            rx={6}
-            tabIndex={0}
-            role="button"
-            aria-label={item.name}
-            data-testid={`ch-item-${item.id}`}
-            onClick={() => onItem?.(item)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" || event.key === " ") onItem?.(item);
-            }}
-          />
-        );
-      })}
-      {!quiet && onIndex && n === 3 && x < TRIM.x + PAGE.width
-        ? CHILE_INDEX.map((entry) => (
-            <rect
-              key={entry.page}
-              className="ch-hot"
-              x={100}
-              y={entry.y - 12}
-              width={400}
-              height={22}
-              rx={4}
-              tabIndex={0}
-              role="button"
-              aria-label={entry.label}
-              data-testid={`ch-index-${entry.page}`}
-              onClick={() => onIndex(entry.page)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") onIndex(entry.page);
-              }}
-            />
-          ))
-        : null}
+      {!quiet && !photosOnly && (onItem || onIndex) ? (
+        <Suspense fallback={null}>
+          <SpreadHotspots n={n} view={[x, y, w, h]} onItem={onItem} onIndex={onIndex} />
+        </Suspense>
+      ) : null}
     </svg>
   );
 });

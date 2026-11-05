@@ -28,29 +28,6 @@
   height: 100%;
 }
 
-.mn-start-wrap {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: calc(var(--sab) + 6%);
-  display: flex;
-  justify-content: center;
-}
-
-.mn-start {
-  min-width: 200px;
-  padding: 17px 36px;
-  border-radius: 999px;
-  border: 1px solid rgba(243, 236, 222, 0.75);
-  color: #f3ecde;
-  font-family: "Perfectly Nineties", Georgia, serif;
-  font-size: 24px;
-  letter-spacing: 0.02em;
-  background: rgba(27, 13, 8, 0.2);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-}
-
 .mn-top {
   position: relative;
   z-index: 3;
@@ -59,13 +36,6 @@
   justify-content: space-between;
   gap: 12px;
   padding: calc(var(--sat) + 12px) max(20px, var(--sar)) 10px max(20px, var(--sal));
-}
-
-.mn-cover .mn-top {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
 }
 
 .mn-home {
@@ -86,17 +56,6 @@
   color: #9aa1b2;
 }
 
-.mn-index-button {
-  min-height: 40px;
-  padding: 0 4px;
-  font-size: 15px;
-  font-weight: 600;
-  color: #1d2e54;
-  text-decoration: underline;
-  text-underline-offset: 5px;
-  text-decoration-thickness: 1px;
-}
-
 .mn-progress {
   height: 2px;
   margin: 0 max(20px, var(--sar)) 0 max(20px, var(--sal));
@@ -111,31 +70,6 @@
   background: #1d2e54;
 }
 
-.mn-rail {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-  overscroll-behavior-x: contain;
-}
-
-.mn-rail::-webkit-scrollbar {
-  display: none;
-}
-
-.mn-page-old {
-  flex: 0 0 100%;
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
-  overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-width: none;
-  padding: 8px max(24px, var(--sar)) calc(var(--sab) + 40px) max(24px, var(--sal));
-}
-
 .mn-page::-webkit-scrollbar {
   display: none;
 }
@@ -147,7 +81,7 @@
 }
 
 .mn-hero {
-  height: min(38vh, 320px);
+  height: min(26vh, 220px);
   overflow: visible;
   display: grid;
   place-items: center;
@@ -181,52 +115,6 @@
   margin-bottom: 0;
   font-size: 16px;
   color: #6b7387;
-}
-
-.mn-list {
-  list-style: none;
-  padding: 0;
-  margin-top: 22px;
-  margin-bottom: 0;
-}
-
-.mn-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: baseline;
-  column-gap: 16px;
-  width: 100%;
-  text-align: left;
-  padding: 16px 0;
-  border-top: 1px solid #eceef2;
-  color: #1d2e54;
-}
-
-.mn-list li:last-child .mn-row {
-  border-bottom: 1px solid #eceef2;
-}
-
-.mn-row:active {
-  opacity: 0.55;
-}
-
-.mn-name {
-  font-size: 19px;
-  font-weight: 600;
-  line-height: 1.25;
-}
-
-.mn-price {
-  font-size: 18px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-
-.mn-sizes {
-  grid-column: 1 / -1;
-  margin-top: 2px;
-  font-size: 13px;
-  color: #8a91a3;
 }
 
 .mn-next {
@@ -263,62 +151,6 @@
   color: #f3ecde;
 }
 
-.mn-index {
-  position: absolute;
-  inset: 0;
-  z-index: 10;
-  background: #fff;
-  display: flex;
-  flex-direction: column;
-}
-
-.mn-index-list {
-  list-style: none;
-  margin: 0;
-  padding: 10px max(24px, var(--sar)) calc(var(--sab) + 30px) max(24px, var(--sal));
-  overflow-y: auto;
-  flex: 1;
-}
-
-.mn-index-list button {
-  display: flex;
-  align-items: baseline;
-  gap: 16px;
-  width: 100%;
-  text-align: left;
-  padding: 9px 0;
-  color: #1d2e54;
-}
-
-.mn-index-n {
-  font-size: 12px;
-  font-weight: 700;
-  color: #9aa1b2;
-  font-variant-numeric: tabular-nums;
-  width: 22px;
-}
-
-.mn-index-name {
-  font-family: "Perfectly Nineties", Georgia, serif;
-  font-size: clamp(28px, 8.4vw, 40px);
-  line-height: 1.05;
-}
-
-.mn-index-list button.on .mn-index-name {
-  font-style: italic;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .mn-rail {
-    scroll-behavior: auto;
-  }
-}
-
-/* index as cards */
-.mn-index {
-  overflow-y: auto;
-}
-
 .mn-index-title {
   font-family: "Perfectly Nineties", Georgia, serif;
   font-weight: 400;
@@ -327,147 +159,9 @@
   margin: 4px max(20px, var(--sar)) 16px max(20px, var(--sal));
 }
 
-.mn-cards {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  padding: 0 max(16px, var(--sar)) calc(var(--sab) + 28px) max(16px, var(--sal));
-  max-width: 720px;
-  width: 100%;
-  margin: 0 auto;
-}
-
-.mn-card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  min-height: 210px;
-  padding: 14px 14px 16px;
-  border-radius: 26px;
-  color: #1d2e54;
-  overflow: hidden;
-  /* depth: a soft lift from the page, a light edge on top, a shade at the foot */
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 45%, rgba(29, 24, 18, 0.04) 100%);
-  box-shadow:
-    0 1px 2px rgba(29, 24, 18, 0.06),
-    0 6px 14px -6px rgba(29, 24, 18, 0.14),
-    0 20px 36px -18px rgba(29, 24, 18, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.85),
-    inset 0 -1px 0 rgba(29, 24, 18, 0.05);
-  transform: translateZ(0);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
-}
-
-@media (hover: hover) {
-  .mn-card:hover {
-    transform: translateY(-3px);
-    box-shadow:
-      0 2px 4px rgba(29, 24, 18, 0.06),
-      0 12px 22px -8px rgba(29, 24, 18, 0.18),
-      0 30px 48px -22px rgba(29, 24, 18, 0.34),
-      inset 0 1px 0 rgba(255, 255, 255, 0.85),
-      inset 0 -1px 0 rgba(29, 24, 18, 0.05);
-  }
-}
-
-.mn-card.on {
-  box-shadow:
-    0 0 0 2px #1d2e54,
-    0 6px 14px -6px rgba(29, 24, 18, 0.14),
-    0 20px 36px -18px rgba(29, 24, 18, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.85);
-}
-
-/* the product casts its own shadow on the card */
-.mn-card-art {
-  position: relative;
-}
-
-.mn-card-art::after {
-  content: "";
-  position: absolute;
-  left: 22%;
-  right: 22%;
-  bottom: 2px;
-  height: 12px;
-  border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(29, 24, 18, 0.22), rgba(29, 24, 18, 0));
-  pointer-events: none;
-}
-
-.mn-card.wide {
-  grid-column: 1 / -1;
-  min-height: 190px;
-}
-
-.mn-card-n {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: rgba(29, 46, 84, 0.45);
-  font-variant-numeric: tabular-nums;
-}
-
-.mn-card-art {
-  flex: 1;
-  width: 100%;
-  min-height: 112px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  margin: 2px 0 8px;
-}
-
-.mn-card-art img {
-  max-width: 100%;
-  max-height: 120px;
-  object-fit: contain;
-  filter: drop-shadow(0 14px 16px rgba(29, 24, 18, 0.18));
-  animation: mn-float 5s ease-in-out infinite;
-}
-
-.mn-card.wide .mn-card-art img {
-  max-height: 104px;
-  max-width: 22%;
-}
-
-.mn-card-art img.photo {
-  width: 100%;
-  height: 120px;
-  object-fit: cover;
-  border-radius: 16px;
-  filter: none;
-}
-
-.mn-card-name {
-  font-family: "Perfectly Nineties", Georgia, serif;
-  font-size: 23px;
-  line-height: 1.02;
-  text-wrap: balance;
-}
-
-.mn-card-count {
-  margin-top: 4px;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: rgba(29, 46, 84, 0.55);
-}
-
 @keyframes mn-float {
   0%, 100% { transform: translateY(0) rotate(0deg); }
   50% { transform: translateY(-5px) rotate(-1.2deg); }
-}
-
-@media (min-width: 720px) {
-  .mn-cards { grid-template-columns: repeat(3, 1fr); }
-  .mn-card.wide { grid-column: span 3; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .mn-card-art img { animation: none; }
 }
 
 /* the book: full-bleed white sheets */
@@ -496,10 +190,6 @@
 
 .mn-sheet.mn-page {
   display: block;
-}
-
-.mn-sheet .mn-cards {
-  padding: 4px 2px calc(var(--sab) + 28px);
 }
 
 .mn-sheet .mn-index-title {
@@ -546,18 +236,12 @@
     margin-left: auto;
     margin-right: auto;
   }
+
 }
 
 /* sheets start under the bar */
 .mn-sheet {
   padding-top: calc(var(--sat) + 76px);
-}
-
-.mn-cover .mn-cover-top {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
 }
 
 /* ===== liquid glass ===== */
@@ -590,14 +274,6 @@
   background: rgba(29, 46, 84, 0.06);
 }
 
-.mn-index-button.glass {
-  text-decoration: none;
-  padding: 0 16px;
-  min-height: 38px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.55);
-}
-
 .mn-lang.glass {
   padding: 3px;
   background: rgba(255, 255, 255, 0.5);
@@ -616,13 +292,6 @@
   background: rgba(255, 255, 255, 0.22);
   color: #fff;
   box-shadow: none;
-}
-
-.mn-start.glass {
-  border: 0;
-  background: rgba(27, 13, 8, 0.22);
-  color: #fff8ee;
-  padding: 18px 44px;
 }
 
 .mn-next.glass {
@@ -696,13 +365,6 @@
   white-space: nowrap;
 }
 
-.mn-cover-lang {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  z-index: 3;
-}
-
 .mn-index-head {
   display: flex;
   align-items: center;
@@ -716,6 +378,7 @@
 
 @media (max-width: 370px) {
   .mn-city { font-size: 10.5px; letter-spacing: 0.1em; }
+
 }
 
 /* a compact header: city, count, language and index all fit a 360 px phone */
@@ -764,14 +427,9 @@
   font-size: 11.5px;
 }
 
-.mn-bar .mn-index-button.glass {
-  min-height: 32px;
-  padding: 0 11px;
-  font-size: 13.5px;
-}
-
 @media (max-width: 370px) {
   .mn-city { font-size: 9px; letter-spacing: 0.06em; }
+
 }
 
 /* the gutter of an open book: shade where the sheet meets the spine */
@@ -810,6 +468,171 @@
   background: linear-gradient(90deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.18) 22%, rgba(255, 225, 190, 0.1) 34%, rgba(0, 0, 0, 0) 100%);
 }
 
+/* ===== the cover turns by itself: a line fills along its foot ===== */
+.mn-cover-tap {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+
+.mn-load {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: calc(var(--sab) + 7%);
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(243, 236, 222, 0.28);
+  overflow: hidden;
+  z-index: 3;
+}
+
+.mn-load span {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: #f3ecde;
+  box-shadow: 0 0 12px rgba(243, 236, 222, 0.6);
+}
+
+/* ===== the index: a title, a search, the chapters as pills, the products as cards ===== */
+.mn-index-title {
+  font-family: "Perfectly Nineties", Georgia, serif;
+  font-weight: 400;
+  font-size: clamp(36px, 10vw, 48px);
+  line-height: 1;
+  margin: 8px 0 12px;
+}
+
+.mn-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  min-height: 48px;
+  border-radius: 16px;
+  background: #f1ece3;
+  color: #5d6579;
+  margin-bottom: 12px;
+}
+
+.mn-search input {
+  flex: 1;
+  min-width: 0;
+  font-size: 16px;
+  color: #1d2e54;
+  background: transparent;
+}
+
+.mn-search input::placeholder {
+  color: #9aa1b2;
+}
+
+.mn-section {
+  font-family: "Perfectly Nineties", Georgia, serif;
+  font-weight: 400;
+  font-size: 26px;
+  line-height: 1.05;
+  margin: 2px 0 12px;
+}
+
+.mn-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.mn-empty {
+  grid-column: 1 / -1;
+  padding: 24px 0;
+  text-align: center;
+  font-size: 15px;
+  color: #6b7387;
+}
+
+.mn-pcard {
+  position: relative;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow:
+    0 1px 2px rgba(29, 24, 18, 0.05),
+    0 10px 24px -14px rgba(29, 24, 18, 0.28),
+    0 0 0 1px rgba(29, 46, 84, 0.05);
+}
+
+.mn-pcard-open {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px 14px;
+  color: #1d2e54;
+}
+
+.mn-pcard-open:active {
+  opacity: 0.7;
+}
+
+.mn-pcard-photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fff;
+  margin-bottom: 10px;
+}
+
+.mn-pcard-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.12);
+  transform-origin: 50% 54%;
+}
+
+.mn-pcard-name {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.2;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.mn-pcard-price {
+  margin-top: 4px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #8a4a2c;
+  font-variant-numeric: tabular-nums;
+}
+
+.mn-pcard-note {
+  margin-top: 2px;
+  font-size: 12.5px;
+  color: #8a91a3;
+}
+
+.mn-tag {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #eaf0e1;
+  color: #4c6b2f;
+}
+
+@media (min-width: 540px) {
+  .mn-grid { grid-template-columns: repeat(3, 1fr); }
+
+}
+
+/* the last sheet: beans and the house note, centred */
 .mn-colophon {
   display: flex;
   flex-direction: column;
@@ -827,9 +650,330 @@
   color: #6b7387;
 }
 
-.mn-card-art img.fade-v60 {
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 9%, #000 88%, transparent 100%), linear-gradient(to left, transparent 0, #000 7%);
-  -webkit-mask-composite: source-in;
-  mask-image: linear-gradient(to bottom, transparent 0, #000 9%, #000 88%, transparent 100%), linear-gradient(to left, transparent 0, #000 7%);
-  mask-composite: intersect;
+/* on a chapter sheet the cards follow the title */
+.mn-page .mn-grid {
+  margin-top: 18px;
+}
+
+.mn-page .mn-next {
+  margin: 24px auto 0;
+  display: flex;
+}
+
+/* ===== the chapters as cards: a cut-out floating on a soft ground, the name, how many pieces ===== */
+.mn-index-head .mn-index-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.mn-ccard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  padding: 10px 12px 14px;
+  border-radius: 22px;
+  background: #fff;
+  color: #1d2e54;
+  box-shadow:
+    0 1px 2px rgba(29, 24, 18, 0.05),
+    0 10px 24px -14px rgba(29, 24, 18, 0.28),
+    0 0 0 1px rgba(29, 46, 84, 0.05);
+}
+
+.mn-ccard.wide {
+  grid-column: 1 / -1;
+}
+
+.mn-ccard-art {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 16px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.mn-ccard.wide .mn-ccard-art {
+  aspect-ratio: auto;
+  height: 160px;
+  gap: 2px;
+}
+
+.mn-ccard-art img.cut {
+  max-width: 84%;
+  max-height: 84%;
+  object-fit: contain;
+  filter: drop-shadow(0 14px 16px rgba(29, 24, 18, 0.18));
+  animation: mn-float 5s ease-in-out infinite;
+}
+
+.mn-ccard.wide .mn-ccard-art img.cut {
+  max-width: 24%;
+  max-height: 94%;
+}
+
+/* drip and capsules: three pieces, drawn larger so they sit together */
+.mn-ccard.formats .mn-ccard-art img.cut {
+  max-width: 36%;
+  max-height: 100%;
+}
+
+.mn-ccard.formats .mn-ccard-art img.cut:first-child {
+  max-width: 44%;
+}
+
+.mn-ccard-name {
+  font-family: "Perfectly Nineties", Georgia, serif;
+  font-size: 22px;
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+.mn-ccard-count {
+  margin-top: 4px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: rgba(29, 46, 84, 0.55);
+}
+
+/* the way to the categories, in the header: a real button, navy, so it reads as one */
+.mn-index-button {
+  flex-shrink: 0;
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: #1d2e54;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  box-shadow: 0 6px 14px -8px rgba(29, 46, 84, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  transition: transform 0.15s ease, background 0.2s ease;
+}
+
+.mn-index-button:active {
+  transform: scale(0.96);
+  background: #16244a;
+}
+
+@media (max-width: 370px) {
+  .mn-index-button {
+    padding: 0 11px;
+    font-size: 12.5px;
+  }
+
+}
+
+/* the red heart beside the magnifier: the way to what the guest saved */
+.mn-index-head {
+  gap: 8px;
+}
+
+/* ===== the round buttons are liquid glass: the magnifier and the heart on the index, the magnifier in the header, the heart on every card ===== */
+.mn-search-toggle.glass,
+.mn-heart-toggle.glass,
+.mn-bar-search.glass {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  color: #1d2e54;
+  /* see-through: almost no fill, what is behind blurs through; a bright rim on top and a shaded rim at the foot draw the disc */
+  background:
+    radial-gradient(120% 90% at 30% 15%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 55%),
+    rgba(255, 255, 255, 0.14);
+  -webkit-backdrop-filter: blur(16px) saturate(1.7);
+  backdrop-filter: blur(16px) saturate(1.7);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1.5px 0 rgba(29, 46, 84, 0.12),
+    inset 1px 0 0 rgba(255, 255, 255, 0.55),
+    inset -1px 0 0 rgba(29, 46, 84, 0.06),
+    0 12px 24px -14px rgba(29, 46, 84, 0.4),
+    0 0 0 1px rgba(29, 46, 84, 0.12);
+  transition: transform 0.15s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.mn-search-toggle.glass,
+.mn-heart-toggle.glass {
+  width: 42px;
+  height: 42px;
+}
+
+.mn-bar-search.glass {
+  width: 34px;
+  height: 34px;
+}
+
+.mn-search-toggle.glass:active,
+.mn-heart-toggle.glass:active,
+.mn-bar-search.glass:active {
+  transform: scale(0.92);
+}
+
+.mn-heart-toggle.glass {
+  color: #9a4a44;
+}
+
+.mn-search-toggle.glass.on {
+  background:
+    radial-gradient(120% 90% at 30% 15%, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0) 55%),
+    rgba(29, 46, 84, 0.55);
+  color: #fff;
+}
+
+.mn-heart-toggle.glass.on {
+  background:
+    radial-gradient(120% 90% at 30% 15%, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0) 55%),
+    rgba(154, 74, 68, 0.55);
+  color: #fff;
+}
+
+/* the heart on a card: a small dark see-through disc inside the photograph's corner, the heart drawn in white */
+.mn-heart.glass {
+  position: absolute;
+  top: 20px;
+  right: 22px;
+  width: 32px;
+  height: 32px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: rgba(27, 22, 18, 0.3);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  transition: transform 0.15s ease, background 0.2s ease;
+}
+
+.mn-heart.glass::before,
+.mn-heart.glass::after {
+  display: none;
+}
+
+.mn-heart.glass svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2;
+}
+
+.mn-heart.glass:active {
+  transform: scale(0.9);
+}
+
+.mn-heart.glass.on {
+  color: #e9a79d;
+  background: rgba(27, 22, 18, 0.34);
+}
+
+/* ===== a quiet arrow in the sheet's top corner: the page turns this way ===== */
+.mn-turn {
+  position: absolute;
+  top: 12px;
+  right: calc(max(14px, var(--sar)) + 4px);
+  z-index: 5;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  color: #1d2e54;
+  opacity: 0.42;
+  animation: mn-turn 2.2s ease-in-out infinite;
+}
+
+/* the one that goes back, in the other corner, swaying the other way */
+.mn-turn.back {
+  right: auto;
+  left: calc(max(14px, var(--sal)) + 4px);
+  animation-name: mn-turn-back;
+}
+
+/* the index keeps its corner for the arrow: its buttons sit a little to the left */
+.mn-index .mn-index-head {
+  padding-right: 38px;
+}
+
+.mn-turn:active {
+  opacity: 1;
+  animation: none;
+}
+
+@keyframes mn-turn {
+  0%, 100% { transform: translateX(0); opacity: 0.38; }
+  50% { transform: translateX(5px); opacity: 0.85; }
+}
+
+@keyframes mn-turn-back {
+  0%, 100% { transform: translateX(0); opacity: 0.38; }
+  50% { transform: translateX(-5px); opacity: 0.85; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mn-turn { animation: none; opacity: 0.55; }
+}
+
+/* ===== the fold: the paper fades at the foot of a sheet with more below, and a small nudge says to scroll until the reader does ===== */
+.mn-more {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 92px;
+  z-index: 4;
+  pointer-events: none;
+  display: grid;
+  place-items: end center;
+  padding-bottom: 12px;
+  border-radius: 0 0 22px 6px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.94) 72%);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.mn-more.on {
+  opacity: 1;
+}
+
+.mn-more-button {
+  pointer-events: none;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 6px 14px;
+  color: #1d2e54;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.6;
+  animation: mn-more 2.2s ease-in-out infinite;
+}
+
+.mn-more.on .mn-more-button {
+  pointer-events: auto;
+}
+
+@keyframes mn-more {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mn-more-button { animation: none; }
+}
+
+/* the cover's photograph alone, under the print's layers, so something shows while they arrive */
+.mn-cover-poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
