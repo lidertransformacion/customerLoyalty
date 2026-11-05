@@ -31,7 +31,9 @@ export default defineConfig({
     devWhere(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.png", "icons/*.png", "menu/*.jpg"],
+      // the manifest icons are not pushed into the precache by themselves: the ones the phone needs are in includeAssets
+      includeManifestIcons: false,
+      includeAssets: ["favicon.png", "icons/icon-192.png", "icons/icon-512.png", "icons/maskable-512.png", "icons/icon-180.png"],
       manifest: {
         name: "Libertario",
         short_name: "Libertario",
@@ -56,16 +58,33 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ["**/*.{js,css,html,png,jpg,woff2}"],
-        // the sharper copies and the clips load on demand, not at install
-        globIgnores: ["**/*@2x.jpg", "**/video/*", "**/products/*", "**/menu/cl/**"],
+        // Install takes only the shell: code, styles, the manifest and the icons. Nothing heavy up front.
+        globPatterns: ["**/*.{js,css,html,webmanifest}", "chile/brujula-azul*.webp"],
+        // the 1024 px icon is for the install sheet only; the rest of the photographs are kept as they are seen
+        globIgnores: ["**/video/*", "**/products/*", "**/menu/**", "**/chile/img/**", "**/chile/pages/**", "icons/icon-1024.png"],
         navigateFallback: "/index.html",
-        // the Chile photographs are kept once seen, so a second visit opens offline
+        cleanupOutdatedCaches: true,
+        // Everything the guest sees is kept once seen: the second visit opens offline, the first downloads only what it shows.
         runtimeCaching: [
           {
-            urlPattern: ({ url }) => url.pathname.startsWith("/menu/cl/"),
+            urlPattern: ({ url }) => url.pathname.startsWith("/menu/"),
             handler: "CacheFirst",
-            options: { cacheName: "chile-photos-v1", expiration: { maxEntries: 200 } },
+            options: { cacheName: "menu-photos-v2", expiration: { maxEntries: 600, maxAgeSeconds: 60 * 60 * 24 * 90 } },
+          },
+          {
+            urlPattern: ({ url }) => url.pathname.startsWith("/chile/"),
+            handler: "CacheFirst",
+            options: { cacheName: "chile-print-v1", expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 90 } },
+          },
+          {
+            urlPattern: ({ url }) => url.pathname.startsWith("/products/") || url.pathname.startsWith("/brand/") || url.pathname.startsWith("/video/"),
+            handler: "CacheFirst",
+            options: { cacheName: "house-images-v1", expiration: { maxEntries: 120, maxAgeSeconds: 60 * 60 * 24 * 90 } },
+          },
+          {
+            urlPattern: ({ request }) => request.destination === "font",
+            handler: "CacheFirst",
+            options: { cacheName: "fonts-v1", expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 365 } },
           },
         ],
       },

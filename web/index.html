@@ -14,6 +14,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Libertario" />
     <meta name="format-detection" content="telephone=no" />
+    <!-- the Chile cover and its type start with the HTML, so the first screen does not wait for the code -->
+    <link rel="preload" href="/chile/pages/p1.json" as="fetch" crossorigin="anonymous" />
+    <link rel="preload" href="/chile/img/p1-1.webp" as="image" />
+    <link rel="preload" href="/fonts/PerfectlyNineties-Regular.otf" as="font" type="font/otf" crossorigin="anonymous" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/icons/icon-180.png" />
   </head>

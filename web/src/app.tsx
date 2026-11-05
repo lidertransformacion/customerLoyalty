@@ -1,25 +1,27 @@
 import { AnimatePresence } from "motion/react";
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router";
 
 import { productionBlocked } from "@/src/data/program";
 
 import { menuOnly } from "./core/mode";
 import { useCopy } from "./i18n";
-import { Celebrate } from "./motion/celebrate";
-import { Home } from "./screens/home";
 import { ItemScreen } from "./screens/item";
-import { Landing } from "./screens/landing";
 import { MenuScreen } from "./screens/menu";
-import { Opening } from "./screens/opening";
-import { OrderScreen } from "./screens/order";
-import { SettingsScreen } from "./screens/settings";
-import { SignupScreen } from "./screens/signup";
-import { WalletScreen } from "./screens/wallet";
 import { useAccount } from "./state/account";
 import { LensFilter } from "./ui/glass";
-import { TabBar } from "./ui/tabbar";
 import { Toast } from "./ui/toast";
+
+// The house account only loads where the full app runs; the menu-only build never downloads it.
+const Celebrate = lazy(() => import("./motion/celebrate").then((m) => ({ default: m.Celebrate })));
+const Home = lazy(() => import("./screens/home").then((m) => ({ default: m.Home })));
+const Landing = lazy(() => import("./screens/landing").then((m) => ({ default: m.Landing })));
+const Opening = lazy(() => import("./screens/opening").then((m) => ({ default: m.Opening })));
+const OrderScreen = lazy(() => import("./screens/order").then((m) => ({ default: m.OrderScreen })));
+const SettingsScreen = lazy(() => import("./screens/settings").then((m) => ({ default: m.SettingsScreen })));
+const SignupScreen = lazy(() => import("./screens/signup").then((m) => ({ default: m.SignupScreen })));
+const WalletScreen = lazy(() => import("./screens/wallet").then((m) => ({ default: m.WalletScreen })));
+const TabBar = lazy(() => import("./ui/tabbar").then((m) => ({ default: m.TabBar })));
 
 function RequireAccount({ children }: { children: React.ReactElement }) {
   const { ready, account } = useAccount();
@@ -63,7 +65,7 @@ export function App() {
   }
 
   return (
-    <>
+    <Suspense fallback={null}>
       <LensFilter />
       <AnimatePresence mode="wait" initial={false}>
         <Routes location={location} key={location.pathname.split("/")[1] ?? ""}>
@@ -83,6 +85,6 @@ export function App() {
       {tabbed ? <TabBar /> : null}
       <Toast note={note} onDismiss={dismissNote} />
       <Celebrate trigger={celebration} />
-    </>
+    </Suspense>
   );
 }
