@@ -39,6 +39,15 @@ jobs:
 
       - run: npm ci
 
+      # The shared modules under the repository root (src/data, src/i18n, src/format) sit beside
+      # the Expo app's tsconfig.json, which extends expo/tsconfig.base. The Expo app is not installed
+      # here, so Vite gets the two fields esbuild reads from that base in its place.
+      - name: Stand in for the Expo tsconfig base
+        working-directory: .
+        run: |
+          mkdir -p node_modules/expo
+          echo '{ "compilerOptions": { "jsx": "react-jsx", "target": "ESNext" } }' > node_modules/expo/tsconfig.base.json
+
       - run: npm test
 
       - name: Build the menu for Chile
