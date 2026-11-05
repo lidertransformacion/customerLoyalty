@@ -57,7 +57,13 @@ function isMarketId(value: unknown): value is MarketId {
   return value === "CO" || value === "CL";
 }
 
-/** URL `?pais=CL`, then what was chosen before, then the phone's region and clock. */
+/** The market a build serves by default (`VITE_MARKET`), for a site published for one country. */
+export function builtMarket(): MarketId | null {
+  const built = (import.meta.env.VITE_MARKET ?? "").toUpperCase();
+  return isMarketId(built) ? built : null;
+}
+
+/** URL `?pais=CL`, then what was chosen before, then the build's own market, then the phone's region and clock. */
 export function detectMarket(): MarketId {
   try {
     if (window.location.pathname.replace(/\/+$/, "") === "/chile") return "CL";
@@ -68,6 +74,8 @@ export function detectMarket(): MarketId {
     }
     const stored = window.localStorage.getItem(MARKET_KEY);
     if (isMarketId(stored)) return stored;
+    const built = builtMarket();
+    if (built) return built;
     const region = new Intl.Locale(navigator.language).region;
     if (region === "CL") return "CL";
     const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;

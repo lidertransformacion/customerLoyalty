@@ -1,0 +1,87 @@
+# The Chile menu: every push to `menuChile` builds web/ in menu mode for the Chilean market,
+# runs its tests and publishes dist/ to the S3 bucket behind the CloudFront distribution.
+# Until the AWS secret and variables exist in the repository, the build and tests still run
+# and the publish steps are skipped (see web/README.md, "Despliegue del menú de Chile").
+name: Deploy Chile menu
+
+on:
+  push:
+    branches: [menuChile]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: deploy-chile-menu
+  cancel-in-progress: false
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    env:
+      AWS_ROLE: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      BUCKET: ${{ vars.CHILE_S3_BUCKET }}
+      DISTRIBUTION: ${{ vars.CHILE_CLOUDFRONT_ID }}
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - run: npm ci
+
+      - run: npm test
+
+      - name: Build the menu for Chile
+        run: npm run build
+        env:
+          VITE_APP_MODE: menu
+          VITE_MARKET: CL
+          EXPO_PUBLIC_ODOO_URL: ""
+
+      - name: Explain a skipped publish
+        if: env.AWS_ROLE == '' || env.BUCKET == '' || env.DISTRIBUTION == '' || env.AWS_REGION == ''
+        run: |
+          echo "::notice::Built and tested, not published: set the AWS_DEPLOY_ROLE_ARN secret and the AWS_REGION, CHILE_S3_BUCKET and CHILE_CLOUDFRONT_ID variables (web/README.md)."
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        if: env.AWS_ROLE != '' && env.BUCKET != '' && env.DISTRIBUTION != '' && env.AWS_REGION != ''
+        with:
+          role-to-assume: ${{ env.AWS_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Upload the site
+        if: env.AWS_ROLE != '' && env.BUCKET != '' && env.DISTRIBUTION != '' && env.AWS_REGION != ''
+        run: |
+          # Hashed bundles: forever, and stale ones go.
+          aws s3 sync dist/assets "s3://$BUCKET/assets" --delete \
+            --cache-control "public, max-age=31536000, immutable"
+          # Photographs, fonts, icons, print pages: a month. Replaced photographs carry a new
+          # name, and old names stay in the bucket for phones that still ask for them.
+          aws s3 sync dist "s3://$BUCKET" \
+            --exclude "assets/*" --exclude "index.html" --exclude "sw.js" --exclude "workbox-*.js" \
+            --exclude "manifest.webmanifest" --exclude "_redirects" \
+            --cache-control "public, max-age=2592000"
+          # The shell: always revalidated, so a new build reaches the phones at once.
+          for file in index.html sw.js workbox-*.js; do
+            for path in dist/$file; do
+              aws s3 cp "$path" "s3://$BUCKET/$(basename "$path")" --cache-control "no-cache"
+            done
+          done
+          aws s3 cp dist/manifest.webmanifest "s3://$BUCKET/manifest.webmanifest" \
+            --cache-control "no-cache" --content-type "application/manifest+json"
+
+      - name: Refresh CloudFront
+        if: env.AWS_ROLE != '' && env.BUCKET != '' && env.DISTRIBUTION != '' && env.AWS_REGION != ''
+        run: |
+          aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION" \
+            --paths "/" "/index.html" "/sw.js" "/workbox-*" "/manifest.webmanifest"

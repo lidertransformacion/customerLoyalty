@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { formatMoney, isAdult, MARKETS } from "./market";
+import { builtMarket, detectMarket, formatMoney, isAdult, MARKETS } from "./market";
 
 /** 14 October 2026, 10:00 local (America/Bogota under the test config). */
 const TODAY = new Date(2026, 9, 14, 10);
@@ -76,5 +76,40 @@ describe("MARKETS", () => {
     expect(MARKETS.CL.idPattern.test("12345678k")).toBe(true);
     expect(MARKETS.CL.idPattern.test("1234567-9")).toBe(true);
     expect(MARKETS.CL.idPattern.test("123456-9")).toBe(false);
+  });
+});
+
+describe("the market a build serves", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  function visit(search: string) {
+    vi.stubGlobal("window", { location: { pathname: "/", search }, localStorage: { getItem: () => null, setItem: () => undefined } });
+    vi.stubGlobal("navigator", { language: "en-US" });
+  }
+
+  it("reads VITE_MARKET in any case and ignores what is not a market", () => {
+    vi.stubEnv("VITE_MARKET", "cl");
+    expect(builtMarket()).toBe("CL");
+    vi.stubEnv("VITE_MARKET", "PE");
+    expect(builtMarket()).toBe(null);
+    vi.stubEnv("VITE_MARKET", "");
+    expect(builtMarket()).toBe(null);
+  });
+
+  it("opens the Chile site on Chile for a foreign phone, unless the link says otherwise", () => {
+    vi.stubEnv("VITE_MARKET", "CL");
+    visit("");
+    expect(detectMarket()).toBe("CL");
+    visit("?pais=CO");
+    expect(detectMarket()).toBe("CO");
+  });
+
+  it("falls back to Colombia without a built market or a Chilean phone", () => {
+    vi.stubEnv("VITE_MARKET", "");
+    visit("");
+    expect(detectMarket()).toBe("CO");
   });
 });

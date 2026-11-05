@@ -27,7 +27,7 @@ Routes live in `app/`. Non-route code stays in `src/`. Import `Link`, `router`, 
 - If `ios/` and `android/` do not exist, they are generated. Do not create or edit them by hand. Configure native behavior in `app.json`.
 - Customer-facing Spanish copy belongs in `src/i18n/strings.ts` with English keys.
 - Do not call production Odoo. `productionBlocked()` refuses `libertariocoffee.odoo.com`.
-- Do not deploy this demo.
+- Do not deploy the loyalty demo (the Expo app, or the web app in `full` mode). The menu alone (`menu` mode) is published: the Chile menu deploys itself from `menuChile` through `.github/workflows/deploy-chile-menu.yml` (see `web/README.md`).
 
 ## Web app (`web/`)
 
@@ -37,4 +37,4 @@ Routes live in `app/`. Non-route code stays in `src/`. Import `Link`, `router`, 
 - Todo elemento interactivo lleva `data-testid`.
 - Los módulos compartidos por el alias `@` (`src/data/program.ts`, `src/data/menu.*`, `src/i18n/strings.ts`, `src/format.ts`) alimentan las dos apps. Después de cualquier cambio se corre `npx tsc --noEmit` en `web/` y en la raíz.
 - `EXPO_PUBLIC_ODOO_URL` nunca apunta a producción. `productionBlocked()` también rige en la web: Vite inyecta esa variable con `define`.
-- No se despliega la app web.
+- La app web solo se publica en modo `menu` (la carta). La carta de Chile se despliega sola desde `menuChile` con `.github/workflows/deploy-chile-menu.yml`; el modo `full` (cuenta, puntos, recargas) no se despliega.
