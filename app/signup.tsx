@@ -34,7 +34,8 @@ function errorsFor(signup: Signup): Partial<Record<Field, string>> {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(signup.email.trim()))
     errors.email = copy.signup.emailError;
   if (signup.name.trim().length < 2) errors.name = copy.signup.nameError;
-  if (!/^\d{6,10}$/.test(signup.idNumber.trim()))
+  const idNumber = signup.idNumber.trim();
+  if (idNumber && !/^\d{6,10}$/.test(idNumber))
     errors.idNumber = copy.signup.idError;
   return errors;
 }

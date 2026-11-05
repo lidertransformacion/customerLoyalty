@@ -12,14 +12,8 @@ import {
 import { storeName, type StoreId } from "@/src/data/program";
 import { copy } from "@/src/i18n/strings";
 
+import { courtesyFor, type Courtesy } from "../core/courtesy";
 import { haptics } from "../core/haptics";
-import {
-  isLive,
-  promoId,
-  remainingMs,
-  startPromo,
-  type ActivePromo,
-} from "../core/promo";
 import { readJson, writeJson } from "../core/storage";
 import { geoById, nearestStore, type LatLng, type Nearest } from "../core/stores";
 import { useAccount } from "./account";
@@ -32,9 +26,8 @@ type Api = {
   position: LatLng | null;
   nearest: Nearest | null;
   simulated: StoreId | null;
-  promo: ActivePromo | null;
+  courtesy: Courtesy | null;
   live: boolean;
-  remaining: number;
   ask: () => void;
   simulate: (storeId: StoreId | null) => void;
   claim: () => void;
@@ -44,7 +37,7 @@ type Api = {
 const PresenceContext = createContext<Api | null>(null);
 
 const PERMISSION_KEY = "libertario-presence-v1";
-const PROMO_KEY = "libertario-promo-v1";
+const COURTESY_KEY = "libertario-courtesy-v1";
 
 type StoredPermission = { permission: "granted" | "denied" };
 
@@ -57,10 +50,13 @@ function isStoredPermission(value: unknown): value is StoredPermission {
   );
 }
 
-function isPromo(value: unknown): value is ActivePromo {
+/** The courtesy on the table now, and the ids already activated or closed. Nothing is offered twice. */
+type StoredCourtesy = { current: Courtesy | null; seen: string[] };
+
+function isStoredCourtesy(value: unknown): value is StoredCourtesy {
   if (!value || typeof value !== "object") return false;
-  const promo = value as Partial<ActivePromo>;
-  return typeof promo.id === "string" && typeof promo.expiresAt === "string" && typeof promo.kind === "string";
+  const stored = value as Partial<StoredCourtesy>;
+  return Array.isArray(stored.seen) && (stored.current === null || typeof stored.current === "object");
 }
 
 function notify(title: string, body: string): void {
@@ -68,7 +64,7 @@ function notify(title: string, body: string): void {
     if (typeof Notification === "undefined") return;
     if (Notification.permission !== "granted") return;
     if (document.visibilityState === "visible") return;
-    new Notification(title, { body, icon: "/icons/icon-192.png", tag: "libertario-promo" });
+    new Notification(title, { body, icon: "/icons/icon-192.png", tag: "libertario-courtesy" });
   } catch {
     /* notifications are optional */
   }
@@ -80,11 +76,17 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
   const [permission, setPermission] = useState<Permission>("idle");
   const [position, setPosition] = useState<LatLng | null>(null);
   const [simulated, setSimulated] = useState<StoreId | null>(null);
-  const [promo, setPromo] = useState<ActivePromo | null>(() => readJson(PROMO_KEY, isPromo));
-  const [now, setNow] = useState(() => Date.now());
+  const [stored, setStored] = useState<StoredCourtesy>(
+    () => readJson(COURTESY_KEY, isStoredCourtesy) ?? { current: null, seen: [] },
+  );
   const watchId = useRef<number | null>(null);
-  const promoRef = useRef<ActivePromo | null>(promo);
-  promoRef.current = promo;
+  const storedRef = useRef(stored);
+  storedRef.current = stored;
+
+  const remember = useCallback((next: StoredCourtesy) => {
+    setStored(next);
+    writeJson(COURTESY_KEY, next);
+  }, []);
 
   const startWatch = useCallback(() => {
     if (!("geolocation" in navigator)) {
@@ -147,48 +149,37 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
 
   const nearest = useMemo(() => (effective ? nearestStore(effective) : null), [effective]);
 
-  // Walking in starts the promo once per house per day, and moves the ledger to that house.
+  // Walking in: the ledger moves to that house, and if the house has something for the guest, it shows. No clock on it.
   useEffect(() => {
     if (!account || !nearest?.inside) return;
-    const date = new Date();
-    const id = promoId(nearest.store.id, date);
-    const current = promoRef.current;
-    if (current && current.id === id) return;
-    const fresh = startPromo(nearest.store.id, date);
-    setPromo(fresh);
-    writeJson(PROMO_KEY, fresh);
     if (account.storeId !== nearest.store.id) {
       dispatch({ type: "chooseStore", storeId: nearest.store.id });
     }
+    const current = storedRef.current;
+    if (current.current && !current.current.claimed) return;
+    const fresh = courtesyFor(account, nearest.store.id, new Date(), current.seen);
+    if (!fresh) return;
+    remember({ ...current, current: fresh });
     haptics.select();
-    const text = copy.promo.catalog[fresh.kind];
-    notify(`${copy.brand} · ${storeName(nearest.store.id)}`, `${text.title}. ${copy.promo.minutesLeft("10:00")}.`);
-  }, [account, dispatch, nearest]);
+    const text = copy.courtesy.catalog[fresh.kind];
+    notify(`${copy.brand} · ${storeName(nearest.store.id)}`, `${text.title(storeName(nearest.store.id))}. ${text.detail}`);
+  }, [account, dispatch, nearest, remember]);
 
-  const live = isLive(promo, new Date(now));
-
-  useEffect(() => {
-    if (!live) return;
-    const timer = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(timer);
-  }, [live]);
+  const courtesy = stored.current;
+  const live = !!courtesy && !courtesy.claimed;
 
   const claim = useCallback(() => {
-    const current = promoRef.current;
-    if (!current || !isLive(current, new Date())) return;
-    dispatch({ type: "claimPromo", promo: current });
-    const claimed = { ...current, claimed: true };
-    setPromo(claimed);
-    writeJson(PROMO_KEY, claimed);
-  }, [dispatch]);
+    const current = storedRef.current.current;
+    if (!current || current.claimed) return;
+    dispatch({ type: "claimCourtesy", courtesy: current });
+    remember({ current: { ...current, claimed: true }, seen: [...storedRef.current.seen, current.id] });
+  }, [dispatch, remember]);
 
   const dismiss = useCallback(() => {
-    const current = promoRef.current;
+    const current = storedRef.current.current;
     if (!current) return;
-    const closed = { ...current, claimed: true };
-    setPromo(closed);
-    writeJson(PROMO_KEY, closed);
-  }, []);
+    remember({ current: null, seen: [...storedRef.current.seen, current.id] });
+  }, [remember]);
 
   const simulate = useCallback((storeId: StoreId | null) => {
     setSimulated(storeId);
@@ -196,20 +187,8 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<Api>(
-    () => ({
-      permission,
-      position,
-      nearest,
-      simulated,
-      promo,
-      live,
-      remaining: promo ? remainingMs(promo, new Date(now)) : 0,
-      ask,
-      simulate,
-      claim,
-      dismiss,
-    }),
-    [permission, position, nearest, simulated, promo, live, now, ask, simulate, claim, dismiss],
+    () => ({ permission, position, nearest, simulated, courtesy, live, ask, simulate, claim, dismiss }),
+    [permission, position, nearest, simulated, courtesy, live, ask, simulate, claim, dismiss],
   );
 
   return <PresenceContext.Provider value={value}>{children}</PresenceContext.Provider>;

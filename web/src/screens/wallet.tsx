@@ -2,11 +2,15 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
+import { storeName } from "@/src/data/program";
+
+import type { TopUpMethod } from "../core/account";
 import { haptics } from "../core/haptics";
 import { useCopy, useLocale } from "../i18n";
 import { useAccount } from "../state/account";
 import { Glass } from "../ui/glass";
 import { Press } from "../ui/press";
+import { Qr } from "../ui/qr";
 import { Screen } from "../ui/screen";
 import { Sheet } from "../ui/sheet";
 
@@ -20,15 +24,14 @@ const STEPS = 3;
 const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 type Flow = { amount: number; bank: string; reference: string };
-type Receipt = Flow & { at: string };
+type Receipt = { amount: number; method: TopUpMethod; via: string; reference: string; at: string };
 
-/** A demo reference, `PSE-XXXXXX`. Nothing stands behind it: no bank, no provider. */
-function pseReference(): string {
+function code(prefix: string, length = 6): string {
   let out = "";
-  for (let i = 0; i < 6; i += 1) {
+  for (let i = 0; i < length; i += 1) {
     out += ALPHABET[Math.floor(Math.random() * ALPHABET.length)] ?? "L";
   }
-  return `PSE-${out}`;
+  return `${prefix}-${out}`;
 }
 
 function slug(name: string): string {
@@ -40,20 +43,22 @@ function slug(name: string): string {
 }
 
 /**
- * The prepaid balance: what is loaded, a simulated PSE top-up, and the movements.
- * This is a demo. The real flow goes through a PSE provider (Wompi or PayU) from a backend.
+ * The prepaid balance, the way a registered coffee card works: loaded at the counter or from the phone,
+ * and paying with it earns double. This is a demo. The real PSE flow goes through Wompi or PayU from a backend.
  */
 export function WalletScreen() {
   const copy = useCopy();
   const { money, date, market } = useLocale();
   const navigate = useNavigate();
   const { account, dispatch } = useAccount();
+  const [method, setMethod] = useState<TopUpMethod>("register");
   const [preset, setPreset] = useState<number>(PRESETS[1]);
   const [custom, setCustom] = useState("");
   const [bank, setBank] = useState<string | null>(null);
   const [bankOpen, setBankOpen] = useState(false);
   const [flow, setFlow] = useState<Flow | null>(null);
   const [stage, setStage] = useState(0);
+  const [registerCode, setRegisterCode] = useState<string | null>(null);
   const [receipt, setReceipt] = useState<Receipt | null>(null);
 
   // The three PSE steps, then the top-up lands on the account and the receipt shows.
@@ -63,8 +68,8 @@ export function WalletScreen() {
       window.setTimeout(() => setStage(1), STEP_MS),
       window.setTimeout(() => setStage(2), STEP_MS * 2),
       window.setTimeout(() => {
-        dispatch({ type: "topUp", amount: flow.amount, bank: flow.bank, reference: flow.reference });
-        setReceipt({ ...flow, at: new Date().toISOString() });
+        dispatch({ type: "topUp", amount: flow.amount, method: "pse", bank: flow.bank, reference: flow.reference });
+        setReceipt({ amount: flow.amount, method: "pse", via: flow.bank, reference: flow.reference, at: new Date().toISOString() });
         setFlow(null);
       }, STEP_MS * 3),
     ];
@@ -77,6 +82,7 @@ export function WalletScreen() {
   const amount = custom ? Number(custom) : preset;
   const enough = amount >= MIN_TOP_UP;
   const movements = account.walletMovements ?? [];
+  const house = storeName(account.storeId);
 
   const pay = () => {
     if (!enough || flow) return;
@@ -87,7 +93,22 @@ export function WalletScreen() {
     }
     setReceipt(null);
     setStage(0);
-    setFlow({ amount, bank, reference: pseReference() });
+    setFlow({ amount, bank, reference: code("PSE") });
+  };
+
+  const showAtRegister = () => {
+    if (!enough) return;
+    haptics.select();
+    setReceipt(null);
+    setRegisterCode(code("CAJA", 4));
+  };
+
+  // In the store the register scans the code, takes the money and the balance lands. Here one tap stands in for the register.
+  const registerConfirmed = () => {
+    if (!registerCode) return;
+    dispatch({ type: "topUp", amount, method: "register", storeId: account.storeId, reference: registerCode });
+    setReceipt({ amount, method: "register", via: house, reference: registerCode, at: new Date().toISOString() });
+    setRegisterCode(null);
   };
 
   return (
@@ -118,7 +139,9 @@ export function WalletScreen() {
             >
               {money(funds)}
             </motion.div>
-            {funds === 0 ? <div style={{ fontSize: 13, color: "var(--smoke)", marginTop: 6, lineHeight: 1.4 }}>{copy.wallet.empty}</div> : null}
+            <div style={{ fontSize: 13, color: "var(--smoke)", marginTop: 6, lineHeight: 1.4 }} data-testid="wallet-rule">
+              {funds === 0 ? copy.wallet.empty : copy.wallet.earnsDouble}
+            </div>
           </Glass>
         </div>
 
@@ -135,25 +158,67 @@ export function WalletScreen() {
             >
               <Glass lens style={{ padding: 18 }} data-testid="wallet-receipt">
                 <div className="kicker">{copy.wallet.receiptKicker}</div>
-                <div className="serif" style={{ fontSize: 26, marginTop: 4 }}>{copy.wallet.receiptTitle}</div>
+                <div className="serif" style={{ fontSize: 26, marginTop: 4 }}>{receipt.method === "register" ? copy.wallet.registerReceipt : copy.wallet.receiptTitle}</div>
                 <div style={{ marginTop: 10 }}>
                   <ReceiptLine label={copy.wallet.amount} value={money(receipt.amount)} />
-                  <ReceiptLine label={copy.wallet.bank} value={receipt.bank} />
+                  <ReceiptLine label={receipt.method === "register" ? copy.wallet.atRegister : copy.wallet.bank} value={receipt.via} />
                   <ReceiptLine label={copy.wallet.reference} value={receipt.reference} testId="wallet-reference" spaced />
                   <ReceiptLine label={copy.wallet.date} value={date(receipt.at)} />
                 </div>
-                <div style={{ fontSize: 12, color: "var(--smoke)", marginTop: 12, lineHeight: 1.4 }}>{copy.wallet.demoNote}</div>
+                <div style={{ fontSize: 12, color: "var(--smoke)", marginTop: 12, lineHeight: 1.4 }}>{copy.wallet.earnsDouble}</div>
                 <Press className="ink-button" style={{ marginTop: 14, minHeight: 48 }} onClick={() => setReceipt(null)} data-testid="wallet-done">
                   {copy.wallet.done}
                 </Press>
+              </Glass>
+            </motion.div>
+          ) : registerCode ? (
+            <motion.div
+              key="register"
+              className="pad"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ type: "spring", stiffness: 240, damping: 24 }}
+              style={{ marginTop: 24 }}
+            >
+              <Glass lens style={{ padding: 18, display: "flex", flexDirection: "column", alignItems: "center", gap: 10, textAlign: "center" }} data-testid="wallet-register">
+                <div className="kicker">{copy.wallet.registerTitle} · {house}</div>
+                <div style={{ fontSize: 14, color: "var(--smoke)", lineHeight: 1.4 }}>{copy.wallet.registerLead(money(amount))}</div>
+                <div style={{ background: "#fff", padding: 12, borderRadius: 20 }}>
+                  <Qr value={`libertario:topup:${registerCode}:${amount}`} size={170} />
+                </div>
+                <div className="serif" style={{ fontSize: 24, letterSpacing: 2 }} data-testid="wallet-register-code">{registerCode}</div>
+                <div className="serif" style={{ fontSize: 22, fontVariantNumeric: "tabular-nums" }}>{money(amount)}</div>
+                <Press className="ink-button" style={{ minHeight: 48, width: "100%" }} onClick={registerConfirmed} data-testid="wallet-register-confirm">
+                  {copy.wallet.registerConfirm}
+                </Press>
+                <button onClick={() => setRegisterCode(null)} style={{ fontSize: 14, color: "var(--smoke)" }} data-testid="wallet-register-cancel">
+                  {copy.web.close}
+                </button>
               </Glass>
             </motion.div>
           ) : (
             <motion.div key="form" className="pad" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ marginTop: 24 }}>
               <h2 className="serif" style={{ fontSize: 24, margin: 0 }}>{copy.wallet.topUpTitle}</h2>
 
+              {/* how: at the counter or from the phone */}
+              <div className="kicker" style={{ marginTop: 14 }}>{copy.wallet.method}</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 10 }}>
+                {(["register", "pse"] as const).map((option) => {
+                  const selected = method === option;
+                  return (
+                    <Press key={option} quiet onClick={() => setMethod(option)} data-testid={`topup-${option}`} style={{ textAlign: "left" }}>
+                      <Glass flat style={{ padding: 14, minHeight: 92, background: selected ? "rgba(122,67,40,0.12)" : "var(--cream)", outline: selected ? "1.5px solid var(--roast)" : "none" }}>
+                        <div style={{ fontWeight: 500, fontSize: 15 }}>{option === "register" ? copy.wallet.atRegister : copy.wallet.digital}</div>
+                        <div style={{ fontSize: 12, color: "var(--smoke)", marginTop: 4, lineHeight: 1.35 }}>{option === "register" ? copy.wallet.atRegisterHint : copy.wallet.digitalHint}</div>
+                      </Glass>
+                    </Press>
+                  );
+                })}
+              </div>
+
               {/* amount */}
-              <div className="kicker" style={{ marginTop: 14 }}>{copy.wallet.pickAmount}</div>
+              <div className="kicker" style={{ marginTop: 18 }}>{copy.wallet.pickAmount}</div>
               <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
                 {PRESETS.map((value) => {
                   const selected = !custom && preset === value;
@@ -200,23 +265,34 @@ export function WalletScreen() {
               </Glass>
               <div style={{ fontSize: 12, color: custom && !enough ? "var(--roast)" : "var(--smoke)", margin: "6px 4px 0" }}>{copy.wallet.minimum(money(MIN_TOP_UP))}</div>
 
-              {/* bank */}
-              <div className="kicker" style={{ marginTop: 18 }}>{copy.wallet.bank}</div>
-              <Press quiet onClick={() => setBankOpen(true)} data-testid="wallet-bank" style={{ width: "100%", textAlign: "left", marginTop: 10 }}>
-                <Glass flat style={{ padding: "12px 14px", display: "flex", alignItems: "center", gap: 12, background: "var(--cream)" }}>
-                  <BankMark name={bank} />
-                  <div className="grow">
-                    <div style={{ fontWeight: 500, fontSize: 15 }}>{bank ?? copy.wallet.chooseBank}</div>
-                    <div style={{ fontSize: 12, color: "var(--smoke)" }}>{copy.wallet.viaPse}</div>
-                  </div>
-                  <span style={{ color: "var(--smoke)", fontSize: 20 }}>›</span>
-                </Glass>
-              </Press>
+              {method === "pse" ? (
+                <>
+                  {/* bank */}
+                  <div className="kicker" style={{ marginTop: 18 }}>{copy.wallet.bank}</div>
+                  <Press quiet onClick={() => setBankOpen(true)} data-testid="wallet-bank" style={{ width: "100%", textAlign: "left", marginTop: 10 }}>
+                    <Glass flat style={{ padding: "12px 14px", display: "flex", alignItems: "center", gap: 12, background: "var(--cream)" }}>
+                      <BankMark name={bank} />
+                      <div className="grow">
+                        <div style={{ fontWeight: 500, fontSize: 15 }}>{bank ?? copy.wallet.chooseBank}</div>
+                        <div style={{ fontSize: 12, color: "var(--smoke)" }}>{copy.wallet.viaPse}</div>
+                      </div>
+                      <span style={{ color: "var(--smoke)", fontSize: 20 }}>›</span>
+                    </Glass>
+                  </Press>
 
-              <Press className="ink-button" style={{ marginTop: 18 }} onClick={pay} disabled={!enough || flow !== null} data-testid="wallet-pay">
-                {enough ? `${copy.wallet.pay} · ${money(amount)}` : copy.wallet.pay}
-              </Press>
-              <div style={{ fontSize: 12, color: "var(--smoke)", marginTop: 10, lineHeight: 1.4 }} data-testid="wallet-demo-note">{copy.wallet.demoNote}</div>
+                  <Press className="ink-button" style={{ marginTop: 18 }} onClick={pay} disabled={!enough || flow !== null} data-testid="wallet-pay">
+                    {enough ? `${copy.wallet.pay} · ${money(amount)}` : copy.wallet.pay}
+                  </Press>
+                  <div style={{ fontSize: 12, color: "var(--smoke)", marginTop: 10, lineHeight: 1.4 }} data-testid="wallet-demo-note">{copy.wallet.demoNote}</div>
+                </>
+              ) : (
+                <>
+                  <Press className="ink-button" style={{ marginTop: 18 }} onClick={showAtRegister} disabled={!enough} data-testid="wallet-show-register">
+                    {enough ? `${copy.wallet.atRegister} · ${money(amount)}` : copy.wallet.atRegister}
+                  </Press>
+                  <div style={{ fontSize: 12, color: "var(--smoke)", marginTop: 10, lineHeight: 1.4 }} data-testid="wallet-register-note">{copy.wallet.atRegisterHint} {copy.wallet.earnsDouble}</div>
+                </>
+              )}
             </motion.div>
           )}
         </AnimatePresence>

@@ -1,21 +1,19 @@
 import { motion } from "motion/react";
 
-import { CUPS_FOR_FILTER } from "@/src/data/program";
+type Props = { stamps: number; total: number };
 
-type Props = { stamps: number };
-
-/** Eight cups. Each one fills when it is drunk; the eighth is the filter on the house. */
-export function Stamps({ stamps }: Props) {
+/** The logbook row: one cup per stamp toward the next level. Each fills when it is earned; the last one opens the level. */
+export function Stamps({ stamps, total }: Props) {
   return (
     <div style={{ display: "flex", justifyContent: "space-between", gap: 6 }} data-testid="stamps">
-      {Array.from({ length: CUPS_FOR_FILTER }, (_, index) => (
-        <Cup key={index} filled={index < stamps} last={index === CUPS_FOR_FILTER - 1} delay={index * 0.05} />
+      {Array.from({ length: total }, (_, index) => (
+        <Cup key={index} filled={index < stamps} last={index === total - 1} mark={total} delay={index * 0.05} />
       ))}
     </div>
   );
 }
 
-function Cup({ filled, last, delay }: { filled: boolean; last: boolean; delay: number }) {
+function Cup({ filled, last, mark, delay }: { filled: boolean; last: boolean; mark: number; delay: number }) {
   const id = `cup-${last ? "last" : "n"}`;
   return (
     <svg width="38" height="42" viewBox="0 0 38 42" aria-hidden="true">
@@ -48,7 +46,7 @@ function Cup({ filled, last, delay }: { filled: boolean; last: boolean; delay: n
       </g>
       {last ? (
         <text x="17" y="7.5" textAnchor="middle" fontSize="8" fontFamily="var(--sans)" fontWeight="500" fill={filled ? "var(--roast)" : "var(--smoke)"}>
-          8
+          {mark}
         </text>
       ) : null}
       {filled ? (

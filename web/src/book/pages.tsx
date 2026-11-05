@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 import type { Category, MenuItem } from "@/src/data/menu";
-import { pointsForPrice } from "@/src/data/program";
+import { pointsForItem } from "@/src/data/menu";
 
 import type { Catalog } from "../core/catalog";
 import { BRAND, CLIPS, PRODUCT_IMAGES } from "../core/photos";
@@ -60,7 +60,7 @@ function Row({ item, money, onItem, copy, points }: { item: MenuItem; money: (v:
       <span className="book-leader" />
       <div>
         <div className="price">{money(item.price)}</div>
-        {points ? <div className="pts">{copy.menu.earns(pointsForPrice(item.price))}</div> : null}
+        {points ? <div className="pts">{copy.menu.earns(pointsForItem(item))}</div> : null}
       </div>
     </button>
   );

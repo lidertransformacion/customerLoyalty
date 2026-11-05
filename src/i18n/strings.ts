@@ -1,9 +1,11 @@
 /**
  * Customer-facing copy for Colombian guests. Keys are English.
  * Every Spanish sentence in the interface comes from this file.
+ * Brújula never says "aprovecha", never counts down, never offers a percentage.
  */
 export const copy = {
   brand: "Libertario",
+  program: "Brújula",
   roastLine: "Tostión de la casa",
   roastLabel: "Café en tostión",
   productionBlocked: "Esta demo no habla con la tienda de producción.",
@@ -17,27 +19,28 @@ export const copy = {
   },
 
   signup: {
-    kicker: "Libertario",
+    kicker: "Brújula",
     title: "Un momento",
-    lead: "Celular, correo, nombre y cédula. Con eso entra el bono de 1.000 puntos.",
+    lead: "Nombre y correo. Con eso entra la bienvenida: 100 cerezas y dos sellos en tu Bitácora.",
     phone: "Celular",
     email: "Correo",
     name: "Nombre",
     idNumber: "Cédula",
+    idHint: "Opcional. Solo si quieres la factura a tu nombre.",
     phoneError: "Diez dígitos, empieza por 3.",
     emailError: "Hace falta un correo.",
     nameError: "El nombre queda corto.",
-    idError: "Entre 6 y 10 dígitos.",
+    idError: "Entre 6 y 10 dígitos, o déjala vacía.",
     submit: "Entrar a la casa",
     footnote:
-      "La cédula se guarda en este teléfono, con el resto de la cuenta. No sale a producción.",
-    welcomeNote: "El bono de bienvenida ya está: 1.000 puntos.",
+      "Te identificas con el celular, el QR de la mesa o tu pase. Nadie te pide la cédula en la barra. Todo queda en este teléfono.",
+    welcomeNote: "Bienvenido a Brújula. Tienes 100 cerezas y dos sellos.",
   },
 
   home: {
     kicker: "La casa",
-    pointsLabel: "puntos",
-    earnRule: "Cada $100 en el mostrador suman un punto.",
+    pointsLabel: "cerezas",
+    earnRule: "Cada COP 1.000 es una cereza. El grano suma el doble.",
     awayFromStore: (storeName: string) =>
       `Estás en ${storeName}. En este demo, la casa más cerca es Zona G. `,
     openNearest: "Ver Zona G",
@@ -46,22 +49,26 @@ export const copy = {
       `Para ${rewardName} faltan ${formatPoints(missing)}.`,
     allRewardsInReach: "Los tres están al alcance.",
     thisMonth: "Este mes",
-    nothingExpires: "No vence ningún punto de esta cuenta.",
-    rewardsUntil: (date: string) => `Los premios se piden hasta el ${date}.`,
+    nothingExpires: "Las cerezas no vencen mientras vengas.",
+    noExpiry:
+      "Las cerezas no vencen mientras vengas. Solo tras 12 meses sin comprar, y te avisamos 30 días antes.",
     cupsTitle: "Las tazas",
     cupsNote:
-      "Ocho tazas. La octava es un filtrado Paz. No es un premio de puntos.",
+      "Ocho tazas. La octava es un filtrado Paz. No es un premio de cerezas.",
+    logbookTitle: "La Bitácora",
+    logbookNote:
+      "Cada primera vez deja un sello: un perfil, un método, una sede, una bolsa, una cata. Los sellos suben de nivel y nunca se borran.",
     counterTitle: "Para la caja",
     counterNote:
       "Se muestra en el mostrador. No paga. Queda guardado en este teléfono, también sin red.",
     counterCodeLabel: "Código del mostrador",
-    redeemTitle: "Lo que se cambia por puntos",
+    redeemTitle: "Lo que se cambia por cerezas",
     redeemNote:
-      "Se cambia entero. No se completa con plata. El canje no suma puntos.",
+      "Se cambia entero. No se completa con plata. El canje no suma cerezas.",
     canRedeemNow: "Con lo que tienes",
     later: "Más adelante",
     rewardMeta: (points: number, note: string) =>
-      `${formatPoints(points)} puntos · ${note}`,
+      `${formatPoints(points)} cerezas · ${note}`,
     missingPoints: (missing: number) => `Faltan ${formatPoints(missing)}`,
     redeem: "Canjear",
     historyTitle: "En las sedes",
@@ -69,18 +76,48 @@ export const copy = {
   },
 
   rewards: {
-    americano: {
-      name: "Americano Paz o Libre",
-      note: "Taza de Paz o de Libre.",
-    },
     cappuccino: {
-      name: "Cappuccino Paz o Libre",
-      note: "Taza de Paz o de Libre.",
+      name: "Cappuccino",
+      note: "Blend o single origin, en la barra.",
     },
-    croissant: {
-      name: "Croissant de almendras",
-      note: "Del horno de la casa.",
+    invite: {
+      name: "Invitar un café",
+      note: "Un cappuccino para quien quieras. Rinde el doble.",
     },
+    bagPaz: {
+      name: "Bolsa PAZ 340 g",
+      note: "El grano de la casa, para tu cocina.",
+    },
+  },
+
+  levels: {
+    rumbo: { name: "Rumbo", line: "Elegiste una dirección." },
+    travesia: { name: "Travesía", line: "Recorres el café con intención." },
+    origen: { name: "Origen", line: "Conoces el café desde donde nace." },
+  },
+
+  logbook: {
+    toNext: (count: number, level: string) =>
+      count === 1 ? `Un sello para ${level}` : `${count} sellos para ${level}`,
+    atTop: "Origen. Lo más alto.",
+    keep: "El nivel se mantiene con una visita cada 90 días. Los sellos nunca se borran.",
+    recent: (labels: string) => `Sellos: ${labels}`,
+    empty: "Tu primera compra deja los primeros sellos.",
+    families: {
+      profile: "Perfil",
+      method: "Método",
+      place: "Lugar",
+      home: "Casa",
+      learn: "Aprender",
+      welcome: "Bienvenida",
+    },
+    methods: {
+      filter: "Filtrado",
+      espresso: "Espresso",
+      "cold-brew": "Cold brew",
+    },
+    bag: (profile: string) => `Bolsa ${profile}`,
+    welcomeStamp: (n: number) => `Bienvenida ${n}`,
   },
 
   stores: {
@@ -127,7 +164,7 @@ export const copy = {
     turn: "Pasar",
     missingItem: "Esa pieza no está en la carta.",
     earnsAtCounter: (points: number) =>
-      `En el mostrador esta pieza suma ${formatPoints(points)}. Cada $100 son un punto.`,
+      `En el mostrador esta pieza suma ${formatPoints(points)} cerezas. Cada COP 1.000 es una cereza; el grano, el doble.`,
     addToTable: "Sumar a la mesa",
     postAtRegister: "Anotar en caja",
     notCharged: "No se cobra aquí. La caja de la sede es la que factura.",
@@ -149,13 +186,18 @@ export const copy = {
     callFloor: "Avisar en sala",
     postOrder: "Anotar la comanda en caja",
     footnote:
-      "En la tienda, la caja cobra. Aquí solo se anotan los puntos y las tazas.",
+      "En la tienda, la caja cobra. Aquí solo se anotan las cerezas y los sellos.",
   },
 
   ledger: {
-    welcome: "Bono de bienvenida",
+    welcome: "Bienvenida a Brújula",
     eighthCup: "Octava taza · Filtrado Paz",
     redemption: (name: string) => `Canje · ${name}`,
+    stamp: (label: string) => `Sello · ${label}`,
+    invitation: (code: string) => `Invitación · Cappuccino para otra persona · ${code}`,
+    migrated: (lealPoints: number, points: number) =>
+      `De Leal · ${formatPoints(lealPoints)} puntos = ${formatPoints(points)} cerezas`,
+    courtesy: (title: string) => `Cortesía · ${title}`,
   },
 
   notes: {
@@ -163,14 +205,21 @@ export const copy = {
       `${name} quedó anotada en la caja. No se cobró: este demo no cobra.`,
     emptyTable: "La mesa está vacía.",
     orderPosted:
-      "La comanda pasó al mostrador. El cobro, en la caja. Aquí solo se anotaron los puntos.",
+      "La comanda pasó al mostrador. El cobro, en la caja. Aquí solo se anotaron las cerezas.",
     floorCall: (table: string, storeName: string) =>
       `Quedó el aviso de la mesa ${table} en ${storeName}. No sale de este teléfono.`,
     cannotRedeem: (missing: number, rewardName: string) =>
-      `Faltan ${formatPoints(missing)} puntos para ${rewardName}. Se cambia entero.`,
+      `Faltan ${formatPoints(missing)} cerezas para ${rewardName}. Se cambia entero.`,
     redeemed: (rewardName: string, points: number) =>
-      `${rewardName} quedó pedido. Se descontaron ${formatPoints(points)} puntos. Se recoge en caja.`,
+      `${rewardName} quedó pedido. Se descontaron ${formatPoints(points)} cerezas. Se recoge en caja.`,
+    invited: (code: string) =>
+      `Va por ti: un cappuccino para quien quieras. Código ${code}. Se muestra en caja.`,
     eighthCupToast: "La octava taza. Un filtrado Paz.",
+    levelUp: (level: string) => `Llegaste a ${level}.`,
+    migrated: (lealPoints: number, points: number) =>
+      `Tus ${formatPoints(lealPoints)} puntos de Leal son ${formatPoints(points)} cerezas. No vencen en un año.`,
+    alreadyMigrated: "Tu saldo de Leal ya pasó a cerezas.",
+    permissionSaved: "Guardamos tu cambio.",
   },
 
   nativeNote:
@@ -191,7 +240,7 @@ export const copy = {
 
   presence: {
     title: "Avisos al llegar",
-    ask: "Activa la ubicación. Cuando entres a una casa Libertario te avisamos de la promo del momento. La ubicación no sale del teléfono.",
+    ask: "Activa la ubicación. Cuando entres a una casa Libertario te avisamos si hay algo para ti. La ubicación no sale del teléfono.",
     allow: "Activar ubicación",
     later: "Ahora no",
     denied: "La ubicación está apagada. Se activa en los ajustes del navegador.",
@@ -202,31 +251,25 @@ export const copy = {
     simulate: (store: string) => `Simular que llego a ${store}`,
     simulating: (store: string) => `Simulando la llegada a ${store}.`,
     stopSimulating: "Dejar de simular",
-    demoNote: "Para probar la promo sin salir: simula la llegada desde la lista de casas.",
+    demoNote: "Para ver la cortesía sin salir: simula la llegada desde la lista de casas.",
   },
 
-  promo: {
-    kicker: "Promo de llegada",
-    minutesLeft: (time: string) => `Te quedan ${time}`,
-    expired: "La promo venció. La próxima vez que entres hay otra.",
+  courtesy: {
+    kicker: "Para ti",
     activate: "Activar en caja",
-    activated: (title: string, points: number) =>
-      `${title} quedó activa. Se sumaron ${formatPoints(points)} puntos por venir.`,
-    ledger: (store: string) => `Promo de llegada · ${store}`,
-    codeNote: "Muéstralo en el mostrador antes de pagar.",
-    onlyToday: "Una por casa, cada día.",
+    activated: (title: string) => `${title} quedó en tu Brújula. Muéstralo en caja cuando quieras.`,
     catalog: {
-      filterCroissant: {
-        title: "Croissant con tu filtrado",
-        detail: "Pide un filtrado de 12 oz y el croissant sencillo va por la casa.",
+      firstVisit: {
+        title: (store: string) => `Primera vez en ${store}`,
+        detail: "Este espresso va por nosotros.",
       },
-      doubleCup: {
-        title: "Doble taza",
-        detail: "La taza de hoy marca dos en las ocho.",
+      secondVisit: {
+        title: () => "Tu segunda visita",
+        detail: "Hoy tu BariRockStar elige tu café. Va por nosotros.",
       },
-      afternoon: {
-        title: "Tarde de espresso",
-        detail: "El segundo espresso a mitad de precio, hasta las seis.",
+      birthday: {
+        title: () => "Feliz cumpleaños",
+        detail: "Una bebida de la carta va por nosotros. Tienes quince días.",
       },
     },
   },
@@ -234,7 +277,9 @@ export const copy = {
   book: {
     cover: "La carta",
     open: "Abrir la carta",
+    start: "Iniciar",
     index: "Índice",
+    options: (n: number) => (n === 1 ? "1 opción" : `${n} opciones`),
     turnHint: "Desliza para pasar la página",
     page: (n: number, total: number) => `${n} de ${total}`,
     continues: "Sigue en la otra página",
@@ -258,7 +303,7 @@ export const copy = {
 
   landing: {
     kicker: "Bienvenido a la casa",
-    lead: "Puntos por cada taza, la carta viva y el pedido desde el teléfono.",
+    lead: "Cerezas por cada café, un sello por cada primera vez, y el pedido desde el teléfono.",
     google: "Continuar con Google",
     email: "Crear cuenta con correo",
     viewMenu: "Ver la carta",
@@ -282,8 +327,11 @@ export const copy = {
     adult: "Soy mayor de 18 años.",
     data: (law: string) =>
       `Autorizo el tratamiento de mis datos personales según la ${law} y la política de datos de Libertario.`,
-    terms: "Acepto los términos del programa de puntos de la casa.",
-    marketing: "Quiero recibir novedades de la casa por correo. Opcional.",
+    terms: "Acepto los términos de Brújula, el programa de la casa.",
+    marketing: "Novedades de la casa por correo. Opcional.",
+    whatsapp: "Invitaciones por WhatsApp. Máximo dos al mes, nunca de noche ni en domingo. Opcional.",
+    sms: "Avisos por SMS. Opcional.",
+    permissionsNote: "Cada permiso es aparte y se cambia cuando quieras. Guardamos la fecha de cada cambio.",
     policy: "Leer la política de datos",
     required: "Hace falta aceptar esto para entrar.",
     fromGoogle: "Nombre y correo vienen de Google. Puedes corregirlos.",
@@ -300,6 +348,7 @@ export const copy = {
     empty: "Todavía no has sumado nada. La carta está a un toque.",
     goToMenu: "Abrir la carta",
     how: "Cómo lo quieres",
+    payHow: "Cómo pagas",
     pickup: "Recoger en caja",
     pickupHint: "Lo preparamos y te llamamos por tu nombre.",
     table: "En la mesa",
@@ -314,12 +363,12 @@ export const copy = {
     code: "Código",
     payAtCounter: "Se paga en caja. La app no cobra.",
     subtotal: "Subtotal",
-    earns: (points: number) => `Suma ${formatPoints(points)} puntos al cobrar`,
+    earns: (points: number) => `Suma ${formatPoints(points)} cerezas al cobrar`,
     add: "Sumar",
     added: (name: string) => `${name} está en tu pedido.`,
     remove: "Quitar",
     units: (n: number) => (n === 1 ? "1 unidad" : `${n} unidades`),
-    needAccount: "Para pedir hace falta la cuenta. Es un minuto y trae 1.000 puntos.",
+    needAccount: "Para pedir hace falta la cuenta. Es un minuto y trae 100 cerezas y dos sellos.",
     createAccount: "Crear cuenta",
     again: "Pedir otra cosa",
     done: "Listo",
@@ -344,7 +393,16 @@ export const copy = {
     title: "Ajustes",
     account: "La cuenta",
     forget: "Olvidar este teléfono",
-    forgetHint: "Borra la cuenta de este teléfono. Los puntos quedan en la casa.",
+    forgetHint: "Borra la cuenta de este teléfono. Las cerezas quedan en la casa.",
+    download: "Descargar mis datos",
+    downloadHint: "Un archivo con tu cuenta, tus cerezas y tus sellos.",
+    permissions: "Tus permisos",
+    savedAt: (date: string) => `Guardado el ${date}`,
+    off: "Sin activar",
+    fromLeal: "¿Vienes de Leal?",
+    lealLead: "Nadie pierde lo que tiene. 910 puntos de Leal son 300 cerezas: el mismo cappuccino, desde el día uno.",
+    lealPoints: "Tus puntos de Leal",
+    migrate: "Pasar a cerezas",
     version: "Demo web. No cobra, no habla con producción.",
   },
 
@@ -356,28 +414,28 @@ export const copy = {
 
   casa: {
     expiring: "vencen este mes",
-    available: "puntos disponibles",
-    ratio: "$100 = 1 punto",
-    level: "Casa",
-    levelNote: "Tu nivel. Suma visitas y sube.",
+    available: "cerezas disponibles",
+    ratio: "COP 1.000 = 1 cereza",
+    level: "Rumbo",
+    levelNote: "Tu nivel. Sube explorando, no gastando.",
     startOrder: "Inicia tu pedido",
     pickup: "Recoger en caja",
     pickupNote: "Pides desde aquí y lo recoges sin fila.",
     counterTab: "Caja",
-    scanTitle: "Escanea para sumar puntos",
-    scanLead: "Muéstralo antes de pagar. Cada $100 suman un punto.",
+    scanTitle: "Escanea para sumar cerezas",
+    scanLead: "Muéstralo antes de pagar. Cada COP 1.000 es una cereza.",
     bright: "Brillo para el lector",
     settings: "Ajustes",
-    promos: "Promos de la casa",
+    promos: "Para ti",
     seeAll: "Ver todo",
     today: "Para hoy",
     todayMorning: "Para empezar el día",
     todayAfternoon: "Para la tarde",
     todayEvening: "Para la noche",
     roasting: "Lo que se tuesta",
-    roastingNote: "Las bolsas de la casa. Toca una para verla.",
+    roastingNote: "Las bolsas de la casa suman el doble. Toca una para verla.",
     tapToShow: "Toca para mostrar en caja",
-    memberCard: "Tarjeta de la casa",
+    memberCard: "Tu Brújula",
     openMenu: "Toda la carta",
     add: "Sumar",
     inOrder: (n: number) => `${n} en tu pedido`,
@@ -387,9 +445,25 @@ export const copy = {
     kicker: "El saldo",
     title: "Saldo",
     available: "Saldo disponible",
-    empty: "Sin saldo todavía. Se recarga con PSE y se paga desde el teléfono.",
-    homeNote: "Saldo de la casa",
-    homeEmpty: "Recarga con PSE",
+    empty: "Sin saldo todavía. Se recarga en caja o desde el teléfono, y pagar con él suma el doble de cerezas.",
+    homeNote: "Pagar con él suma el doble",
+    homeEmpty: "Recarga en caja o aquí",
+    earnsDouble: "Pagar con el saldo suma el doble de cerezas. Recargar no suma: suma cuando lo gastas.",
+    method: "Cómo recargas",
+    digital: "Desde el teléfono",
+    digitalHint: "PSE, con tu banco.",
+    atRegister: "En caja",
+    atRegisterHint: "Pagas en el mostrador y el saldo entra al momento.",
+    registerTitle: "Recarga en caja",
+    registerLead: (amount: string) =>
+      `Muestra este código en caja y paga ${amount}. El saldo entra cuando la caja confirma.`,
+    registerConfirm: "La caja confirmó (demo)",
+    registerReceipt: "Recarga en caja",
+    payWithBalance: "Pagar con mi saldo",
+    payWithBalanceHint: (balance: string) => `Tienes ${balance}. Suma el doble.`,
+    payAtRegister: "Pagar en caja",
+    payAtRegisterHint: "Como siempre. Suma una cereza por cada COP 1.000.",
+    paidWithBalance: "Pagado con tu saldo. Sumó el doble.",
     topUp: "Recargar",
     topUpTitle: "Recargar saldo",
     pickAmount: "Cuánto",
@@ -418,10 +492,14 @@ export const copy = {
     noMovements: "Todavía no hay movimientos.",
     ledger: {
       topUp: (bank: string) => `Recarga PSE · ${bank}`,
+      topUpAtRegister: (store: string) => `Recarga en caja · ${store}`,
+      order: (code: string) => `Pedido ${code}`,
     },
     notes: {
       toppedUp: (amount: number) =>
         `Se sumaron $${formatPoints(amount)} al saldo. Es una simulación: no se cobró nada.`,
+      paidOrder: (amount: number) =>
+        `Pagado con tu saldo: $${formatPoints(amount)}. Sumó el doble de cerezas.`,
       insufficient: (missing: number) => `Faltan $${formatPoints(missing)} de saldo.`,
       paid: (label: string, amount: number) => `${label} · $${formatPoints(amount)} del saldo.`,
     },

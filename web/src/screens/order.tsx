@@ -2,10 +2,10 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
+import { pointsForItem } from "@/src/data/menu";
 import { storeName } from "@/src/data/program";
-import { pointsForPrice } from "@/src/data/program";
 
-import { orderTotal, type OrderMode } from "../core/account";
+import { orderTotal, type OrderMode, type PaidWith } from "../core/account";
 import { haptics } from "../core/haptics";
 import { useCatalog } from "../state/catalog";
 import { useCopy, useLocale } from "../i18n";
@@ -25,6 +25,7 @@ export function OrderScreen() {
   const { account, dispatch } = useAccount();
   const catalog = useCatalog();
   const [mode, setMode] = useState<OrderMode>(account?.table ? "table" : "pickup");
+  const [payWith, setPayWith] = useState<PaidWith>("register");
   const [sending, setSending] = useState(false);
   const [tableError, setTableError] = useState(false);
 
@@ -47,6 +48,8 @@ export function OrderScreen() {
     })
     .filter((line): line is NonNullable<typeof line> => line !== null);
   const total = orderTotal(account.order);
+  const funds = account.balance ?? 0;
+  const canPayWithBalance = funds >= total.price && total.price > 0;
 
   const send = () => {
     if (mode === "table" && !account.table) {
@@ -56,7 +59,7 @@ export function OrderScreen() {
     }
     setSending(true);
     window.setTimeout(() => {
-      dispatch({ type: "postOrder", mode });
+      dispatch({ type: "postOrder", mode, payWith });
       setSending(false);
     }, 900);
   };
@@ -96,7 +99,7 @@ export function OrderScreen() {
                       <div className="grow">
                         <div className="serif" style={{ fontSize: 18 }}>{item.name}</div>
                         <div style={{ fontSize: 13, color: "var(--smoke)" }}>
-                          {money(item.price * quantity)} · {copy.menu.earns(pointsForPrice(item.price) * quantity)}
+                          {money(item.price * quantity)} · {copy.menu.earns(pointsForItem(item) * quantity)}
                         </div>
                       </div>
                       <Glass pill flat style={{ display: "flex", alignItems: "center", background: "var(--cream)" }}>
@@ -168,7 +171,40 @@ export function OrderScreen() {
                   </motion.div>
                 ) : null}
               </AnimatePresence>
-              <div style={{ fontSize: 12, color: "var(--smoke)", marginTop: 12 }}>{copy.order.payAtCounter}</div>
+            </div>
+
+            {/* how you pay: at the counter as always, or with the balance, which earns double */}
+            <div className="pad" style={{ marginTop: 18 }}>
+              <div className="kicker">{copy.order.payHow}</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 10 }}>
+                {(["register", "balance"] as const).map((option) => {
+                  const selected = payWith === option;
+                  const blocked = option === "balance" && !canPayWithBalance;
+                  return (
+                    <Press
+                      key={option}
+                      quiet
+                      onClick={() => {
+                        if (blocked) {
+                          haptics.warn();
+                          return;
+                        }
+                        setPayWith(option);
+                      }}
+                      data-testid={`pay-${option}`}
+                      style={{ textAlign: "left", opacity: blocked ? 0.55 : 1 }}
+                    >
+                      <Glass flat style={{ padding: 14, minHeight: 96, background: selected ? "rgba(122,67,40,0.12)" : "var(--cream)", outline: selected ? "1.5px solid var(--roast)" : "none" }}>
+                        <div style={{ fontWeight: 500, fontSize: 15 }}>{option === "register" ? copy.wallet.payAtRegister : copy.wallet.payWithBalance}</div>
+                        <div style={{ fontSize: 12, color: "var(--smoke)", marginTop: 4, lineHeight: 1.35 }}>
+                          {option === "register" ? copy.wallet.payAtRegisterHint : copy.wallet.payWithBalanceHint(money(funds))}
+                        </div>
+                      </Glass>
+                    </Press>
+                  );
+                })}
+              </div>
+              <div style={{ fontSize: 12, color: "var(--smoke)", marginTop: 12 }}>{payWith === "balance" ? copy.wallet.earnsDouble : copy.order.payAtCounter}</div>
             </div>
           </>
         )}
@@ -233,7 +269,9 @@ function Receipt() {
             </div>
           ))}
         </div>
-        <div style={{ fontSize: 13, color: "var(--smoke)", marginTop: 8 }}>{stage >= 1 ? copy.order.preparing : copy.order.payAtCounter}</div>
+        <div style={{ fontSize: 13, color: "var(--smoke)", marginTop: 8 }} data-testid="receipt-payment">
+          {stage >= 1 ? copy.order.preparing : order.paidWith === "balance" ? copy.wallet.paidWithBalance : copy.order.payAtCounter}
+        </div>
 
         <div style={{ width: "100%", marginTop: 22, textAlign: "left" }}>
           {order.lines.map((line) => {

@@ -1,22 +1,46 @@
+import { useState } from "react";
 import { useNavigate } from "react-router";
 
+import { lealToPoints } from "@/src/data/program";
+
+import { type Account, type Channel } from "../core/account";
 import { CITIES, type CityId } from "../core/catalog";
+import { haptics } from "../core/haptics";
 import { MARKETS, type MarketId } from "../core/market";
 import { useCatalog, useCity } from "../state/catalog";
 import { useCopy, useLocale } from "../i18n";
 import { useAccount } from "../state/account";
+import { Check } from "../ui/check";
 import { Glass } from "../ui/glass";
 import { Press } from "../ui/press";
 import { Screen } from "../ui/screen";
 
-/** Language, country, city, and the way out. */
+const CHANNELS: Channel[] = ["whatsapp", "email", "sms"];
+const MAX_LEAL_DIGITS = 7;
+
+/** The guest's own copy of the account, as a file. Nothing leaves the phone. */
+function download(account: Account): void {
+  const blob = new Blob([JSON.stringify(account, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = "brujula-libertario.json";
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
+/** Language, country, city, the permissions, the Leal balance, and the way out. */
 export function SettingsScreen() {
   const copy = useCopy();
-  const { lang, setLang, market, setMarket, date } = useLocale();
+  const { lang, setLang, market, setMarket, date, money } = useLocale();
   const { setCity } = useCity();
   const catalog = useCatalog();
   const { account, dispatch } = useAccount();
   const navigate = useNavigate();
+  const [leal, setLeal] = useState("");
+
+  const lealPoints = Number(leal);
+  const labels: Record<Channel, string> = { whatsapp: copy.legal.whatsapp, email: copy.legal.marketing, sms: copy.legal.sms };
 
   return (
     <Screen direction="up" testId="settings">
@@ -65,8 +89,77 @@ export function SettingsScreen() {
         </Section>
 
         {account ? (
+          <Section title={copy.settings.permissions}>
+            <div style={{ fontSize: 13, color: "var(--smoke)", marginBottom: 4 }}>{copy.legal.permissionsNote}</div>
+            {CHANNELS.map((channel) => {
+              const permission = account.permissions?.[channel];
+              const on = permission?.on ?? (channel === "email" ? (account.consent?.marketing ?? false) : false);
+              return (
+                <Check
+                  key={channel}
+                  label={labels[channel]}
+                  hint={permission ? copy.settings.savedAt(date(permission.at)) : copy.settings.off}
+                  checked={on}
+                  onChange={(value) => dispatch({ type: "setPermission", channel, on: value })}
+                  testId={`permission-${channel}`}
+                />
+              );
+            })}
+          </Section>
+        ) : null}
+
+        {account ? (
+          <Section title={copy.settings.fromLeal}>
+            <div style={{ fontSize: 13, color: "var(--smoke)", marginBottom: 10, lineHeight: 1.4 }}>{copy.settings.lealLead}</div>
+            {account.migratedFrom ? (
+              <Glass flat style={{ padding: 14, background: "var(--cream)" }} data-testid="leal-migrated">
+                <div className="serif" style={{ fontSize: 18 }}>{copy.notes.migrated(account.migratedFrom.lealPoints, account.migratedFrom.points)}</div>
+                <div style={{ fontSize: 12, color: "var(--smoke)", marginTop: 4 }}>{date(account.migratedFrom.at)}</div>
+              </Glass>
+            ) : (
+              <>
+                <Glass flat className="glass-field" style={{ borderRadius: 18, background: "rgba(246,241,234,0.7)" }}>
+                  <label htmlFor="leal-points">{copy.settings.lealPoints}</label>
+                  <input
+                    id="leal-points"
+                    inputMode="numeric"
+                    value={leal ? Number(leal).toLocaleString(market.locale) : ""}
+                    onChange={(event) => setLeal(event.target.value.replace(/\D/g, "").replace(/^0+/, "").slice(0, MAX_LEAL_DIGITS))}
+                    className="serif"
+                    style={{ fontSize: 26 }}
+                    data-testid="leal-points"
+                  />
+                </Glass>
+                {lealPoints > 0 ? (
+                  <div style={{ fontSize: 13, color: "var(--roast)", margin: "6px 4px 0" }} data-testid="leal-preview">
+                    {copy.ledger.migrated(lealPoints, lealToPoints(lealPoints))}
+                  </div>
+                ) : null}
+                <Press
+                  className="ink-button"
+                  style={{ marginTop: 12 }}
+                  disabled={lealPoints <= 0}
+                  onClick={() => {
+                    haptics.select();
+                    dispatch({ type: "migrateLeal", lealPoints });
+                    setLeal("");
+                  }}
+                  data-testid="leal-migrate"
+                >
+                  {copy.settings.migrate}
+                </Press>
+              </>
+            )}
+          </Section>
+        ) : null}
+
+        {account ? (
           <Section title={copy.settings.account}>
-            <div style={{ fontSize: 13, color: "var(--smoke)", marginBottom: 10 }}>{copy.settings.forgetHint}</div>
+            <div style={{ fontSize: 13, color: "var(--smoke)", marginBottom: 10 }}>{copy.settings.downloadHint}</div>
+            <Press className="ghost-button" onClick={() => download(account)} data-testid="download-data">
+              {copy.settings.download}
+            </Press>
+            <div style={{ fontSize: 13, color: "var(--smoke)", margin: "16px 0 10px" }}>{copy.settings.forgetHint}</div>
             <Press
               className="ghost-button"
               style={{ borderColor: "var(--roast)", color: "var(--roast)" }}
@@ -81,7 +174,10 @@ export function SettingsScreen() {
           </Section>
         ) : null}
 
-        <div style={{ fontSize: 12, color: "var(--smoke)", marginTop: 30, textAlign: "center" }}>{copy.settings.version}</div>
+        <div style={{ fontSize: 12, color: "var(--smoke)", marginTop: 30, textAlign: "center" }}>
+          {copy.settings.version}
+          {account?.balance ? ` · ${money(account.balance)}` : ""}
+        </div>
       </div>
     </Screen>
   );

@@ -8,6 +8,7 @@ import { haptics } from "../core/haptics";
 import { isAdult } from "../core/market";
 import { useCopy, useLocale } from "../i18n";
 import { useAccount } from "../state/account";
+import { Check } from "../ui/check";
 import { Glass } from "../ui/glass";
 import { Press } from "../ui/press";
 import { Screen } from "../ui/screen";
@@ -22,9 +23,11 @@ type Form = {
   data: boolean;
   terms: boolean;
   marketing: boolean;
+  whatsapp: boolean;
+  sms: boolean;
 };
 
-const EMPTY: Form = { name: "", email: "", phone: "", idNumber: "", birthday: "", adult: false, data: false, terms: false, marketing: false };
+const EMPTY: Form = { name: "", email: "", phone: "", idNumber: "", birthday: "", adult: false, data: false, terms: false, marketing: false, whatsapp: false, sms: false };
 
 type Errors = Partial<Record<keyof Form, string>>;
 
@@ -68,7 +71,9 @@ export function SignupScreen() {
     }
     if (which === 1) {
       if (!market.phonePattern.test(form.phone.trim())) found.phone = copy.signup.phoneError;
-      if (!market.idPattern.test(form.idNumber.trim())) found.idNumber = market.id === "CL" ? copy.legal.rutError : copy.signup.idError;
+      // The ID number is optional: Brújula identifies by phone. It is only for an invoice in the guest's name.
+      const idNumber = form.idNumber.trim();
+      if (idNumber && !market.idPattern.test(idNumber)) found.idNumber = market.id === "CL" ? copy.legal.rutError : copy.signup.idError;
       if (!form.birthday) found.birthday = copy.legal.birthdayError;
       else if (!isAdult(form.birthday, new Date())) found.birthday = copy.legal.underage;
     }
@@ -99,6 +104,7 @@ export function SignupScreen() {
       idNumber: form.idNumber,
       birthday: form.birthday,
       consent: { adult: form.adult, data: form.data, terms: form.terms, marketing: form.marketing },
+      channels: { whatsapp: form.whatsapp, email: form.marketing, sms: form.sms },
       provider: google ? "google" : "email",
       ...(google?.picture ? { picture: google.picture } : {}),
       market: market.id,
@@ -181,7 +187,7 @@ export function SignupScreen() {
                 <Field label={copy.legal.phoneFor(market.phonePrefix)} value={form.phone} error={errors.phone} onChange={(v) => set("phone", v)} type="tel" autoComplete="tel-national" inputMode="numeric" testId="signup-phone" />
                 <Field
                   label={market.id === "CL" ? copy.legal.rut : copy.signup.idNumber}
-                  hint={copy.legal.idFor(market.country)}
+                  hint={copy.signup.idHint}
                   value={form.idNumber}
                   error={errors.idNumber}
                   onChange={(v) => set("idNumber", v)}
@@ -198,7 +204,10 @@ export function SignupScreen() {
                 <Check label={copy.legal.adult} checked={form.adult} error={errors.adult} onChange={(v) => set("adult", v)} testId="consent-adult" />
                 <Check label={copy.legal.data(market.dataLaw)} checked={form.data} error={errors.data} onChange={(v) => set("data", v)} testId="consent-data" link={{ href: market.policyUrl, label: copy.legal.policy }} />
                 <Check label={copy.legal.terms} checked={form.terms} error={errors.terms} onChange={(v) => set("terms", v)} testId="consent-terms" />
+                <Check label={copy.legal.whatsapp} checked={form.whatsapp} onChange={(v) => set("whatsapp", v)} testId="consent-whatsapp" />
                 <Check label={copy.legal.marketing} checked={form.marketing} onChange={(v) => set("marketing", v)} testId="consent-marketing" />
+                <Check label={copy.legal.sms} checked={form.sms} onChange={(v) => set("sms", v)} testId="consent-sms" />
+                <div style={{ fontSize: 13, color: "var(--smoke)", lineHeight: 1.4 }}>{copy.legal.permissionsNote}</div>
               </>
             ) : null}
           </motion.div>
@@ -247,50 +256,3 @@ function Field({
   );
 }
 
-function Check({
-  label,
-  checked,
-  error,
-  onChange,
-  testId,
-  link,
-}: {
-  label: string;
-  checked: boolean;
-  error?: string;
-  onChange: (value: boolean) => void;
-  testId: string;
-  link?: { href: string; label: string };
-}) {
-  return (
-    <div>
-      <button
-        type="button"
-        role="checkbox"
-        aria-checked={checked}
-        onClick={() => {
-          haptics.tap();
-          onChange(!checked);
-        }}
-        data-testid={testId}
-        style={{ display: "flex", gap: 14, alignItems: "flex-start", textAlign: "left", width: "100%", padding: "12px 0" }}
-      >
-        <motion.span
-          style={{ width: 26, height: 26, borderRadius: 9, border: `1.5px solid ${error ? "var(--roast)" : "var(--ink)"}`, display: "grid", placeItems: "center", flexShrink: 0, marginTop: 1 }}
-          animate={{ background: checked ? "#1b1612" : "rgba(27,22,18,0)" }}
-        >
-          <motion.svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <motion.path d="M2.5 7.5 5.5 10.5 11.5 4" initial={false} animate={{ pathLength: checked ? 1 : 0, opacity: checked ? 1 : 0 }} transition={{ duration: 0.25 }} />
-          </motion.svg>
-        </motion.span>
-        <span style={{ fontSize: 15, lineHeight: 1.4 }}>{label}</span>
-      </button>
-      {link ? (
-        <a href={link.href} target="_blank" rel="noreferrer" style={{ fontSize: 13, color: "var(--roast)", fontWeight: 500, marginLeft: 40 }}>
-          {link.label} ↗
-        </a>
-      ) : null}
-      {error ? <div style={{ fontSize: 13, color: "var(--roast)", marginLeft: 40, marginTop: 4 }}>{error}</div> : null}
-    </div>
-  );
-}

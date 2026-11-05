@@ -1,4 +1,4 @@
-import { pointsForPrice } from "@/src/data/program";
+import { pointsFor } from "@/src/data/program";
 import { fold } from "@/src/format";
 
 import raw from "./menu.json";
@@ -55,8 +55,9 @@ export function itemById(id: string): MenuItem | undefined {
   return items.find((item) => item.id === id);
 }
 
+/** One cereza per COP 1.000; a bag of beans earns double. */
 export function pointsForItem(item: MenuItem): number {
-  return pointsForPrice(item.price);
+  return pointsFor(item.price, item.category);
 }
 
 export type MenuFilter = {

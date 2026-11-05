@@ -21,7 +21,7 @@ import { haptics } from "../core/haptics";
 import { useLocale } from "../i18n";
 import { webStore } from "../core/storage";
 
-export type Flash = { kind: "cup" | "eighth"; id: number } | null;
+export type Flash = { kind: "cup" | "level"; id: number } | null;
 
 type Api = {
   ready: boolean;
@@ -82,7 +82,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       if (flashTimer.current) window.clearTimeout(flashTimer.current);
       flashTimer.current = window.setTimeout(
         () => setFlash((current) => (current?.id === id ? null : current)),
-        effect.roast === "eighth" ? 2600 : 1700,
+        effect.roast === "level" ? 2600 : 1700,
       );
     }
     if (effect.celebrate) {

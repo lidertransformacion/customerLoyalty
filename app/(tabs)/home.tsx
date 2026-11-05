@@ -3,7 +3,6 @@ import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import {
-  REWARD_DEADLINE,
   REWARDS,
   pointsStillNeeded,
   rewardName,
@@ -12,7 +11,7 @@ import {
   storeName,
   type Reward,
 } from "@/src/data/program";
-import { dateFromKey, shortDate, withSign } from "@/src/format";
+import { shortDate, withSign } from "@/src/format";
 import { copy } from "@/src/i18n/strings";
 import { nativeFlags } from "@/src/native";
 import { useAccount } from "@/src/state/account";
@@ -94,9 +93,7 @@ export default function Home() {
         <View style={styles.slip}>
           <Text style={styles.slipKicker}>{copy.home.thisMonth}</Text>
           <Text style={styles.slipText}>{copy.home.nothingExpires}</Text>
-          <Text style={styles.slipSoft}>
-            {copy.home.rewardsUntil(dateFromKey(REWARD_DEADLINE))}
-          </Text>
+          <Text style={styles.slipSoft}>{copy.home.noExpiry}</Text>
         </View>
 
         <Text style={styles.section}>{copy.home.cupsTitle}</Text>

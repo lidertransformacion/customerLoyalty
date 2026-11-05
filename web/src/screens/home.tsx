@@ -2,14 +2,14 @@ import { AnimatePresence, motion, useTransform } from "motion/react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 
-import type { MenuItem } from "@/src/data/menu";
-import { REWARD_DEADLINE, REWARDS, pointsForPrice, pointsStillNeeded, storeName, type Reward } from "@/src/data/program";
-import { dateFromKey, withSign } from "@/src/format";
+import { pointsForItem, type MenuItem } from "@/src/data/menu";
+import { levelHeld, pointsStillNeeded, REWARDS, STAMPS_FOR_ORIGEN, stampsForNextLevel, storeName, type Reward } from "@/src/data/program";
+import { withSign } from "@/src/format";
 import { formatMeters } from "@/src/i18n/strings";
 
+import type { CourtesyKind } from "../core/courtesy";
 import { haptics } from "../core/haptics";
 import { BRAND, photoSpec, PRODUCT_IMAGES } from "../core/photos";
-import { formatCountdown } from "../core/promo";
 import { visualFor } from "../core/visuals";
 import { useCopy, useLocale } from "../i18n";
 import { LivingPhoto } from "../motion/living-photo";
@@ -83,6 +83,18 @@ export function Home() {
   const firstName = account.name.split(" ")[0] ?? account.name;
   const funds = account.balance ?? 0;
   const orderCount = account.order.reduce((sum, line) => sum + line.quantity, 0);
+  // The logbook: stamps climb toward the next level; the row shows the cups to that door.
+  const stampLog = account.stampLog ?? [];
+  const level = levelHeld(stampLog, account.lastPurchaseAt, new Date());
+  const target = stampsForNextLevel(level);
+  const nextLevel = level === "rumbo" ? "travesia" : level === "travesia" ? "origen" : null;
+  const rowTotal = target ?? STAMPS_FOR_ORIGEN;
+  const rowFilled = Math.min(stampLog.length, rowTotal);
+  const recentStamps = stampLog
+    .filter((stamp) => stamp.family !== "welcome")
+    .slice(-4)
+    .map((stamp) => stamp.label)
+    .join(" · ");
 
   return (
     <Screen testId="home">
@@ -100,7 +112,7 @@ export function Home() {
                   exit={{ scale: 0, opacity: 0 }}
                   onClick={() => navigate("/table")}
                   data-testid="home-order-badge"
-                  style={{ height: 40, padding: "0 14px", borderRadius: 20, background: "var(--ink)", color: "#fff", fontSize: 13, fontWeight: 500 }}
+                  style={{ height: 40, padding: "0 14px", borderRadius: 20, background: "var(--ink)", color: "#fff", fontSize: 13, fontWeight: 500, boxShadow: "var(--shadow-card)" }}
                 >
                   {copy.casa.inOrder(orderCount)}
                 </motion.button>
@@ -136,31 +148,25 @@ export function Home() {
             points={account.points}
             onDisplay={setShown}
             onOpen={() => setCounterOpen(true)}
-            label={copy.casa.memberCard}
+            label={`${copy.casa.memberCard} · ${copy.levels[level].name}`}
             hint={copy.casa.tapToShow}
             pointsLabel={copy.home.pointsLabel}
           />
         </div>
 
-        {/* arrival promo */}
+        {/* something on the house, with a reason and without a clock */}
         <AnimatePresence>
-          {presence.live && presence.promo ? (
-            <motion.div key={presence.promo.id} className="pad" initial={{ opacity: 0, y: -16, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, height: 0 }} transition={{ type: "spring", stiffness: 260, damping: 26 }} style={{ marginTop: 14 }}>
-              <LivingPhoto photo={{ ...visualForPromo(presence.promo.kind) }} radius={26} style={{ minHeight: 210 }} testId="promo-card">
+          {presence.live && presence.courtesy ? (
+            <motion.div key={presence.courtesy.id} className="pad" initial={{ opacity: 0, y: -16, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, height: 0 }} transition={{ type: "spring", stiffness: 260, damping: 26 }} style={{ marginTop: 14 }}>
+              <LivingPhoto photo={{ ...visualForCourtesy(presence.courtesy.kind) }} radius={26} style={{ minHeight: 210 }} testId="courtesy-card">
                 <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(27,22,18,0.15), rgba(27,22,18,0.82) 70%)" }} />
                 <div style={{ position: "absolute", inset: 0, padding: 18, display: "flex", flexDirection: "column", justifyContent: "flex-end", color: "#fff" }}>
-                  <div className="row" style={{ justifyContent: "space-between" }}>
-                    <span className="kicker" style={{ color: "rgba(255,255,255,0.75)" }}>{copy.promo.kicker} · {storeName(presence.promo.storeId)}</span>
-                    <span className="serif" style={{ fontSize: 24, fontVariantNumeric: "tabular-nums" }} data-testid="promo-countdown">{formatCountdown(presence.remaining)}</span>
-                  </div>
-                  <div className="serif" style={{ fontSize: 28, lineHeight: 1.05, marginTop: 6 }}>{copy.promo.catalog[presence.promo.kind].title}</div>
-                  <div style={{ fontSize: 14, color: "rgba(255,255,255,0.85)", marginTop: 4 }}>{copy.promo.catalog[presence.promo.kind].detail}</div>
-                  <div style={{ height: 4, borderRadius: 2, background: "rgba(255,255,255,0.2)", marginTop: 12, overflow: "hidden" }}>
-                    <motion.div style={{ height: "100%", background: "#ffb15a", transformOrigin: "left" }} animate={{ scaleX: presence.remaining / 600000 }} transition={{ duration: 1, ease: "linear" }} />
-                  </div>
-                  <div className="row" style={{ marginTop: 12, gap: 8 }}>
-                    <Press className="ink-button" style={{ background: "#fff", color: "var(--ink)", minHeight: 44, flex: 1 }} onClick={presence.claim} data-testid="promo-claim">{copy.promo.activate}</Press>
-                    <button onClick={presence.dismiss} style={{ color: "rgba(255,255,255,0.8)", padding: "0 10px", fontSize: 14 }}>{copy.web.close}</button>
+                  <span className="kicker" style={{ color: "rgba(255,255,255,0.75)" }}>{copy.courtesy.kicker} · {storeName(presence.courtesy.storeId)}</span>
+                  <div className="serif" style={{ fontSize: 28, lineHeight: 1.05, marginTop: 6 }} data-testid="courtesy-title">{copy.courtesy.catalog[presence.courtesy.kind].title(storeName(presence.courtesy.storeId))}</div>
+                  <div style={{ fontSize: 14, color: "rgba(255,255,255,0.85)", marginTop: 4 }}>{copy.courtesy.catalog[presence.courtesy.kind].detail}</div>
+                  <div className="row" style={{ marginTop: 14, gap: 8 }}>
+                    <Press className="ink-button" style={{ background: "#fff", color: "var(--ink)", minHeight: 44, flex: 1 }} onClick={presence.claim} data-testid="courtesy-claim">{copy.courtesy.activate}</Press>
+                    <button onClick={presence.dismiss} style={{ color: "rgba(255,255,255,0.8)", padding: "0 10px", fontSize: 14 }} data-testid="courtesy-dismiss">{copy.web.close}</button>
                   </div>
                 </div>
               </LivingPhoto>
@@ -184,7 +190,7 @@ export function Home() {
                 item={item}
                 price={money(item.price)}
                 inOrder={account.order.find((line) => line.itemId === item.id)?.quantity ?? 0}
-                earns={copy.menu.earns(pointsForPrice(item.price))}
+                earns={copy.menu.earns(pointsForItem(item))}
                 onOpen={() => navigate(`/item/${item.id}`)}
                 onAdd={() => dispatch({ type: "addToTable", itemId: item.id })}
               />
@@ -233,14 +239,19 @@ export function Home() {
           </Press>
         </div>
 
-        {/* cups */}
+        {/* the logbook */}
         <div className="pad" style={{ marginTop: 26 }}>
           <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
-            <h2 className="serif" style={{ fontSize: 24, margin: 0 }}>{copy.home.cupsTitle}</h2>
-            <span style={{ fontSize: 13, color: "var(--roast)" }}>{account.stamps >= 8 ? copy.cups.full : copy.cups.left(8 - account.stamps)}</span>
+            <h2 className="serif" style={{ fontSize: 24, margin: 0 }}>{copy.home.logbookTitle}</h2>
+            <span style={{ fontSize: 13, color: "var(--roast)" }} data-testid="logbook-next">
+              {target !== null && nextLevel ? copy.logbook.toNext(Math.max(0, target - stampLog.length), copy.levels[nextLevel].name) : copy.logbook.atTop}
+            </span>
           </div>
-          <div style={{ fontSize: 13, color: "var(--smoke)", margin: "4px 0 12px" }}>{copy.home.cupsNote}</div>
-          <Stamps stamps={account.stamps} />
+          <div style={{ fontSize: 13, color: "var(--smoke)", margin: "4px 0 12px" }}>{copy.home.logbookNote}</div>
+          <Stamps stamps={rowFilled} total={rowTotal} />
+          <div style={{ fontSize: 12, color: "var(--smoke)", marginTop: 10 }} data-testid="logbook-recent">
+            {recentStamps ? copy.logbook.recent(recentStamps) : copy.logbook.empty}
+          </div>
         </div>
 
         {/* rewards */}
@@ -255,7 +266,7 @@ export function Home() {
           {later.map((reward) => (
             <RewardRow key={reward.id} reward={reward} canRedeem={false} missing={pointsStillNeeded(balance, reward.points)} onRedeem={() => dispatch({ type: "redeem", rewardId: reward.id })} />
           ))}
-          <div style={{ fontSize: 12, color: "var(--smoke)", marginTop: 10 }}>{copy.home.rewardsUntil(dateFromKey(REWARD_DEADLINE))}</div>
+          <div style={{ fontSize: 12, color: "var(--smoke)", marginTop: 10 }} data-testid="no-expiry">{copy.home.noExpiry}</div>
         </div>
 
         {/* ledger */}
@@ -279,7 +290,7 @@ export function Home() {
       <AnimatePresence>
         {flash ? (
           <motion.div key={flash.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ position: "absolute", inset: 0, zIndex: 50, background: "rgba(27,22,18,0.92)", display: "grid", placeItems: "center" }}>
-            <Roast compact duration={flash.kind === "eighth" ? 2.2 : 1.4} line={flash.kind === "eighth" ? copy.notes.eighthCupToast : copy.cups.pour} />
+            <Roast compact duration={flash.kind === "level" ? 2.2 : 1.4} line={flash.kind === "level" ? copy.notes.levelUp(copy.levels[level].name) : copy.cups.pour} />
           </motion.div>
         ) : null}
       </AnimatePresence>
@@ -301,8 +312,8 @@ export function Home() {
   );
 }
 
-function visualForPromo(kind: "filterCroissant" | "doubleCup" | "afternoon") {
-  return kind === "filterCroissant" ? photoSpec("filter.jpg") : kind === "doubleCup" ? photoSpec("espresso.jpg") : photoSpec("espresso.jpg");
+function visualForCourtesy(kind: CourtesyKind) {
+  return kind === "firstVisit" ? photoSpec("espresso.jpg") : photoSpec("filter.jpg");
 }
 
 /** The house card: ink glass with the logo, the balance and the counter code. It tilts in the hand. */
@@ -330,7 +341,7 @@ function MemberCard({ name, code, points, onDisplay, onOpen, label, hint, points
           minHeight: 190,
           color: "#fff",
           background: "linear-gradient(135deg, #2b211b 0%, #1b1612 55%, #3c2418 100%)",
-          boxShadow: "0 30px 60px -30px rgba(27,22,18,0.7), inset 0 1px 0 rgba(255,255,255,0.18)",
+          boxShadow: "0 36px 80px -30px rgba(27,22,18,0.78), 0 10px 22px -10px rgba(27,22,18,0.35), inset 0 1px 0 rgba(255,255,255,0.18)",
         }}
       >
         <motion.div aria-hidden="true" style={{ position: "absolute", inset: 0, background: `radial-gradient(260px 180px at var(--mx) var(--my), rgba(255,255,255,0.22), rgba(255,255,255,0) 70%)`, ["--mx" as string]: sheenX, ["--my" as string]: sheenY, pointerEvents: "none" }} />
@@ -375,7 +386,7 @@ function PickCard({ item, price, earns, inOrder, onOpen, onAdd }: { item: MenuIt
             </div>
           </LivingPhoto>
         ) : (
-          <div style={{ height: 230, borderRadius: 22, background: "var(--cream)", display: "grid", placeItems: "center" }}>
+          <div style={{ height: 230, borderRadius: 22, background: "var(--cream)", display: "grid", placeItems: "center", boxShadow: "var(--shadow-card)" }}>
             <Product src={visual.src} size={150} />
           </div>
         )}

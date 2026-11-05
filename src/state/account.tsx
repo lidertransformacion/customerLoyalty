@@ -14,7 +14,7 @@ import {
   CUPS_FOR_FILTER,
   INITIAL_STORE,
   isCup,
-  pointsForPrice,
+  pointsFor,
   pointsStillNeeded,
   REWARDS,
   storeById,
@@ -114,7 +114,7 @@ function createAccount(signup: Signup): Account {
     phone: signup.phone.trim(),
     email: signup.email.trim(),
     idNumber: signup.idNumber.trim(),
-    code: codeFor(signup.idNumber.trim()),
+    code: codeFor(signup.phone.trim()),
     points: WELCOME_BONUS,
     stamps: 0,
     storeId: INITIAL_STORE,
@@ -222,7 +222,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       const movements = [...current.movements];
       let cups = 0;
       for (const item of purchased) {
-        const earned = pointsForPrice(item.price);
+        const earned = pointsFor(item.price, item.category);
         points += earned;
         movements.unshift(movement(item.name, earned, store));
         if (isCup(item.category)) cups += 1;

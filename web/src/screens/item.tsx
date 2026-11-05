@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 import { useNavigate, useParams } from "react-router";
 
-import { pointsForPrice } from "@/src/data/program";
+import { pointsForItem } from "@/src/data/menu";
 
 import { menuOnly } from "../core/mode";
 import { visualFor } from "../core/visuals";
@@ -39,7 +39,7 @@ export function ItemScreen() {
   const visual = visualFor(item);
   const pairing = item.description.match(/(?:Maridaje|Pairing):\s*(.+?)\.?$/)?.[1];
   const inOrder = account?.order.find((line) => line.itemId === item.id)?.quantity ?? 0;
-  const points = pointsForPrice(item.price);
+  const points = pointsForItem(item);
   const dark = visual.kind === "photo";
 
   return (

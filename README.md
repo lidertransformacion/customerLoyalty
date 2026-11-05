@@ -2,7 +2,7 @@
 
 Local demo of the house account. One Expo project: the web build is a PWA, and the same code is ready for iOS and Android. It does not charge, it does not call Odoo, and it is not deployed.
 
-The numbers are the live program. Every $100 at the register earns one point. The welcome bonus is 1,000. An Americano Paz or Libre is 700, a Cappuccino Paz or Libre is 910, and the almond croissant is 2,000. Rewards can be requested until 31 December 2026. The ledger is written per store, for example Libertario calle 93.
+The numbers are Brújula, the house program (deck of 3 November 2026). Every COP 1,000 at the register earns one cereza; a bag of beans earns double, and so does paying with the prepaid balance. Signing up brings 100 cerezas and two stamps. A cappuccino is 300, inviting someone to one is 150, a PAZ bag is 1,000. Cerezas never expire while the guest keeps coming. Stamps (a first profile, method, house, bag or tasting) climb the levels Rumbo, Travesía and Origen. The ledger is written per store, for example Libertario calle 93.
 
 The interface is Libertario, on white. Roast and ink are accents, not the ground. Other apps were read only to see what a guest has to be able to do. Their look and structure were not copied.
 
