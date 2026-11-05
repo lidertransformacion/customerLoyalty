@@ -1,8 +1,8 @@
 # Libertario loyalty, web (PWA)
 
-La app web de la casa Libertario: puntos, tazas, código de mostrador y la carta. Es una PWA instalable (Vite 7 + React 19 + TypeScript, `motion` v12, `react-router` v7, `vite-plugin-pwa`) pensada para el teléfono. En una tableta (720 a 1023 px) se enmarca como un teléfono de 430 px; en un monitor (desde 1024 px) usa un lienzo ancho: las pantallas de texto se leen en una columna de 760 px y la carta se abre a doble página, como un libro.
+La app web de la casa Libertario: Brújula (cerezas, Bitácora de sellos, niveles), el saldo, el código de mostrador y la carta. Es una PWA instalable (Vite 7 + React 19 + TypeScript, `motion` v12, `react-router` v7, `vite-plugin-pwa`) pensada para el teléfono. En una tableta (720 a 1023 px) se enmarca como un teléfono de 430 px; en un monitor (desde 1024 px) usa un lienzo ancho: las pantallas de texto se leen en una columna de 760 px y la carta se lee como una hoja centrada de 600 px.
 
-Comparte con la app Expo de la raíz las reglas del programa, la carta y los textos. El alias `@` apunta a la raíz del repositorio: `@/src/data/program` (puntos, bonos, casas, `productionBlocked()`), `@/src/data/menu` (carta base), `@/src/i18n/strings` (español) y `@/src/format`. Esos módulos están incluidos en el `tsconfig.json` de `web/` y en `server.fs.allow` de Vite. Como la app Expo: no cobra, no llama a Odoo y no se despliega.
+Comparte con la app Expo de la raíz las reglas del programa, la carta y los textos. El alias `@` apunta a la raíz del repositorio: `@/src/data/program` (cerezas, sellos, niveles, carta de canje, casas, `productionBlocked()`), `@/src/data/menu` (carta base), `@/src/i18n/strings` (español) y `@/src/format`. Esos módulos están incluidos en el `tsconfig.json` de `web/` y en `server.fs.allow` de Vite. Como la app Expo: no cobra, no llama a Odoo y no se despliega.
 
 ## Cómo correr
 
@@ -17,11 +17,12 @@ npm run typecheck  # solo tsc --noEmit
 
 ## Mapa de carpetas
 
-- `src/core/`: lógica pura, sin React. `account.ts` (la cuenta como reducer, con reloj y azar inyectados), `catalog.ts` y `cities.ts` (catálogo por ciudad), `market.ts` (país, moneda, idioma, visita por QR), `promo.ts` (promo de llegada), `stores.ts` (coordenadas de las casas y distancia), `google.ts` (Google Identity), `storage.ts` (puerto clave-valor), `haptics.ts`, `photos.ts`, `visuals.ts`.
+- `src/core/`: lógica pura, sin React. `account.ts` (la cuenta como reducer, con reloj y azar inyectados), `catalog.ts` y `cities.ts` (catálogo por ciudad), `market.ts` (país, moneda, idioma, visita por QR), `courtesy.ts` (cortesías al llegar: primera vez en la sede, segunda visita, cumpleaños), `stores.ts` (coordenadas de las casas y distancia), `google.ts` (Google Identity), `storage.ts` (puerto clave-valor), `haptics.ts`, `photos.ts`, `visuals.ts`.
 - `src/state/`: providers. `LocaleProvider` (en `i18n/`), `CatalogProvider`, `AccountProvider`, `PresenceProvider`. Se anidan en `main.tsx` en ese orden.
 - `src/ui/`: componentes Liquid Glass. `Glass`, `Press`, `Screen`, `Sheet`, `TabBar`, `Toast`, `Counter`, `QR`, `Ring`, `Stamps`.
 - `src/motion/`: animaciones de café en SVG con `motion`. `Roast` (el tueste, al abrir), `Brew` (V60), `Espresso`, `Liquid`, `Beans`, `Steam`, `Celebrate`.
-- `src/book/`: el motor de pasar página de la carta (`Book`, `pages.tsx`). Una página en el teléfono, pliego doble en pantalla ancha; se arrastra con el pulgar, se toca cerca del borde o se usan las flechas del teclado.
+- `src/menu/`: la carta minimal (`minimal.tsx` + `minimal.css`): portada a pantalla completa con el tueste vivo y «Iniciar»; luego el índice en tarjetas y un capítulo por hoja, con su foto viva, el título en la serif de la casa y una lista tranquila de productos agrupados por tamaño o blend (`core/lines.ts`) con precio desde y, en modo `full`, las cerezas. Mismo esqueleto que la carta de Chile de la rama `menuChile`, en la tipografía y los colores de Libertario Colombia.
+- `src/book/`: el motor de pasar página (`Book`). Una hoja a la vez, se arrastra con el pulgar, se toca cerca del borde o se usan las flechas del teclado. `pages.tsx` conserva el libro anterior.
 - `src/screens/`: `opening`, `landing`, `signup`, `home`, `menu`, `item`, `order`, `settings`, `store-picker`.
 - `src/i18n/`: `LocaleProvider`, `useLocale()`, `useCopy()` y `en.ts`.
 - `src/styles/`: `tokens.css`, `base.css` (marco de teléfono en tableta, lienzo ancho en escritorio, keyframes `drift`/`burst` para los SVG), `glass.css`.
@@ -50,18 +51,13 @@ Los tres siguen el mismo orden: parámetro de URL, luego lo que se eligió antes
 
 Los tres se cambian en Ajustes (`/settings`). `useLocale()` entrega `copy`, `market`, `money()` y `date()`.
 
-## Promo de llegada
+## Cortesías al llegar
 
-`PresenceProvider` (`state/presence.tsx`) junta geolocalización, promo y simulación.
+`PresenceProvider` (`state/presence.tsx`) junta geolocalización, cortesía y simulación. Brújula no tiene cuentas regresivas ni descuentos: lo que aparece al entrar es algo de la casa, con motivo, y se activa cuando el invitado quiera.
 
-- Al tocar "permitir" se abre `navigator.geolocation.watchPosition` (baja precisión, `maximumAge` 20 s) y, si el navegador lo permite, se pide permiso de `Notification`. La decisión se recuerda en `libertario-presence-v1` y el watch se reanuda solo en la siguiente visita.
 - `core/stores.ts` tiene las coordenadas de las cuatro casas y la distancia haversine. `nearestStore()` devuelve la más cercana y si se está dentro del radio: `PROMO_RADIUS_METERS = 150`.
-- Al entrar en el radio con cuenta, `startPromo()` crea la promo con id `storeId:YYYY-MM-DD`: una promo por casa por día, aunque se salga y se vuelva. Dura `PROMO_MINUTES = 10`; la cuenta regresiva baja cada segundo en la tarjeta de Home. El tipo depende de la hora: `filterCroissant` antes de las 12, `doubleCup` de 12 a 14, `afternoon` desde las 14. Los puntos de cada una están en `PROMO_POINTS`.
-- Entrar también mueve el libro a esa casa (`chooseStore`). Activar la promo despacha `claimPromo` al reducer; descartarla la cierra sin puntos. Se persiste en `libertario-promo-v1`.
-- Si la pestaña está en segundo plano y el permiso fue concedido, se dispara una notificación local. No hay push.
-- Para probar sin salir de la oficina: desde Home se abre la lista de casas (`store-picker.tsx`) y se toca "Simular que llego a …". `simulate(storeId)` reemplaza la posición real por la de la casa; "Dejar de simular" la devuelve.
-- Calle 85 fue auditada contra Google (Carrera 13 #85-13). Zona G, Calle 93 y Usaquén están a nivel de manzana (`approximate: true`).
-
+- Al entrar en el radio con cuenta, `courtesyFor()` (`core/courtesy.ts`) decide si hay algo para ese invitado, en este orden: cumpleaños (el día y los 15 siguientes), segunda visita, primera vez en esa sede. Sin reloj. Nada se ofrece dos veces: los ids activados o cerrados quedan en `seen`.
+- Entrar también mueve el libro a esa casa (`chooseStore`). Activar la cortesía despacha `claimCourtesy` al reducer, que la escribe en el libro a cero cerezas; cerrarla la guarda como vista. Se persiste en `libertario-courtesy-v1`.
 ## Google sign-in
 
 1. Copiar `.env.example` a `.env.local` y poner `VITE_GOOGLE_CLIENT_ID` con un cliente OAuth de tipo "Web application" del proyecto Google Cloud de Libertario.
@@ -72,9 +68,9 @@ El script de Google Identity Services se carga bajo demanda (`core/google.ts`). 
 
 ## Qué es simulado
 
-- Pedidos: `postOrder` genera un código `P-XXXX` en el teléfono, cierra la compra y suma puntos y tazas en el reducer local. Nada llega a un POS.
+- Pedidos: `postOrder` genera un código `P-XXXX` en el teléfono, cierra la compra y suma cerezas y sellos en el reducer local; con `payWith: "balance"` descuenta del saldo y cada pieza suma el doble. Nada llega a un POS.
 - Pago: el pedido se paga en caja, como dice `docs/loyalty-proposal.md`. El saldo prepago (`/wallet`, `screens/wallet.tsx`) tiene una recarga por PSE **simulada**: no llama a ningún banco ni cobra; el flujo real va por un proveedor PSE (Wompi o PayU) desde un backend. El código de mesa no es un pago.
-- Odoo: no se llama nunca. Saldo, tazas, código de mostrador y libro viven en `localStorage` bajo `libertario-home-v1`, la misma clave y forma base que la app Expo.
+- Odoo: no se llama nunca. Saldo, cerezas, Bitácora, código de mostrador y libro viven en `localStorage` bajo `libertario-home-v1`, la misma clave y forma base que la app Expo.
 - Guard de producción: `productionBlocked()` lee `process.env.EXPO_PUBLIC_ODOO_URL`, que Vite inyecta con `define` desde el entorno de build. Si contiene `libertariocoffee.odoo.com`, la app muestra el aviso y no arranca.
 
 ## PWA y offline
@@ -98,15 +94,15 @@ El script de Google Identity Services se carga bajo demanda (`core/google.ts`). 
 - `motion/living-photo.tsx` dibuja una foto "viva": la cámara deriva, el marco se inclina con el giroscopio y encima van capas según la foto (`core/photos.ts`): vapor real (`steam`), condensación (`sweat`), burbujas (`fizz`) y líquido que cae (`pours`, con `motion/stream.tsx`: refracción del fondo, gotas, salpicadura, anillos y mancha húmeda que gira sobre el lecho). Las coordenadas se dan en porcentaje de la fotografía, no del marco, así que caen en el mismo sitio en una tarjeta o a pantalla completa. Si la foto ya muestra el chorro, `body: false` deja solo lo que pasa donde cae.
 - Un `PhotoSpec` con `video` reproduce el clip en bucle (silencioso) sobre la foto, que queda de póster y de respaldo. Para usar el clip del V60 vertiendo del sitio: guardarlo como `web/public/video/v60.mp4` (y `.webm`), añadir `CLIPS.v60` en `core/photos.ts` y ponerlo en la portada del libro (`book/pages.tsx`).
 - `motion/product.tsx`: la bolsa flota en 3D, se inclina con el dedo o el teléfono y un brillo cruza el empaque.
-- La carta recuerda la página del libro, el filtro y el scroll de la lista al volver de un producto (`state/menu-memory.ts`). La primera vez, la esquina de la página se levanta sola cada pocos segundos y una flecha semitransparente sugiere el gesto; desaparece al pasar la primera página.
-- El índice del libro son tarjetas por categoría con su foto; arriba del libro hay botones para volver a la portada y al índice.
+- La carta recuerda la página del libro, el filtro y el scroll de la lista al volver de un producto (`state/menu-memory.ts`). La primera vez, la esquina de la portada se levanta sola cada pocos segundos; deja de hacerlo al pasar la primera página.
+- El índice son tarjetas por capítulo con su foto o sus bolsas. La cabecera de cristal lleva la ciudad, el contador de capítulo, el idioma y el botón de índice, con una línea de progreso; las hojas tienen el lomo sombreado de un libro abierto.
 
 ## Modos y ramas
 
 La app lee `VITE_APP_MODE` de `web/.env` (`core/mode.ts`):
 
 - `menu`: solo la carta. El QR o el enlace abren el libro en `/` (con `?sede=`, `?mesa=`, `?ciudad=`, `?lang=`), la ficha de cada producto se abre y se vuelve; no hay barra inferior, cuenta, pedido ni saldo. Es lo que se lanza primero.
-- `full`: todo: arranque, registro, Casa, promo de llegada, pedido, saldo y ajustes.
+- `full`: todo: arranque, registro, Casa, cortesías al llegar, pedido, saldo y ajustes.
 
 Las ramas solo se diferencian en ese archivo: `main` lleva `VITE_APP_MODE=menu` y `loyalty` lleva `VITE_APP_MODE=full`. El código es el mismo, así que para liberar el resto basta con hacer merge de `loyalty` en `main` y cambiar el valor (o dejar `full`). Para probar el otro modo sin tocar el archivo: `VITE_APP_MODE=menu npm run dev`.
 
@@ -141,7 +137,7 @@ npx wrangler pages deploy dist --project-name libertario-carta --branch main
 ## Pruebas
 
 ```bash
-npm test          # Vitest sobre src/core (reducer, promo, catálogo por ciudad, geo)
+npm test          # Vitest sobre src/core (reducer, cortesías, reglas del programa, catálogo por ciudad, geo)
 npm run typecheck
 ```
 

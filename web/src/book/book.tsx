@@ -14,6 +14,8 @@ type Props = {
   nudge?: boolean;
   /** A turn asked for from outside, like the cover button. A new id runs a new turn. */
   command?: { id: number; direction: "forward" | "back" } | null;
+  /** Extra class on the book, for a menu with its own paper. */
+  className?: string;
 };
 
 type Turn = { direction: "forward" | "back"; dragging: boolean } | null;
@@ -23,7 +25,7 @@ type Turn = { direction: "forward" | "back"; dragging: boolean } | null;
  * On a phone, one page: it folds over its left edge. On a wide screen, a
  * spread: the right page folds onto the left, and its back is the next page.
  */
-export function Book({ pages, index, onIndex, spread, verso, nudge = false, command = null }: Props) {
+export function Book({ pages, index, onIndex, spread, verso, nudge = false, command = null, className }: Props) {
   const reduced = useReduced();
   const angle = useMotionValue(0);
   const [turn, setTurn] = useState<Turn>(null);
@@ -202,6 +204,10 @@ export function Book({ pages, index, onIndex, spread, verso, nudge = false, comm
   }, [flip]);
 
   const rotateY = useTransform(angle, (a) => -a);
+  // Which face is toward the reader. Not left to backface-visibility alone:
+  // WebKit without 3D compositing paints the back face over the front.
+  const frontShown = useTransform(angle, (a) => (a < 90 ? "visible" : "hidden"));
+  const backShown = useTransform(angle, (a) => (a >= 90 ? "visible" : "hidden"));
   const frontShade = useTransform(angle, [0, 90, 180], [0, 0.42, 0]);
   const backShade = useTransform(angle, [0, 90, 180], [0, 0.35, 0]);
   const underShadow = useTransform(angle, [0, 30, 100, 180], [0, 0.35, 0.55, 0]);
@@ -244,7 +250,7 @@ export function Book({ pages, index, onIndex, spread, verso, nudge = false, comm
   return (
     <div
       ref={box}
-      className={`book${spread ? " spread" : ""}`}
+      className={`book${spread ? " spread" : ""}${className ? ` ${className}` : ""}`}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
@@ -282,20 +288,20 @@ export function Book({ pages, index, onIndex, spread, verso, nudge = false, comm
           className="book-turning"
           style={{ rotateY, z: lift, skewY: curl }}
         >
-          <div className="book-face front">
+          <motion.div className="book-face front" style={{ visibility: frontShown }}>
             {pageAt(frontPage)}
             <motion.div
               className="book-shade"
               style={{ opacity: frontShade, background: "linear-gradient(270deg, rgba(27,22,18,0.55), rgba(27,22,18,0.05) 60%)" }}
             />
-          </div>
-          <div className="book-face back">
+          </motion.div>
+          <motion.div className="book-face back" style={{ visibility: backShown }}>
             {backPage !== null ? pageAt(backPage) : verso(frontPage)}
             <motion.div
               className="book-shade"
               style={{ opacity: backShade, background: "linear-gradient(90deg, rgba(27,22,18,0.5), rgba(27,22,18,0.05) 60%)" }}
             />
-          </div>
+          </motion.div>
         </motion.div>
       ) : null}
     </div>

@@ -1,0 +1,574 @@
+/* The menu, minimal: white, air, the house serif, one chapter per sheet. The bones of the Chile menu in Libertario's type. */
+.mn {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  color: var(--ink);
+  font-family: var(--sans);
+  overflow: hidden;
+}
+
+/* ===== the header: glass, edge to edge ===== */
+.mn-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 6;
+}
+
+.mn-bar.glass {
+  max-width: none;
+  margin: 0;
+  border-radius: 0;
+  padding-top: var(--sat);
+  padding-bottom: 0;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: inset 0 -1px 0 rgba(27, 22, 18, 0.06);
+}
+
+.mn-bar.glass::before {
+  border-radius: 0;
+}
+
+.mn-top {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 60px;
+  max-width: 628px;
+  margin: 0 auto;
+  padding: 10px max(12px, var(--sar)) 8px max(12px, var(--sal));
+}
+
+.mn-home {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  color: var(--ink);
+}
+
+.mn-home img {
+  width: 26px;
+  height: 26px;
+}
+
+.mn-city {
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.mn-count {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+}
+
+.mn-count span {
+  color: var(--smoke);
+}
+
+.mn-spacer {
+  flex: 1;
+}
+
+.mn-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mn-lang {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.mn-lang button {
+  min-width: 30px;
+  min-height: 30px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--smoke);
+  border-radius: 999px;
+}
+
+.mn-lang button[aria-pressed="true"] {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 2px 8px -4px rgba(27, 22, 18, 0.35);
+}
+
+.mn-index-button {
+  min-height: 32px;
+  padding: 0 11px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.mn-progress {
+  position: relative;
+  z-index: 3;
+  height: 2px;
+  background: rgba(27, 22, 18, 0.06);
+  overflow: hidden;
+}
+
+.mn-progress span {
+  display: block;
+  height: 100%;
+  background: var(--roast);
+}
+
+/* ===== the stage: a sheet with a margin, rounded corners and a shadow, like the Colombian page ===== */
+.mn-stage {
+  position: absolute;
+  top: calc(var(--sat) + 64px);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 10px max(14px, var(--sar)) calc(var(--sab) + 14px) max(14px, var(--sal));
+}
+
+.mn.with-tabs .mn-stage {
+  bottom: calc(var(--tabbar) + var(--sab) + 4px);
+  padding-bottom: 8px;
+}
+
+.mn-book {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.mn-book .book-page,
+.mn-book .book-face {
+  border-radius: 6px 22px 22px 6px;
+  background: #fff;
+  background-image: linear-gradient(90deg, rgba(27, 22, 18, 0.06), rgba(27, 22, 18, 0) 14px);
+  box-shadow: 0 2px 0 rgba(255, 255, 255, 0.6) inset, var(--shadow-float), 0 0 0 1px rgba(27, 22, 18, 0.04);
+}
+
+.mn-book .book-face.back {
+  border-radius: 22px 6px 6px 22px;
+}
+
+/* the gutter of an open book: shade where the sheet meets the spine */
+.mn-book .book-page::after,
+.mn-book .book-face::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 46px;
+  pointer-events: none;
+  z-index: 4;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    rgba(27, 22, 18, 0.2) 0%,
+    rgba(27, 22, 18, 0.1) 18%,
+    rgba(255, 255, 255, 0.16) 30%,
+    rgba(27, 22, 18, 0.04) 46%,
+    rgba(27, 22, 18, 0) 100%
+  );
+  mix-blend-mode: multiply;
+}
+
+.mn-book .book-face.back::after {
+  left: auto;
+  right: 0;
+  transform: scaleX(-1);
+}
+
+.mn-book .book-page:has(.mn-cover)::after,
+.mn-book .book-face:has(.mn-cover)::after {
+  mix-blend-mode: normal;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.18) 22%, rgba(255, 225, 190, 0.1) 34%, rgba(0, 0, 0, 0) 100%);
+}
+
+/* ===== the sheets ===== */
+.mn-sheet {
+  background: #fff;
+  padding: 20px 20px calc(var(--sab) + 40px) 22px;
+  gap: 0;
+}
+
+.mn-sheet.mn-page {
+  display: block;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.mn-sheet.mn-page::-webkit-scrollbar {
+  display: none;
+}
+
+.mn-page > * {
+  max-width: 560px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ===== the cover ===== */
+.mn-cover {
+  position: absolute;
+  inset: 0;
+  background: #1b0d08;
+  overflow: hidden;
+}
+
+.mn-cover-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(27, 22, 18, 0.35), rgba(27, 22, 18, 0.15) 35%, rgba(27, 22, 18, 0.25) 60%, rgba(27, 22, 18, 0.88));
+  pointer-events: none;
+}
+
+.mn-cover-lockup {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 26px;
+  pointer-events: none;
+}
+
+.mn-cover-mark {
+  position: absolute;
+  top: 22px;
+  width: 46px;
+  height: 46px;
+  opacity: 0.9;
+}
+
+.mn-cover-logo {
+  width: 76%;
+  max-width: 300px;
+  height: auto;
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.5));
+}
+
+.mn-start-wrap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--sab) + 11%);
+  display: flex;
+  justify-content: center;
+}
+
+.mn-start {
+  min-width: 200px;
+  padding: 18px 44px;
+  border-radius: 999px;
+  border: 0;
+  color: #fff8ee;
+  font-family: var(--serif);
+  font-size: 24px;
+  letter-spacing: 0.02em;
+  background: rgba(27, 13, 8, 0.22);
+}
+
+.mn-cover-foot {
+  position: absolute;
+  bottom: 18px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 22px;
+  font-size: 11px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+  pointer-events: none;
+}
+
+/* ===== the index as cards ===== */
+.mn-index-title {
+  font-weight: 500;
+  font-size: clamp(40px, 11vw, 56px);
+  line-height: 1;
+  margin: 10px 0 16px;
+}
+
+.mn-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  padding: 4px 2px calc(var(--sab) + 28px);
+  max-width: 720px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.mn-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  min-height: 210px;
+  padding: 14px 14px 16px;
+  border-radius: 26px;
+  color: var(--ink);
+  overflow: hidden;
+  /* depth: a soft lift from the page, a light edge on top, a shade at the foot */
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 45%, rgba(29, 24, 18, 0.04) 100%);
+  box-shadow:
+    0 1px 2px rgba(29, 24, 18, 0.06),
+    0 6px 14px -6px rgba(29, 24, 18, 0.14),
+    0 20px 36px -18px rgba(29, 24, 18, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    inset 0 -1px 0 rgba(29, 24, 18, 0.05);
+  transform: translateZ(0);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+@media (hover: hover) {
+  .mn-card:hover {
+    transform: translateY(-3px);
+    box-shadow:
+      0 2px 4px rgba(29, 24, 18, 0.06),
+      0 12px 22px -8px rgba(29, 24, 18, 0.18),
+      0 30px 48px -22px rgba(29, 24, 18, 0.34),
+      inset 0 1px 0 rgba(255, 255, 255, 0.85),
+      inset 0 -1px 0 rgba(29, 24, 18, 0.05);
+  }
+}
+
+.mn-card.on {
+  box-shadow:
+    0 0 0 2px var(--ink),
+    0 6px 14px -6px rgba(29, 24, 18, 0.14),
+    0 20px 36px -18px rgba(29, 24, 18, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.mn-card.wide {
+  grid-column: 1 / -1;
+  min-height: 190px;
+}
+
+.mn-card-n {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: rgba(27, 22, 18, 0.45);
+  font-variant-numeric: tabular-nums;
+}
+
+.mn-card-art {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  min-height: 112px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  margin: 2px 0 8px;
+}
+
+/* a cut-out casts its own shadow on the card */
+.mn-card-art::after {
+  content: "";
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  bottom: 2px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(29, 24, 18, 0.22), rgba(29, 24, 18, 0));
+  pointer-events: none;
+}
+
+.mn-card-art:has(> img.photo)::after {
+  display: none;
+}
+
+.mn-card-art img.cut {
+  max-width: 100%;
+  max-height: 120px;
+  object-fit: contain;
+  filter: drop-shadow(0 14px 16px rgba(29, 24, 18, 0.18));
+  animation: mn-float 5s ease-in-out infinite;
+}
+
+.mn-card.wide .mn-card-art img.cut {
+  max-height: 104px;
+  max-width: 22%;
+}
+
+.mn-card-art img.photo {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+}
+
+.mn-card-name {
+  font-size: 23px;
+  font-weight: 500;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+
+.mn-card-count {
+  margin-top: 4px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: rgba(27, 22, 18, 0.55);
+}
+
+@keyframes mn-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-5px) rotate(-1.2deg); }
+}
+
+@media (min-width: 720px) {
+  .mn-cards { grid-template-columns: repeat(3, 1fr); }
+  .mn-card.wide { grid-column: span 3; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mn-card-art img.cut { animation: none; }
+}
+
+/* ===== a chapter: its photograph alive, its title, a quiet list ===== */
+.mn-hero {
+  height: min(38vh, 320px);
+  overflow: visible;
+  display: grid;
+  place-items: center;
+  margin-top: 8px;
+}
+
+/* the four bags, larger and slightly overlapping, like on a shelf */
+.mn-packs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mn-packs > *:nth-child(even) {
+  transform: translateY(14px);
+}
+
+.mn-title {
+  font-weight: 500;
+  font-size: clamp(40px, 11vw, 56px);
+  line-height: 0.98;
+  letter-spacing: -0.01em;
+  margin-top: 18px;
+  margin-bottom: 0;
+  text-wrap: balance;
+}
+
+.mn-intro {
+  margin-top: 8px;
+  margin-bottom: 0;
+  font-size: 17px;
+  color: var(--smoke);
+}
+
+.mn-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 22px;
+  margin-bottom: 0;
+}
+
+.mn-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  column-gap: 16px;
+  width: 100%;
+  text-align: left;
+  padding: 16px 0;
+  border-top: 1px solid var(--line-soft);
+  color: var(--ink);
+}
+
+.mn-list li:last-child .mn-row {
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.mn-row:active {
+  opacity: 0.55;
+}
+
+.mn-name {
+  font-family: var(--serif);
+  font-size: 19px;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.mn-price {
+  font-size: 17px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.mn-sizes {
+  grid-column: 1 / -1;
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--smoke);
+}
+
+.mn-next {
+  display: inline-flex;
+  margin-top: 30px;
+  padding: 14px 24px;
+  font-size: 22px;
+  color: var(--ink);
+  background: rgba(244, 240, 233, 0.7);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 12px 26px -16px rgba(29, 24, 18, 0.45);
+}
+
+/* ===== the last sheet ===== */
+.mn-colophon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 14px;
+}
+
+.mn-colophon p {
+  margin: 0;
+  max-width: 260px;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--smoke);
+}
+
+.mn-colophon p.mn-colophon-rule {
+  font-size: 22px;
+  color: var(--ink);
+}
+
+@media (max-width: 370px) {
+  .mn-city { font-size: 9px; letter-spacing: 0.06em; }
+}
