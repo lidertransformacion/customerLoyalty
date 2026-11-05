@@ -2,9 +2,13 @@ import { existsSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { catalogFor, cityById, translateCatalog } from "./catalog";
-import "./chile";
-import { CHILE_CHAPTERS, CHILE_SOURCE } from "./chile-data";
+import { LINES_OF } from "./chile";
+import { CHILE_CHAPTERS, CHILE_RECOMMENDED, CHILE_SOURCE } from "./chile-data";
+import { retina } from "../motion/living-photo";
+import { CHILE_COVERS } from "./chile-covers";
 import { CHILE_PHOTOS } from "./chile-photos";
+import { CHILE_PACKS } from "./photos";
+import { photoSpec } from "./photos";
 import { visualFor } from "./visuals";
 
 const santiago = catalogFor("santiago");
@@ -19,7 +23,7 @@ describe("Santiago, the Chile menu", () => {
 
   it("prints each size and blend as its own line, priced as in the print", () => {
     const price = (id: string) => santiago.items.find((item) => item.id === id)?.price;
-    expect(price("cl-paz-200")).toBe(15990);
+    expect(price("cl-paz-200")).toBe(14990);
     expect(price("cl-paz-decaf-454")).toBe(39000);
     expect(price("cl-fil-rock-3")).toBe(17100);
     expect(price("cl-cappuccino")).toBe(4590);
@@ -52,13 +56,41 @@ describe("Santiago, the Chile menu", () => {
     expect(changed.length).toBeGreaterThan(santiago.items.length * 0.95);
   });
 
-  it("gives every product a photograph that exists, and bags their 3D pack", () => {
+  it("gives every product its studio photograph, published at both sizes, and keeps the print cut where it has one", () => {
     for (const item of santiago.items) {
+      expect(item.studio, item.id).toBeDefined();
       const visual = visualFor(item);
-      if (item.category === "cl-coffee") expect(visual.kind).toBe("product");
-      else if (visual.kind === "photo") expect(existsSync(publicFile(visual.photo.src)), item.id).toBe(true);
+      expect(visual.kind, item.id).toBe("photo");
+      if (visual.kind === "photo") {
+        expect(visual.photo.studio, item.id).toBe(true);
+        expect(existsSync(publicFile(visual.photo.src)), item.id).toBe(true);
+        expect(existsSync(publicFile(retina(visual.photo.src))), item.id).toBe(true);
+      }
+      if (item.photo) expect(existsSync(publicFile(photoSpec(item.photo).src)), item.id).toBe(true);
     }
-    for (const chapter of CHILE_CHAPTERS.filter((c) => c.id !== "cl-coffee")) expect(CHILE_PHOTOS[chapter.photo], chapter.photo).toBeDefined();
+    for (const chapter of CHILE_CHAPTERS.filter((c) => c.id !== "cl-coffee")) expect(existsSync(publicFile(photoSpec(chapter.photo).src)), chapter.photo).toBe(true);
+  });
+
+  it("floats a cut-out cover on every chapter card, and the real Chile bags", () => {
+    for (const chapter of CHILE_CHAPTERS) {
+      if (chapter.id === "cl-coffee" || chapter.id === "cl-formats") continue;
+      const cover = CHILE_COVERS[chapter.id];
+      expect(cover?.cutout, chapter.id).toBe(true);
+      expect(existsSync(publicFile(cover!.src)), chapter.id).toBe(true);
+      expect(existsSync(publicFile(retina(cover!.src))), chapter.id).toBe(true);
+    }
+    for (const src of Object.values(CHILE_PACKS)) expect(existsSync(publicFile(src)), src).toBe(true);
+    expect(santiago.categories[1]?.id).toBe("cl-formats");
+    expect(santiago.items.filter((item) => item.category === "cl-formats").every((item) => item.price === 0)).toBe(true);
+  });
+
+  it("recommends real products, each with its studio photograph", () => {
+    expect(CHILE_RECOMMENDED.length).toBeGreaterThanOrEqual(8);
+    for (const id of CHILE_RECOMMENDED) {
+      expect(CHILE_SOURCE.some((entry) => entry.id === id), id).toBe(true);
+      const first = santiago.items.find((item) => item.id === LINES_OF[id]?.[0]);
+      expect(first?.studio, id).toBeDefined();
+    }
   });
 
   it("carries the print's motion onto the cut photographs", () => {

@@ -35,6 +35,8 @@ const PHOTO_BY_CATEGORY: Record<string, string> = {
 const PACKS = new Set(["coffee", "cl-coffee"]);
 
 export function visualFor(item: MenuItem): Visual {
+  // Its own studio photograph comes first: the real bag, the real plate.
+  if (item.studio) return { kind: "photo", photo: photoSpec(item.studio) };
   if (PACKS.has(item.category)) {
     const profile = item.profile ?? "PAZ";
     return { kind: "product", src: PRODUCT_IMAGES[profile] ?? PRODUCT_IMAGES.PAZ!, profile };

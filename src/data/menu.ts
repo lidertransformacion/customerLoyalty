@@ -19,6 +19,8 @@ export type MenuItem = {
   profile?: string;
   /** Its own photograph, when the menu has one (key of a living photo). */
   photo?: string;
+  /** Its studio photograph on white, when the menu has one (key of a living photo). */
+  studio?: string;
   vegan: boolean;
   nuts: boolean;
   extra: boolean;

@@ -1,5 +1,6 @@
 import type { PhotoSpec } from "../motion/living-photo";
 import { CHILE_PHOTOS } from "./chile-photos";
+import { CHILE_STUDIO } from "./chile-studio";
 
 /** Category photography, served from /public/menu. The native app bundles the same files. */
 export function photoUrl(name: string): string {
@@ -16,6 +17,14 @@ export const PRODUCT_IMAGES: Record<string, string> = {
   PUNK: "/products/punk-1.png",
   IMPACTO: "/products/impacto-1.png",
   COMPETITION: "/products/rock-2.png",
+};
+
+/** The Chile bags: the real store photographs cut off their white, so they float like the renders do. */
+export const CHILE_PACKS: Record<string, string> = {
+  PAZ: "/menu/cl/cl-bag-paz.webp",
+  LIBRE: "/menu/cl/cl-bag-libre.webp",
+  ROCK: "/menu/cl/cl-bag-rock.webp",
+  PUNK: "/menu/cl/cl-bag-punk.webp",
 };
 
 export const BRAND = {
@@ -42,6 +51,12 @@ export const PHOTOS: Record<string, PhotoSpec> = {
     pours: [{ from: { x: 61, y: 33 }, to: { x: 66, y: 68 }, width: 1.3, color: "water", spiral: 4.5, body: false }],
     steam: [{ x: 58, y: 63 }, { x: 78, y: 64 }, { x: 69, y: 66 }],
   },
+  /** The other formats on the Chile print's intro page (October 2026 edition), cut out with the print's own masks. */
+  "cl-drip": { src: "/menu/cl/cl-drip.webp", mood: "still", cutout: true, native: 1064 },
+  "cl-capsulas-paz": { src: "/menu/cl/cl-capsulas-paz.webp", mood: "still", cutout: true, native: 565 },
+  "cl-capsulas-libre": { src: "/menu/cl/cl-capsulas-libre.webp", mood: "still", cutout: true, native: 556 },
+  /** Serrano ham and peach toast: its own photograph on the Chile print since the October 2026 edition. */
+  "cl-tostada-serrano": { src: "/menu/cl/cl-tostada-serrano.webp", mood: "still", cutout: true, native: 566, glints: [{ x: 64, y: 42 }] },
   "filter.jpg": {
     src: photoUrl("filter.jpg"),
     mood: "pour",
@@ -101,5 +116,5 @@ export const CLIPS: Record<string, PhotoSpec> = {
 };
 
 export function photoSpec(name: string): PhotoSpec {
-  return PHOTOS[name] ?? CHILE_PHOTOS[name] ?? { src: photoUrl(name), mood: "still" };
+  return PHOTOS[name] ?? CHILE_PHOTOS[name] ?? CHILE_STUDIO[name] ?? { src: photoUrl(name), mood: "still" };
 }

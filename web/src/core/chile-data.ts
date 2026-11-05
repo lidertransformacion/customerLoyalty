@@ -1,5 +1,5 @@
 /**
- * The Chile menu, from the printed "Menú nuevo Chile Libertario 2026".
+ * The Chile menu, from the printed "Menú nuevo Chile Libertario 2026" (prices from the compaginado edition of 29 October 2026).
  * Prices are Chilean pesos as printed. `focus` is where the product's photo
  * sits in the print (PDF spread, points), used to cut its own photograph.
  * `en` is the English name and description.
@@ -27,6 +27,7 @@ export type ChileChapter = { id: string; name: string; intro: string; en: [strin
 /** Chapter order follows the printed index. `photo` is the key of its cut photograph. */
 export const CHILE_CHAPTERS: ChileChapter[] = [
   { id: "cl-coffee", name: "Café tostado", intro: "Para llevar y regalar.", en: ["Roasted coffee", "To take home and to give."], photo: "cl-beans" },
+  { id: "cl-formats", name: "Drip Coffee y Cápsulas", intro: "Tu café, en otros formatos.", en: ["Drip Coffee and Capsules", "Your coffee, in other formats."], photo: "cl-drip" },
   { id: "cl-filter", name: "Filtrados", intro: "Chemex, Origami o V60.", en: ["Filter coffee", "Chemex, Origami or V60."], photo: "cl-filter" },
   { id: "cl-espresso", name: "A base de espresso", intro: "Signature Blends o Single Origin.", en: ["Espresso drinks", "Signature Blends or Single Origin."], photo: "cl-espresso" },
   { id: "cl-cold", name: "Espresso frío y cold brew", intro: "Con hielo, tónica o extracción en frío.", en: ["Iced espresso and cold brew", "Over ice, with tonic, or cold-extracted."], photo: "cl-coldbrew" },
@@ -41,6 +42,7 @@ export const CHILE_CHAPTERS: ChileChapter[] = [
   { id: "cl-sandwiches", name: "Sándwiches", intro: "Acompañados de chips.", en: ["Sandwiches", "Served with chips."], photo: "cl-sandwiches" },
   { id: "cl-toast", name: "Tostadas", intro: "Sobre pan de masa madre.", en: ["Toasts", "On sourdough."], photo: "cl-toasts" },
   { id: "cl-bowls", name: "Bowls", intro: "Mix de lechugas y lo mejor de la temporada.", en: ["Bowls", "Mixed greens and the best of the season."], photo: "cl-bowls" },
+  { id: "cl-extras", name: "Adiciones", intro: "Se suman en caja a tu plato o a tu bebida.", en: ["Add-ons", "Added at the counter to your plate or your drink."], photo: "cl-p-adicion-palta" },
 ];
 
 const SB = "Signature Blends";
@@ -48,8 +50,11 @@ const SO = "Single Origin";
 const v60 = { spread: 5, x: 440, y: 470, r: 230 };
 
 export const CHILE_SOURCE: ChileSource[] = [
+  // Otras formas de disfrutar Libertario: the print shows them on its intro page, without a price
+  { id: "drip-coffee", category: "cl-formats", name: "Drip Coffee", description: "Café muy especial PAZ, LIBRE o ROCK en filtro individual, listo para preparar directamente en tu taza. Solo agrega agua caliente.", en: ["Drip Coffee", "Very special PAZ, LIBRE or ROCK in a single-serve filter, ready to brew right in your cup. Just add hot water."], prices: [{ value: 0 }], photo: "cl-drip" },
+  { id: "capsulas", category: "cl-formats", name: "Cápsulas", description: "Tu café favorito, listo en segundos. Compatibles con tu máquina de siempre. PAZ o LIBRE.", en: ["Capsules", "Your favourite coffee, ready in seconds. Compatible with your usual machine. PAZ or LIBRE."], prices: [{ value: 0 }], photo: "cl-capsulas-paz" },
   // Café tostado
-  { id: "paz", category: "cl-coffee", profile: "PAZ", name: "PAZ", description: "Balanceado & Acaramelado. PAZ es ese lugar conocido al que siempre quieres volver. Dulce, suave y consistente. Un café que simplemente se siente bien, todos los días.", en: ["PAZ", "Balanced & Caramel. PAZ is the familiar place you always want to come back to. Sweet, smooth and consistent. A coffee that simply feels good, every day."], prices: [{ label: "200 g", value: 15990 }, { label: "340 g", value: 26890 }, { label: "454 g", value: 33890 }], vegan: true },
+  { id: "paz", category: "cl-coffee", profile: "PAZ", name: "PAZ", description: "Balanceado & Acaramelado. PAZ es ese lugar conocido al que siempre quieres volver. Dulce, suave y consistente. Un café que simplemente se siente bien, todos los días.", en: ["PAZ", "Balanced & Caramel. PAZ is the familiar place you always want to come back to. Sweet, smooth and consistent. A coffee that simply feels good, every day."], prices: [{ label: "200 g", value: 14990 }, { label: "340 g", value: 26890 }, { label: "454 g", value: 33890 }], vegan: true },
   { id: "paz-decaf", category: "cl-coffee", profile: "PAZ", name: "PAZ descafeinado", description: "Balanceado & Acaramelado, sin cafeína.", en: ["PAZ decaf", "Balanced & Caramel, without caffeine."], prices: [{ label: "200 g", value: 18590 }, { label: "340 g", value: 32000 }, { label: "454 g", value: 39000 }], vegan: true },
   { id: "libre", category: "cl-coffee", profile: "LIBRE", name: "LIBRE", description: "Intenso & Afrutado. LIBRE comienza donde termina lo conocido. Más intensidad, más carácter y una invitación a explorar un poco más, taza a taza.", en: ["LIBRE", "Intense & Fruity. LIBRE starts where the familiar ends. More intensity, more character and an invitation to explore a little further, cup by cup."], prices: [{ label: "200 g", value: 17000 }, { label: "340 g", value: 28000 }, { label: "454 g", value: 37000 }], vegan: true },
   { id: "rock", category: "cl-coffee", profile: "ROCK", name: "ROCK", description: "Variedades Exóticas, Single Origin. Todo comienza en la genética. ROCK celebra el papel de la genética en los aromas, sabores y texturas de cada taza.", en: ["ROCK", "Exotic Varieties, Single Origin. It all starts with genetics. ROCK celebrates the role of genetics in the aromas, flavours and textures of every cup."], prices: [{ label: "200 g", value: 20000 }, { label: "340 g", value: 32000 }, { label: "454 g", value: 39990 }], vegan: true },
@@ -91,7 +96,7 @@ export const CHILE_SOURCE: ChileSource[] = [
   // Bebidas de autor
   { id: "cold-brew-invierno", category: "cl-signature", photo: "cl-invierno", name: "Cold Brew Invierno", description: "Notas de panela, miel, canela y vainilla, con espuma de leche.", en: ["Winter Cold Brew", "Notes of panela, honey, cinnamon and vanilla, with milk foam."], prices: [{ value: 5590 }], focus: { spread: 9, x: 950, y: 610, r: 90 } },
   { id: "moca-menta", category: "cl-signature", photo: "cl-moca-menta", name: "Moca Menta", description: "Espresso PAZ con leche, chocolate y un refrescante toque de menta.", en: ["Mint Mocha", "PAZ espresso with milk, chocolate and a fresh touch of mint."], prices: [{ value: 5590 }], focus: { spread: 9, x: 845, y: 610, r: 90 } },
-  { id: "hibisco", category: "cl-signature", photo: "cl-hibisco", name: "Hibisco", description: "Infusión de hibisco con naranja, limón y un refrescante toque de ginger beer.", en: ["Hibiscus", "Hibiscus infusion with orange, lemon and a fresh touch of ginger beer."], prices: [{ value: 3990 }], vegan: true, focus: { spread: 9, x: 160, y: 540, r: 220 } },
+  { id: "hibisco", category: "cl-signature", photo: "cl-hibisco", name: "Hibiscus", description: "Infusión de hibiscus con naranja, limón y un refrescante toque de ginger beer.", en: ["Hibiscus", "Hibiscus infusion with orange, lemon and a fresh touch of ginger beer."], prices: [{ value: 3990 }], vegan: true, focus: { spread: 9, x: 160, y: 540, r: 220 } },
   { id: "te-de-flores", category: "cl-signature", photo: "cl-te-flores", name: "Té de flores", description: "Infusión de rooibos con frutos rojos y notas de pomelo.", en: ["Flower tea", "Rooibos infusion with red berries and notes of grapefruit."], prices: [{ value: 5990 }], vegan: true, focus: { spread: 9, x: 555, y: 550, r: 220 } },
 
   // Otras bebidas
@@ -122,7 +127,7 @@ export const CHILE_SOURCE: ChileSource[] = [
   { id: "cacerola-salmon", category: "cl-eggs", name: "Cacerola de salmón", description: "Huevos al gusto con tomates al horno, salmón, queso crema y espinaca, acompañados de pan de masa madre o croissant.", en: ["Salmon skillet", "Eggs your way with baked tomatoes, salmon, cream cheese and spinach, with sourdough or a croissant."], prices: [{ value: 8990 }], pairing: "AEROCANO", focus: { spread: 11, x: 1080, y: 610, r: 160 } },
 
   // Parfait y granola
-  { id: "parfait", category: "cl-parfait", name: "Parfait", description: "Yogurt griego con fruta fresca y granola.", en: ["Parfait", "Greek yogurt with fresh fruit and granola."], prices: [{ value: 6990 }], pairing: "AMERICANO PAZ", nuts: true, focus: { spread: 12, x: 420, y: 455, r: 85 } },
+  { id: "parfait", category: "cl-parfait", name: "Parfait", description: "Yogur griego con fruta fresca y granola.", en: ["Parfait", "Greek yogurt with fresh fruit and granola."], prices: [{ value: 6990 }], pairing: "AMERICANO PAZ", nuts: true, focus: { spread: 12, x: 420, y: 455, r: 85 } },
   { id: "granola", category: "cl-parfait", name: "Granola", description: "Con yogurt, chocolate y fruta fresca.", en: ["Granola", "With yogurt, chocolate and fresh fruit."], prices: [{ value: 8990 }], pairing: "MOCACCINO PAZ", nuts: true, focus: { spread: 12, x: 225, y: 530, r: 130 } },
   { id: "bowl-frutas", category: "cl-parfait", name: "Bowl de frutas", description: "Smoothie de frutas de temporada, con granola, frutas frescas, miel y coco rallado.", en: ["Fruit bowl", "Seasonal fruit smoothie with granola, fresh fruit, honey and grated coconut."], prices: [{ value: 8990 }], pairing: "FILTRADO LIBRE", nuts: true, focus: { spread: 12, x: 500, y: 625, r: 135 } },
   { id: "waffle", category: "cl-parfait", name: "Waffle de frutas", description: "Waffle de avena con fruta fresca, almendras, yogur griego y ralladura de limón.", en: ["Fruit waffle", "Oat waffle with fresh fruit, almonds, Greek yogurt and lemon zest."], prices: [{ value: 7990 }], pairing: "MOCACCINO PAZ", nuts: true, focus: { spread: 12, x: 1000, y: 480, r: 260 } },
@@ -131,7 +136,7 @@ export const CHILE_SOURCE: ChileSource[] = [
   { id: "pie-limon", category: "cl-cakes", name: "Pie de limón", description: "Pie de limón con merengue.", en: ["Lemon pie", "Lemon meringue pie."], prices: [{ value: 5490 }], pairing: "FILTRADO ROCK", focus: { spread: 13, x: 1285, y: 565, r: 110 } },
   { id: "torta-vasca", category: "cl-cakes", name: "Torta vasca", description: "Cheesecake vasco.", en: ["Basque cheesecake", "Basque burnt cheesecake."], prices: [{ value: 5990 }], pairing: "ESPRESSO PUNK", focus: { spread: 13, x: 615, y: 690, r: 110 } },
   { id: "tartaleta-manzana", category: "cl-cakes", name: "Tartaleta de manzana", description: "Tartaleta de manzana.", en: ["Apple tart", "Apple tart."], prices: [{ value: 5490 }], pairing: "FILTRADO PAZ", focus: { spread: 13, x: 1125, y: 450, r: 110 } },
-  { id: "red-velvet", category: "cl-cakes", name: "Red Velvet", description: "Torta red velvet.", en: ["Red Velvet", "Red velvet cake."], prices: [{ value: 4990 }], pairing: "AMERICANO PUNK", focus: { spread: 13, x: 565, y: 470, r: 110 } },
+  { id: "red-velvet", category: "cl-cakes", name: "Red Velvet", description: "Torta Red Velvet.", en: ["Red Velvet", "Red velvet cake."], prices: [{ value: 4990 }], pairing: "AMERICANO PUNK", focus: { spread: 13, x: 565, y: 470, r: 110 } },
   { id: "carrot-cake", category: "cl-cakes", name: "Carrot Cake", description: "Bizcocho húmedo y especiado de zanahoria, cubierto con frosting de queso crema.", en: ["Carrot Cake", "Moist spiced carrot cake topped with cream cheese frosting."], prices: [{ value: 4990 }], pairing: "AEROCANO", nuts: true, focus: { spread: 13, x: 505, y: 285, r: 110 } },
   { id: "cheesecake-oreo", category: "cl-cakes", name: "Cheesecake de Oreo", description: "Cheesecake de Oreo.", en: ["Oreo cheesecake", "Oreo cheesecake."], prices: [{ value: 5490 }], pairing: "MOCACCINO", focus: { spread: 13, x: 440, y: 95, r: 110 } },
   { id: "tiramisu", category: "cl-cakes", name: "Tiramisú", description: "Tiramisú de la casa.", en: ["Tiramisu", "House tiramisu."], prices: [{ value: 4990 }], pairing: "ESPRESSO PAZ", focus: { spread: 13, x: 1135, y: 215, r: 110 } },
@@ -158,7 +163,7 @@ export const CHILE_SOURCE: ChileSource[] = [
   { id: "sandwich-vegetariano", category: "cl-sandwiches", name: "Sándwich vegetariano", description: "Focaccia con pesto, palta, tomate al horno, rúcula, champiñones salteados y mozzarella. Con chips y dip de queso.", en: ["Vegetarian sandwich", "Focaccia with pesto, avocado, baked tomato, rocket, sautéed mushrooms and mozzarella. With chips and cheese dip."], prices: [{ value: 8990 }], pairing: "COLD BREW", focus: { spread: 15, x: 905, y: 140, r: 120 } },
 
   // Tostadas
-  { id: "tostada-serrano", category: "cl-toast", name: "Jamón serrano y durazno", description: "Tostada con burrata, jamón serrano, duraznos asados y balsámico.", en: ["Serrano ham and peach", "Toast with burrata, serrano ham, roasted peaches and balsamic."], prices: [{ value: 8290 }], focus: { spread: 16, x: 580, y: 680, r: 135 } },
+  { id: "tostada-serrano", category: "cl-toast", photo: "cl-tostada-serrano", name: "Jamón serrano y durazno", description: "Tostada con burrata, jamón serrano, duraznos asados y balsámico.", en: ["Serrano ham and peach", "Toast with burrata, serrano ham, roasted peaches and balsamic."], prices: [{ value: 8290 }], focus: { spread: 16, x: 580, y: 680, r: 135 } },
   { id: "tostada-vegetariana", category: "cl-toast", name: "Vegetariana", description: "Tostada con betarraga y champiñones sobre una base suave de pimentón y zanahoria, pesto de albahaca, almendras laminadas y brotes.", en: ["Vegetarian", "Toast with beetroot and mushrooms on a soft pepper and carrot base, basil pesto, sliced almonds and sprouts."], prices: [{ value: 7590 }], pairing: "COLD BREW", nuts: true, focus: { spread: 16, x: 125, y: 445, r: 125 } },
   { id: "tostada-palta-salmon", category: "cl-toast", name: "Palta con salmón ahumado", description: "Tostada con pesto, palta y salmón ahumado.", en: ["Avocado and smoked salmon", "Toast with pesto, avocado and smoked salmon."], prices: [{ value: 8890 }], focus: { spread: 16, x: 865, y: 80, r: 120 } },
   { id: "huevos-benedictinos", category: "cl-toast", name: "Huevos benedictinos con salmón", description: "Tostada con salmón ahumado, huevos pochados, tocino, palta, salsa holandesa y brotes.", en: ["Eggs Benedict with salmon", "Toast with smoked salmon, poached eggs, bacon, avocado, hollandaise and sprouts."], prices: [{ value: 10990 }], focus: { spread: 16, x: 340, y: 575, r: 130 } },
@@ -173,9 +178,41 @@ export const CHILE_SOURCE: ChileSource[] = [
   { id: "bowl-mediterraneo", category: "cl-bowls", name: "Mediterráneo", description: "Mix de lechugas con huevos de codorniz, tomates cherry, pepino, aceitunas, queso feta, cebolla morada, tocino, crutones de pan y aderezo de limón y orégano.", en: ["Mediterranean", "Mixed greens with quail eggs, cherry tomatoes, cucumber, olives, feta, red onion, bacon, croutons and lemon-oregano dressing."], prices: [{ value: 9490 }], focus: { spread: 17, x: 1155, y: 125, r: 125 } },
   { id: "bowl-pastrami", category: "cl-bowls", name: "Pastrami", description: "Mix de lechugas y rúcula con pastrami, palta, mango, tomates cherry, almendras, crutones de pan y pesto.", en: ["Pastrami", "Mixed greens and rocket with pastrami, avocado, mango, cherry tomatoes, almonds, croutons and pesto."], prices: [{ value: 11390 }], pairing: "AMERICANO PAZ", nuts: true, focus: { spread: 17, x: 1160, y: 400, r: 125 } },
   { id: "bowl-caprese", category: "cl-bowls", name: "Caprese", description: "Mix de lechugas y rúcula con tomate, burrata, albahaca y salsa de aceto balsámico.", en: ["Caprese", "Mixed greens and rocket with tomato, burrata, basil and balsamic dressing."], prices: [{ value: 8890 }], pairing: "AMERICANO PUNK", focus: { spread: 17, x: 1160, y: 655, r: 125 } },
+  // Adiciones — printed beside the bowls, the eggs, the waffle and the espresso drinks
+  { id: "adicion-huevo", category: "cl-extras", name: "Huevo (1 ud)", description: "Un huevo más, como lo pidas.", en: ["Egg (1)", "One more egg, your way."], prices: [{ value: 1990 }] },
+  { id: "adicion-porcion-de-pollo", category: "cl-extras", name: "Porción de pollo (100 g)", description: "Pollo a la plancha.", en: ["Chicken portion (100 g)", "Grilled chicken."], prices: [{ value: 2790 }] },
+  { id: "adicion-jamon-serrano", category: "cl-extras", name: "Jamón serrano (30 g)", description: "Jamón serrano en láminas.", en: ["Serrano ham (30 g)", "Sliced serrano ham."], prices: [{ value: 2790 }] },
+  { id: "adicion-palta", category: "cl-extras", name: "Palta (150 g)", description: "Palta fresca.", en: ["Avocado (150 g)", "Fresh avocado."], prices: [{ value: 2490 }], vegan: true },
+  { id: "adicion-salmon", category: "cl-extras", name: "Salmón (50 g)", description: "Salmón ahumado.", en: ["Salmon (50 g)", "Smoked salmon."], prices: [{ value: 2990 }] },
+  { id: "adicion-chips-y-dip", category: "cl-extras", name: "Chips y dip", description: "Chips de la casa con dip.", en: ["Chips and dip", "House chips with dip."], prices: [{ value: 2490 }], vegan: true },
+  { id: "adicion-pastrami", category: "cl-extras", name: "Pastrami", description: "Pastrami en láminas.", en: ["Pastrami", "Sliced pastrami."], prices: [{ value: 2990 }] },
+  { id: "adicion-jamon", category: "cl-extras", name: "Jamón (30 g)", description: "Jamón en láminas.", en: ["Ham (30 g)", "Sliced ham."], prices: [{ value: 1990 }] },
+  { id: "adicion-queso-mozzarella", category: "cl-extras", name: "Queso mozzarella (30 g)", description: "Mozzarella fresca.", en: ["Mozzarella (30 g)", "Fresh mozzarella."], prices: [{ value: 1490 }] },
+  { id: "adicion-porcion-de-pan-de-masa-madre", category: "cl-extras", name: "Porción de pan de masa madre", description: "Pan de masa madre de la casa.", en: ["Sourdough bread", "House sourdough."], prices: [{ value: 1490 }], vegan: true },
+  { id: "adicion-croissant", category: "cl-extras", name: "Croissant", description: "Croissant de mantequilla.", en: ["Croissant", "Butter croissant."], prices: [{ value: 2990 }] },
+  { id: "adicion-fruta-de-temporada", category: "cl-extras", name: "Fruta de temporada (150 g)", description: "Fruta fresca de temporada.", en: ["Seasonal fruit (150 g)", "Fresh seasonal fruit."], prices: [{ value: 2790 }], vegan: true },
+  { id: "adicion-zumo-de-limon", category: "cl-extras", name: "Zumo de limón", description: "Limón recién exprimido.", en: ["Lemon juice", "Freshly squeezed lemon."], prices: [{ value: 990 }], vegan: true },
+  { id: "adicion-helado", category: "cl-extras", name: "Helado (60 g)", description: "Una bola de helado.", en: ["Ice cream (60 g)", "A scoop of ice cream."], prices: [{ value: 1990 }] },
+  { id: "adicion-leche-de-avena", category: "cl-extras", name: "Leche de avena", description: "Para tu bebida a base de espresso o matcha.", en: ["Oat milk", "For your espresso or matcha drink."], prices: [{ value: 1000 }], vegan: true },
 ];
 
 /** The key of an item's own photograph, cut from the print around its focus. */
 export function focusKey(focus: { spread: number; x: number; y: number; r: number }): string {
   return `cl-${focus.spread}-${focus.x}-${focus.y}-${focus.r}`;
 }
+
+/** The products that carry the index and the search as "Recomendados": the most striking photographs, one or two per chapter, by id. */
+export const CHILE_RECOMMENDED: string[] = [
+  "cappuccino",
+  "matcha-berry",
+  "te-de-flores",
+  "fil-paz",
+  "iced-latte",
+  "tostada-serrano",
+  "cacerola-palta",
+  "soda-frutos-rojos",
+  "sandwich-pollo",
+  "pie-limon",
+  "croissant",
+  "parfait",
+];

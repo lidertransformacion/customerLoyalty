@@ -1,7 +1,10 @@
 import type { Category, MenuItem } from "@/src/data/menu";
 
+import type { Catalog } from "./catalog";
+
 import { registerCatalog, registerTranslations } from "./catalog";
 import { CHILE_CHAPTERS, CHILE_SOURCE, focusKey, type ChileSource } from "./chile-data";
+import { STUDIO_OF } from "./chile-studio";
 
 /**
  * Santiago, from the printed Chile menu. Same book as Colombia; its own
@@ -57,6 +60,7 @@ for (const source of CHILE_SOURCE) {
       description,
       ...(source.profile ? { profile: source.profile } : {}),
       ...(photo ? { photo } : {}),
+      ...(STUDIO_OF[source.id] ? { studio: STUDIO_OF[source.id] } : {}),
       vegan: source.vegan ?? false,
       nuts: source.nuts ?? false,
       extra: false,
@@ -73,3 +77,17 @@ registerTranslations(
   Object.fromEntries(CHILE_CHAPTERS.map((chapter) => [chapter.id, { name: chapter.en[0], intro: chapter.en[1] }])),
   itemsEn,
 );
+
+/** A printed product with every size or blend it is sold in, by its id in chile-data. */
+export type Group = { id: string; chapterId: string; lines: MenuItem[] };
+
+/** The products of one chapter, in the print's order, each with its lines from the catalog given (translated or not). */
+export function groupsOf(catalog: Catalog, chapterId: string): Group[] {
+  return CHILE_SOURCE.filter((source) => source.category === chapterId)
+    .map((source) => ({
+      id: source.id,
+      chapterId,
+      lines: (LINES_OF[source.id] ?? []).map((id) => catalog.items.find((item) => item.id === id)).filter((item): item is MenuItem => !!item),
+    }))
+    .filter((group) => group.lines.length > 0);
+}

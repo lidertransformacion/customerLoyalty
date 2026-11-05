@@ -4,7 +4,6 @@ import { useNavigate, useParams } from "react-router";
 import { pointsForPrice } from "@/src/data/program";
 
 import { menuOnly } from "../core/mode";
-import { photoSpec } from "../core/photos";
 import { visualFor } from "../core/visuals";
 import { useCopy, useLocale } from "../i18n";
 import { LivingPhoto } from "../motion/living-photo";
@@ -43,7 +42,7 @@ export function ItemScreen() {
   const points = pointsForPrice(item.price);
   // A plate without ground, or a photograph the print has few pixels of, sits whole on the paper
   // at a size it can hold sharp, instead of being stretched across the screen.
-  const onPaper = visual.kind === "photo" && (!!visual.photo.cutout || (visual.photo.native ?? 9999) < 1100);
+  const onPaper = visual.kind === "photo" && (!!visual.photo.cutout || !!visual.photo.studio || (visual.photo.native ?? 9999) < 1100);
   const dark = visual.kind === "photo" && !onPaper;
   const sharpWidth = visual.kind === "photo" ? Math.round((visual.photo.native ?? 1200) / 1.6) : 0;
 
@@ -51,11 +50,7 @@ export function ItemScreen() {
     <Screen direction="up" testId="item" className="full">
       <div className="scroll" style={{ paddingBottom: 140 }}>
         <div style={{ position: "relative", height: visual.kind === "photo" ? "58dvh" : "50dvh", minHeight: 360, maxHeight: 620 }}>
-          {item.category === "cl-filter" ? (
-            <div style={{ position: "absolute", inset: 0, background: "#fff", display: "grid", placeItems: "center", padding: "calc(var(--sat) + 60px) 20px 50px" }}>
-              <LivingPhoto photo={photoSpec("real-v60")} radius={0} style={{ width: "min(100%, 420px)", height: "100%" }} testId="living-pour" />
-            </div>
-          ) : visual.kind === "photo" && onPaper ? (
+          {visual.kind === "photo" && onPaper ? (
             <div style={{ position: "absolute", inset: 0, background: "var(--paper)", display: "grid", placeItems: "center", padding: "calc(var(--sat) + 70px) 20px 56px" }}>
               <LivingPhoto
                 photo={{ ...visual.photo, cutout: true }}
@@ -97,7 +92,7 @@ export function ItemScreen() {
                 </div>
               ) : null}
               <div className="row" style={{ justifyContent: "space-between", marginTop: 18 }}>
-                <div className="serif" style={{ fontSize: 30 }}>{money(item.price)}</div>
+                <div className="serif" style={{ fontSize: 30 }} data-testid="item-price">{item.price > 0 ? money(item.price) : copy.menu.askAtBar}</div>
                 {!menuOnly ? <div style={{ textAlign: "right", fontSize: 13, color: "var(--roast)", maxWidth: 170, lineHeight: 1.3 }}>{copy.menu.earnsAtCounter(points)}</div> : null}
               </div>
             </Glass>

@@ -36,6 +36,8 @@ export type PhotoSpec = {
   flow?: "silk" | "liquid";
   /** Plates without a ground: drawn whole on the page, no frame. */
   cutout?: boolean;
+  /** A product shot on plain white: drawn whole on white paper, like a cut-out, never cropped or darkened. */
+  studio?: boolean;
   /** Real pixels across the photograph; it is never shown much larger than this. */
   native?: number;
   /** Edges where the photograph was cut straight: they fade into the page. */
