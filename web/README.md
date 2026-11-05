@@ -130,47 +130,15 @@ npx wrangler pages deploy dist --project-name libertario-carta --branch main
 
 `public/_redirects` manda toda ruta al `index.html` (SPA) y `functions/api/where.ts` se despliega como Pages Function. Wrangler está instalado como dependencia de desarrollo y usa la sesión de `wrangler login` del equipo.
 
-## Despliegue del menú de Chile (AWS, automático)
+## Despliegue del menú de Chile (AWS EC2, automático)
 
-La rama `menuChile` se publica sola: cada push corre `.github/workflows/deploy-chile-menu.yml`, que instala `web/`, corre las pruebas, construye en modo `menu` con `VITE_MARKET=CL` (el sitio abre la carta de Chile aunque el teléfono sea de otro país; `?pais=` y lo elegido antes siguen mandando) y sube `dist/` a un bucket de S3 servido por CloudFront. Hasta que existan el secreto y las variables de abajo, el workflow construye y prueba pero no publica (lo avisa en el resumen de la corrida).
+La rama `menuChile` se publica sola: cada push corre `.github/workflows/deploy-chile-menu.yml`, que instala `web/`, corre las pruebas, construye en modo `menu` con `VITE_MARKET=CL` (el sitio abre la carta de Chile aunque el teléfono sea de otro país; `?pais=` y lo elegido antes siguen mandando) y copia `dist/` por rsync sobre SSH al servidor. Si faltan el secreto o las variables de abajo, el workflow construye y prueba pero no publica (lo avisa en el resumen de la corrida).
 
-Lo que se crea una sola vez en la cuenta de AWS (el workflow no crea nada):
+**El servidor** es la instancia EC2 `13.59.229.68` (Ubuntu 26.04, llave de administración `smurillo.pem`, usuario `ubuntu`). Tiene nginx sirviendo `/var/www/carta-chile` con el sitio `/etc/nginx/sites-available/carta-chile`: toda ruta cae al `index.html` (SPA), `assets/` con caché de un año e inmutable, fotos, fuentes, íconos y páginas del impreso con un mes, `index.html`, `sw.js`, `workbox-*.js` y `manifest.webmanifest` con `no-cache` para que cada build llegue de inmediato, y `/api/where` responde 404 (la función de Cloudflare no existe aquí; `fetchIpHint` devuelve `null` y la carta de Chile no la necesita). Publica el usuario `deploy`, sin sudo, dueño de esa carpeta, con una llave ed25519 hecha solo para GitHub Actions (`~deploy/.ssh/authorized_keys`).
 
-1. **Bucket S3** privado (por ejemplo `libertario-carta-chile`, en `us-east-1`), sin hosting estático: lo sirve CloudFront.
-2. **Distribución CloudFront** con ese bucket como origen mediante *Origin Access Control*, `index.html` como objeto raíz, HTTPS (redirigir HTTP), compresión activada, política de caché `CachingOptimized`, y dos *custom error responses* para que las rutas de la SPA carguen: `403 → /index.html` con código 200 y `404 → /index.html` con código 200. Si va a tener dominio propio, certificado en ACM (`us-east-1`) y CNAME.
-3. **Rol IAM para GitHub** (OIDC, sin llaves): proveedor de identidad `token.actions.githubusercontent.com` (audiencia `sts.amazonaws.com`) y un rol con esta confianza:
+**En GitHub** (`Settings → Secrets and variables → Actions`): el secreto `EC2_SSH_KEY` (la llave privada del usuario `deploy`) y las variables `EC2_HOST`, `EC2_USER` (`deploy`), `EC2_PATH` (`/var/www/carta-chile`) y `EC2_KNOWN_HOSTS` (la huella `ssh-keyscan -t ed25519` del servidor, para que el runner no confíe a ciegas). Para rotar la llave: `ssh-keygen -t ed25519 -f carta-chile-deploy`, reemplazar la línea en `authorized_keys` del usuario `deploy` y volver a cargar el secreto.
 
-   ```json
-   {
-     "Version": "2012-10-17",
-     "Statement": [{
-       "Effect": "Allow",
-       "Principal": { "Federated": "arn:aws:iam::<CUENTA>:oidc-provider/token.actions.githubusercontent.com" },
-       "Action": "sts:AssumeRoleWithWebIdentity",
-       "Condition": {
-         "StringEquals": { "token.actions.githubusercontent.com:aud": "sts.amazonaws.com" },
-         "StringLike": { "token.actions.githubusercontent.com:sub": "repo:lidertransformacion/customerLoyalty:ref:refs/heads/menuChile" }
-       }
-     }]
-   }
-   ```
-
-   y esta política (solo el bucket y la distribución del menú):
-
-   ```json
-   {
-     "Version": "2012-10-17",
-     "Statement": [
-       { "Effect": "Allow", "Action": ["s3:ListBucket"], "Resource": "arn:aws:s3:::<BUCKET>" },
-       { "Effect": "Allow", "Action": ["s3:PutObject", "s3:DeleteObject"], "Resource": "arn:aws:s3:::<BUCKET>/*" },
-       { "Effect": "Allow", "Action": ["cloudfront:CreateInvalidation"], "Resource": "arn:aws:cloudfront::<CUENTA>:distribution/<DISTRIBUCION>" }
-     ]
-   }
-   ```
-
-4. En GitHub (`Settings → Secrets and variables → Actions`): el secreto `AWS_DEPLOY_ROLE_ARN` (ARN del rol) y las variables `AWS_REGION`, `CHILE_S3_BUCKET` y `CHILE_CLOUDFRONT_ID`.
-
-Cómo sube: los bundles con hash (`assets/`) van con caché de un año e inmutables y los viejos se borran; fotos, fuentes, íconos y páginas del impreso con un mes (las fotos reemplazadas llevan nombre nuevo y los nombres viejos se quedan para los teléfonos que aún los piden); `index.html`, `sw.js`, `workbox-*.js` y `manifest.webmanifest` con `no-cache` y una invalidación de CloudFront, para que cada build llegue de inmediato. `_redirects` y `functions/api/where.ts` son de Cloudflare y no se suben: en AWS `/api/where` cae al `index.html`, `fetchIpHint` ve que no es JSON y devuelve `null`, y la carta de Chile no lo necesita (un solo mercado, una sola ciudad). Con un servidor EC2 en vez de S3, cambiarían solo los dos pasos de publicación (rsync por SSH a la raíz de nginx, con el mismo `index.html` como fallback de la SPA).
+**Pendiente del lado de AWS**: el *security group* de la instancia debe aceptar el puerto 80 (y 443) desde cualquier origen; GitHub no lo abre. El sitio hoy sale por HTTP; el *service worker* (caché sin red) solo corre con HTTPS, así que al apuntar un dominio (por ejemplo `carta.libertariocoffee.cl`) a la IP, instalar `certbot --nginx` en el servidor y el sitio queda con certificado y la PWA completa.
 
 ## Safari e iOS
 

@@ -1,6 +1,7 @@
 # The Chile menu: every push to `menuChile` builds web/ in menu mode for the Chilean market,
-# runs its tests and publishes dist/ to the S3 bucket behind the CloudFront distribution.
-# Until the AWS secret and variables exist in the repository, the build and tests still run
+# runs its tests and copies dist/ over rsync to the nginx root on the EC2 server. Only that branch
+# publishes: a manual run from any other branch builds and tests and stops there.
+# Until the server secret and variables exist in the repository, the build and tests still run
 # and the publish steps are skipped (see web/README.md, "Despliegue del menú de Chile").
 name: Deploy Chile menu
 
@@ -10,7 +11,6 @@ on:
   workflow_dispatch:
 
 permissions:
-  id-token: write
   contents: read
 
 concurrency:
@@ -21,10 +21,11 @@ jobs:
   build-and-publish:
     runs-on: ubuntu-latest
     env:
-      AWS_ROLE: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
-      AWS_REGION: ${{ vars.AWS_REGION }}
-      BUCKET: ${{ vars.CHILE_S3_BUCKET }}
-      DISTRIBUTION: ${{ vars.CHILE_CLOUDFRONT_ID }}
+      SERVER_KEY: ${{ secrets.EC2_SSH_KEY }}
+      SERVER_HOST: ${{ vars.EC2_HOST }}
+      SERVER_USER: ${{ vars.EC2_USER }}
+      SERVER_PATH: ${{ vars.EC2_PATH }}
+      SERVER_KNOWN_HOSTS: ${{ vars.EC2_KNOWN_HOSTS }}
     defaults:
       run:
         working-directory: web
@@ -58,39 +59,25 @@ jobs:
           EXPO_PUBLIC_ODOO_URL: ""
 
       - name: Explain a skipped publish
-        if: env.AWS_ROLE == '' || env.BUCKET == '' || env.DISTRIBUTION == '' || env.AWS_REGION == ''
+        if: github.ref != 'refs/heads/menuChile' || env.SERVER_KEY == '' || env.SERVER_HOST == '' || env.SERVER_USER == '' || env.SERVER_PATH == ''
         run: |
-          echo "::notice::Built and tested, not published: set the AWS_DEPLOY_ROLE_ARN secret and the AWS_REGION, CHILE_S3_BUCKET and CHILE_CLOUDFRONT_ID variables (web/README.md)."
+          echo "::notice::Built and tested, not published: only menuChile publishes, and it needs the EC2_SSH_KEY secret and the EC2_HOST, EC2_USER, EC2_PATH and EC2_KNOWN_HOSTS variables (web/README.md)."
 
-      - uses: aws-actions/configure-aws-credentials@v4
-        if: env.AWS_ROLE != '' && env.BUCKET != '' && env.DISTRIBUTION != '' && env.AWS_REGION != ''
-        with:
-          role-to-assume: ${{ env.AWS_ROLE }}
-          aws-region: ${{ env.AWS_REGION }}
+      - name: Open the door to the server
+        if: github.ref == 'refs/heads/menuChile' && env.SERVER_KEY != '' && env.SERVER_HOST != '' && env.SERVER_USER != '' && env.SERVER_PATH != ''
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$SERVER_KEY" > ~/.ssh/deploy_key && chmod 600 ~/.ssh/deploy_key
+          if [ -n "$SERVER_KNOWN_HOSTS" ]; then printf '%s\n' "$SERVER_KNOWN_HOSTS" > ~/.ssh/known_hosts; else ssh-keyscan -t ed25519 "$SERVER_HOST" > ~/.ssh/known_hosts; fi
+          chmod 600 ~/.ssh/known_hosts
 
       - name: Upload the site
-        if: env.AWS_ROLE != '' && env.BUCKET != '' && env.DISTRIBUTION != '' && env.AWS_REGION != ''
+        if: github.ref == 'refs/heads/menuChile' && env.SERVER_KEY != '' && env.SERVER_HOST != '' && env.SERVER_USER != '' && env.SERVER_PATH != ''
         run: |
-          # Hashed bundles: forever, and stale ones go.
-          aws s3 sync dist/assets "s3://$BUCKET/assets" --delete \
-            --cache-control "public, max-age=31536000, immutable"
-          # Photographs, fonts, icons, print pages: a month. Replaced photographs carry a new
-          # name, and old names stay in the bucket for phones that still ask for them.
-          aws s3 sync dist "s3://$BUCKET" \
-            --exclude "assets/*" --exclude "index.html" --exclude "sw.js" --exclude "workbox-*.js" \
-            --exclude "manifest.webmanifest" --exclude "_redirects" \
-            --cache-control "public, max-age=2592000"
-          # The shell: always revalidated, so a new build reaches the phones at once.
-          for file in index.html sw.js workbox-*.js; do
-            for path in dist/$file; do
-              aws s3 cp "$path" "s3://$BUCKET/$(basename "$path")" --cache-control "no-cache"
-            done
-          done
-          aws s3 cp dist/manifest.webmanifest "s3://$BUCKET/manifest.webmanifest" \
-            --cache-control "no-cache" --content-type "application/manifest+json"
-
-      - name: Refresh CloudFront
-        if: env.AWS_ROLE != '' && env.BUCKET != '' && env.DISTRIBUTION != '' && env.AWS_REGION != ''
-        run: |
-          aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION" \
-            --paths "/" "/index.html" "/sw.js" "/workbox-*" "/manifest.webmanifest"
+          SSH="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts"
+          # Hashed bundles: the new ones go up and stale ones go.
+          rsync -az --delete -e "$SSH" dist/assets/ "$SERVER_USER@$SERVER_HOST:$SERVER_PATH/assets/"
+          # Everything else, without deleting: replaced photographs carry a new name and the old
+          # names stay for phones that still ask for them. _redirects belongs to Cloudflare Pages.
+          rsync -az -e "$SSH" --exclude assets --exclude _redirects dist/ "$SERVER_USER@$SERVER_HOST:$SERVER_PATH/"
+          echo "Published to http://$SERVER_HOST/"
