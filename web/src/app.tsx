@@ -50,7 +50,8 @@ export function App() {
     return (
       <>
         <LensFilter />
-        <AnimatePresence mode="wait" initial={false}>
+        {/* No `initial={false}` here: it would block the first animation of everything on the first screen, including the loops (floating bags, steam, bubbles). The first screen skips its own entrance in `Screen`. */}
+        <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname.split("/")[1] ?? ""}>
             <Route path="/" element={<MenuScreen />} />
             <Route path="/chile" element={<MenuScreen />} />
@@ -67,7 +68,7 @@ export function App() {
   return (
     <Suspense fallback={null}>
       <LensFilter />
-      <AnimatePresence mode="wait" initial={false}>
+      <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname.split("/")[1] ?? ""}>
           <Route path="/" element={ready && account && location.search === "" ? <Opening /> : <Opening />} />
           <Route path="/welcome" element={<Landing />} />

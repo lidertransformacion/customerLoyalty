@@ -1,14 +1,14 @@
 /* Chile menu: the print's own type and paper. */
 @font-face {
   font-family: "Perfectly Nineties";
-  src: url("/chile/fonts/PerfectlyNineties-Regular.otf") format("opentype");
+  src: url("/fonts/PerfectlyNineties-Regular.otf") format("opentype");
   font-weight: 400;
   font-display: swap;
 }
 
 @font-face {
   font-family: "Perfectly Nineties";
-  src: url("/chile/fonts/PerfectlyNineties-Italic.otf") format("opentype");
+  src: url("/fonts/PerfectlyNineties-Italic.otf") format("opentype");
   font-weight: 400;
   font-style: italic;
   font-display: swap;
