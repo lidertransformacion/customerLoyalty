@@ -80,4 +80,4 @@ jobs:
           # Everything else, without deleting: replaced photographs carry a new name and the old
           # names stay for phones that still ask for them. _redirects belongs to Cloudflare Pages.
           rsync -az -e "$SSH" --exclude assets --exclude _redirects dist/ "$SERVER_USER@$SERVER_HOST:$SERVER_PATH/"
-          echo "Published to http://$SERVER_HOST/"
+          echo "Published to ${{ vars.SITE_URL || format('http://{0}/', env.SERVER_HOST) }}"
