@@ -977,3 +977,32 @@
   height: 100%;
   object-fit: cover;
 }
+
+/* ===== a wide window: the shop (store.css) replaces the book; the cards answer the pointer ===== */
+@media (min-width: 1024px) {
+  .mn-pcard,
+  .mn-ccard {
+    transition: box-shadow 0.25s ease;
+  }
+
+  .mn-pcard:hover,
+  .mn-ccard:hover {
+    box-shadow:
+      0 1px 2px rgba(29, 24, 18, 0.05),
+      0 20px 36px -16px rgba(29, 24, 18, 0.36),
+      0 0 0 1px rgba(29, 46, 84, 0.07);
+  }
+
+  .mn-pcard-photo img,
+  .mn-ccard-art img {
+    transition: transform 0.45s ease;
+  }
+
+  .mn-pcard:hover .mn-pcard-photo img {
+    transform: scale(1.18);
+  }
+
+  .mn-ccard:hover .mn-ccard-art img {
+    transform: translateY(-3px) scale(1.03);
+  }
+}

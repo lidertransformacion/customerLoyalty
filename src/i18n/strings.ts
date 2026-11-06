@@ -4,6 +4,7 @@
  */
 export const copy = {
   brand: "Libertario",
+  brandFull: "Libertario Coffee Roasters",
   roastLine: "Tostión de la casa",
   roastLabel: "Café en tostión",
   productionBlocked: "Esta demo no habla con la tienda de producción.",
@@ -127,6 +128,8 @@ export const copy = {
     previous: "Anterior",
     turn: "Pasar",
     more: "Desliza para ver más",
+    blendLine: "Signature Blends",
+    originLine: "Single Origin",
     missingItem: "Esa pieza no está en la carta.",
     earnsAtCounter: (points: number) =>
       `En el mostrador esta pieza suma ${formatPoints(points)}. Cada $100 son un punto.`,

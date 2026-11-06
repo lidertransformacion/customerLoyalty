@@ -109,6 +109,8 @@ export const en: CopyOverride = {
     previous: "Previous",
     turn: "Turn",
     more: "Scroll for more",
+    blendLine: "Signature Blends",
+    originLine: "Single Origin",
     missingItem: "That item is not on the menu.",
     earnsAtCounter: (value: number) => `At the counter this earns ${points(value)}. Every $100 is one point.`,
     addToTable: "Add to order",

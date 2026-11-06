@@ -13,6 +13,7 @@ import { BrowserRouter } from "react-router";
 import { registerSW } from "virtual:pwa-register";
 
 import { App } from "./app";
+import { menuOnly } from "./core/mode";
 import "./core/cities";
 import "./core/chile";
 import { LocaleProvider } from "./i18n";
@@ -21,6 +22,7 @@ import { CatalogProvider } from "./state/catalog";
 import { PresenceProvider } from "./state/presence";
 
 registerSW({ immediate: true });
+document.documentElement.classList.toggle("menu-only", menuOnly);
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

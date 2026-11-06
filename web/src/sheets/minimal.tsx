@@ -15,8 +15,10 @@ import { visualFor } from "../core/visuals";
 import type { Copy } from "../i18n";
 import { LivingPhoto } from "../motion/living-photo";
 import { Beans } from "../motion/beans";
+import { useWide } from "../ui/use-wide";
 import { Product } from "../motion/product";
 import { ChileSpread } from "./spread";
+import { Store } from "./store";
 
 type Lang = "es" | "en";
 
@@ -76,7 +78,7 @@ function productsOf(catalog: Catalog, chapterId: string): MenuItem[][] {
 }
 
 /** A soft ground behind each chapter's cut-out on its card, taken from what it serves. */
-const TINT: Record<string, string> = {
+export const TINT: Record<string, string> = {
   "cl-coffee": "#efe8dc",
   "cl-formats": "#ece6dc",
   "cl-filter": "#e9eef4",
@@ -95,9 +97,9 @@ const TINT: Record<string, string> = {
   "cl-bowls": "#e8f0e6",
   "cl-extras": "#f1ece3",
 };
-const PACK_PROFILES = ["PAZ", "LIBRE", "ROCK", "PUNK"] as const;
+export const PACK_PROFILES = ["PAZ", "LIBRE", "ROCK", "PUNK"] as const;
 /** The print's cut-outs of the drip trio and the capsule boxes: what the formats chapter floats. */
-const FORMAT_CUTS = ["cl-drip", "cl-capsulas-paz", "cl-capsulas-libre"] as const;
+export const FORMAT_CUTS = ["cl-drip", "cl-capsulas-paz", "cl-capsulas-libre"] as const;
 
 /** The print's own photograph of a product, if it has one. */
 function printPhoto(item: MenuItem) {
@@ -105,7 +107,7 @@ function printPhoto(item: MenuItem) {
 }
 
 /** The chapter's star at the top of its sheet: its cover cut-out, else the first product's print cut, else its photograph. */
-function heroOf(products: MenuItem[][], chapterId: string) {
+export function heroOf(products: MenuItem[][], chapterId: string) {
   const cover = CHILE_COVERS[chapterId];
   if (cover) return cover;
   for (const [first] of products) {
@@ -138,6 +140,9 @@ export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { c
     rememberPage(next);
     setPageState(next);
   }, []);
+  // A wide window gets the shop (store.tsx) instead of the book; the phone keeps the book.
+  const wide = useWide();
+  const goTo = setPage;
   const setFavoritesOpen = useCallback((open: boolean) => {
     writeSession(VIEW_KEY, open ? "favorites" : "");
     setFavoritesOpenState(open);
@@ -159,7 +164,7 @@ export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { c
 
   const pages = useMemo(
     () => [
-      <CoverSheet key="cover" copy={copy} active={page === 0} warm={warm} onStart={() => turn("forward")} />,
+      <CoverSheet key="cover" copy={copy} active={page === 0} auto warm={warm} onStart={() => turn("forward")} />,
       <IndexSheet
         key="index"
         chapters={chapters}
@@ -175,7 +180,7 @@ export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { c
         favorites={favorites}
         onToggleFavorite={toggleFavorite}
         onItem={onItem}
-        onOpen={(i) => setPage(i + 2)}
+        onOpen={(i) => goTo(i + 2)}
       />,
       ...chapters.map((category, i) => (
         <ChapterPage
@@ -199,12 +204,34 @@ export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { c
       </div>,
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [chapters.map((c) => c.id + c.name).join(), catalog, copy, money, lang, page, favoritesOpen, query, searching, favorites, onItem, setPage, setFavoritesOpen, setQuery, toggleFavorite],
+    [chapters.map((c) => c.id + c.name).join(), catalog, copy, money, lang, page, wide, favoritesOpen, query, searching, favorites, onItem, goTo, setFavoritesOpen, setQuery, toggleFavorite],
   );
 
+  if (wide) {
+    return (
+      <Store
+        chapters={chapters}
+        catalog={catalog}
+        copy={copy}
+        money={money}
+        lang={lang}
+        setLang={setLang}
+        favorites={favorites}
+        onToggleFavorite={toggleFavorite}
+        favoritesOpen={favoritesOpen}
+        onFavoritesOpen={setFavoritesOpen}
+        query={query}
+        onQuery={setQuery}
+        onSearching={setSearching}
+      />
+    );
+  }
   const onCover = page === 0;
   const onIndex = page === 1;
   const onEnd = page === total - 1;
+  const canBack = page >= 2;
+  const canForward = page >= 1 && page < total - 1;
+  const count = String(Math.max(1, page - 1)).padStart(2, "0");
   return (
     <div className="mn" data-testid="minimal-menu">
       <div className="mn-stage">
@@ -217,12 +244,12 @@ export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { c
           command={command}
           className="mn-book"
         />
-        {page >= 2 ? (
+        {canBack ? (
           <button className="mn-turn back" onClick={() => turn("back")} aria-label={copy.back} data-testid="turn-back">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 5l-7 7 7 7" /></svg>
           </button>
         ) : null}
-        {page >= 1 && page < total - 1 ? (
+        {canForward ? (
           <button className="mn-turn" onClick={() => turn("forward")} aria-label={copy.menu.turn} data-testid="turn-forward">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5l7 7-7 7" /></svg>
           </button>
@@ -230,7 +257,7 @@ export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { c
       </div>
       <header className="mn-bar glass lens strong">
         <div className="mn-top">
-          <button className="mn-home" onClick={() => setPage(0)} aria-label={copy.book.toCover} data-testid="book-to-cover">
+          <button className="mn-home" onClick={() => goTo(0)} aria-label={copy.book.toCover} data-testid="book-to-cover">
             <img src="/chile/brujula-azul.webp" srcSet="/chile/brujula-azul.webp 1x, /chile/brujula-azul@2x.webp 2x" alt="" width={28} height={28} decoding="async" />
             {onCover || onIndex ? <span className="mn-city">{catalog.city.name === "Santiago" ? "Santiago de Chile" : catalog.city.name}</span> : null}
           </button>
@@ -238,7 +265,7 @@ export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { c
             <span className="mn-spacer" />
           ) : (
             <span className="mn-count" aria-live="polite">
-              {String(Math.max(1, page - 1)).padStart(2, "0")} <span>/ {String(chapters.length).padStart(2, "0")}</span>
+              {count} <span>/ {String(chapters.length).padStart(2, "0")}</span>
             </span>
           )}
           <div className="mn-right">
@@ -247,7 +274,7 @@ export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { c
                 className="mn-bar-search glass pill lens"
                 onClick={() => {
                   setSearching(true);
-                  setPage(1);
+                  goTo(1);
                 }}
                 aria-label={copy.menu.searchLabel}
                 data-testid="bar-search"
@@ -257,7 +284,7 @@ export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { c
             )}
             <LangSwitch lang={lang} setLang={setLang} />
             {onIndex ? null : (
-              <button className="mn-index-button" onClick={() => setPage(1)} data-testid="book-to-index">
+              <button className="mn-index-button" onClick={() => goTo(1)} data-testid="book-to-index">
                 {copy.book.toCategories}
               </button>
             )}
@@ -275,7 +302,7 @@ export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { c
  * The print's cover as the book's first sheet. A thin line fills along the foot
  * for three seconds and the page turns by itself; a tap turns it sooner.
  */
-function CoverSheet({ copy, active, warm, onStart }: { copy: Copy; active: boolean; warm: string[]; onStart: () => void }) {
+function CoverSheet({ copy, active, auto, warm, onStart }: { copy: Copy; active: boolean; auto: boolean; warm: string[]; onStart: () => void }) {
   const start = useRef(onStart);
   start.current = onStart;
   useEffect(() => {
@@ -296,15 +323,17 @@ function CoverSheet({ copy, active, warm, onStart }: { copy: Copy; active: boole
         <ChileSpread n={1} view="full" label={copy.brand} />
       </div>
       <button className="mn-cover-tap" onClick={onStart} aria-label={copy.book.open} data-testid="book-open" />
-      <div className="mn-load" aria-hidden="true">
-        <motion.span key={active ? "on" : "off"} initial={{ width: "0%" }} animate={{ width: active ? "100%" : "0%" }} transition={{ duration: active ? COVER_MS / 1000 : 0, ease: "linear" }} />
-      </div>
+      {auto ? (
+        <div className="mn-load" aria-hidden="true">
+          <motion.span key={active ? "on" : "off"} initial={{ width: "0%" }} animate={{ width: active ? "100%" : "0%" }} transition={{ duration: active ? COVER_MS / 1000 : 0, ease: "linear" }} />
+        </div>
+      ) : null}
     </div>
   );
 }
 
 /** A product as a little card: its studio photograph, its name, the price it starts from, a line under it and a heart. */
-function ProductCard({ group, index, note, copy, money, favorite, onToggleFavorite, onItem }: { group: Group; index: number; note: string | null; copy: Copy; money: (value: number) => string; favorite: boolean; onToggleFavorite: (id: string) => void; onItem: (item: MenuItem) => void }) {
+export function ProductCard({ group, index, note, copy, money, favorite, onToggleFavorite, onItem, prefix = "" }: { group: Group; index: number; note: string | null; copy: Copy; money: (value: number) => string; favorite: boolean; onToggleFavorite: (id: string) => void; onItem: (item: MenuItem) => void; /** Before the test ids, when the same product appears twice on a page. */ prefix?: string }) {
   const first = group.lines[0]!;
   const from = Math.min(...group.lines.map((line) => line.price));
   const spec = first.studio ? photoSpec(first.studio) : null;
@@ -314,9 +343,9 @@ function ProductCard({ group, index, note, copy, money, favorite, onToggleFavori
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: Math.min(index, 8) * 0.03, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-      data-testid={`card-${group.id}`}
+      data-testid={`${prefix}card-${group.id}`}
     >
-      <button className="mn-pcard-open" onClick={() => onItem(first)} data-testid={`book-item-${first.id}`}>
+      <button className="mn-pcard-open" onClick={() => onItem(first)} data-testid={`${prefix}book-item-${first.id}`}>
         <span className="mn-pcard-photo">
           {spec ? <img src={spec.src} alt="" loading={index < 4 ? "eager" : "lazy"} decoding="async" /> : null}
         </span>
@@ -330,7 +359,7 @@ function ProductCard({ group, index, note, copy, money, favorite, onToggleFavori
         onClick={() => onToggleFavorite(group.id)}
         aria-label={favorite ? copy.menu.unfavorite : copy.menu.favorite}
         aria-pressed={favorite}
-        data-testid={`fav-${group.id}`}
+        data-testid={`${prefix}fav-${group.id}`}
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill={favorite ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinejoin="round"><path d="M12 20.5s-7.5-4.6-7.5-10A4.2 4.2 0 0 1 12 8.2a4.2 4.2 0 0 1 7.5 2.3c0 5.4-7.5 10-7.5 10Z" /></svg>
       </button>
@@ -615,7 +644,7 @@ function ChapterPage({
   );
 }
 
-function LangSwitch({ lang, setLang, dark = false }: { lang: Lang; setLang: (lang: Lang) => void; dark?: boolean }) {
+export function LangSwitch({ lang, setLang, dark = false }: { lang: Lang; setLang: (lang: Lang) => void; dark?: boolean }) {
   return (
     <div className={`mn-lang glass pill flat${dark ? " dark" : ""}`}>
       {(["es", "en"] as const).map((option) => (

@@ -25,18 +25,9 @@ import { markHintSeen, menuMemory } from "../state/menu-memory";
 import { Glass } from "../ui/glass";
 import { Press } from "../ui/press";
 import { Screen } from "../ui/screen";
+import { useWide } from "../ui/use-wide";
 
 type View = "book" | "list";
-
-function useWide(): boolean {
-  const [wide, setWide] = useState(() => window.innerWidth >= 1024);
-  useEffect(() => {
-    const onResize = () => setWide(window.innerWidth >= 1024);
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
-  return wide;
-}
 
 /** The menu: a book you turn, or a list you search. Both read the same catalog. */
 export function MenuScreen() {
