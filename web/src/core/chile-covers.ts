@@ -24,12 +24,12 @@ export const COVER_OF: Record<string, string> = {
 };
 
 export const CHILE_COVERS: Record<string, PhotoSpec> = {
-  "cl-filter": { src: "/menu/cl/cl-cover-cl-filter.webp", mood: "still", cutout: true, native: 1100 },
-  "cl-espresso": { src: "/menu/cl/cl-cover-cl-espresso-v2.webp", mood: "still", cutout: true, native: 1100 },
-  "cl-cold": { src: "/menu/cl/cl-cover-cl-cold-v2.webp", mood: "still", cutout: true, native: 1100 },
-  "cl-matcha": { src: "/menu/cl/cl-cover-cl-matcha-v2.webp", mood: "still", cutout: true, native: 1100 },
-  "cl-signature": { src: "/menu/cl/cl-cover-cl-signature-v2.webp", mood: "still", cutout: true, native: 1100 },
-  "cl-other": { src: "/menu/cl/cl-cover-cl-other-v2.webp", mood: "still", cutout: true, native: 1100 },
+  "cl-filter": { src: "/menu/cl/cl-cover-cl-filter.webp", mood: "hot", steam: [{x: 5.0, y: 66.1}, {x: 14.4, y: 64.7}, {x: 10.3, y: 66.4}], liquid: {x: 1.8, y: 62.7, w: 17.9, h: 7.1}, cutout: true, native: 1100 },
+  "cl-espresso": { src: "/menu/cl/cl-cover-cl-espresso-v2.webp", mood: "hot", steam: [{x: 29.7, y: 10.3}, {x: 59.4, y: 6.7}, {x: 46.5, y: 11.2}], liquid: {x: 19.3, y: 1.3, w: 56.9, h: 18.8}, cutout: true, native: 1100 },
+  "cl-cold": { src: "/menu/cl/cl-cover-cl-cold-v2.webp", mood: "cold", sweat: [{x: 8.1, y: 7.0, w: 83.5, h: 73.6}], liquid: {x: 16.1, y: 11.9, w: 67.6, h: 63.8}, glints: [{x: 20.1, y: 11.9}, {x: 81.7, y: 18.5}, {x: 30.0, y: 51.2}], cutout: true, native: 1100 },
+  "cl-matcha": { src: "/menu/cl/cl-cover-cl-matcha-v2.webp", mood: "cold", sweat: [{x: 8.6, y: 9.7, w: 83.2, h: 71.0}], liquid: {x: 16.5, y: 14.4, w: 67.4, h: 61.6}, glints: [{x: 20.5, y: 14.4}, {x: 81.9, y: 20.7}, {x: 30.4, y: 52.3}], cutout: true, native: 1100 },
+  "cl-signature": { src: "/menu/cl/cl-cover-cl-signature-v2.webp", mood: "cold", sweat: [{x: 8.0, y: 5.0, w: 83.9, h: 75.5}], liquid: {x: 16.0, y: 10.1, w: 67.9, h: 65.4}, glints: [{x: 20.0, y: 10.1}, {x: 81.9, y: 16.8}, {x: 30.0, y: 50.3}], cutout: true, native: 1100 },
+  "cl-other": { src: "/menu/cl/cl-cover-cl-other-v2.webp", mood: "cold", sweat: [{x: 8.3, y: 7.1, w: 83.2, h: 73.5}], liquid: {x: 16.2, y: 12.0, w: 67.4, h: 63.7}, fizz: [{x: 20.2, y: 10.4, w: 59.5, h: 67.0}], glints: [{x: 20.2, y: 12.0}, {x: 81.6, y: 18.6}, {x: 30.1, y: 51.2}], cutout: true, native: 1100 },
   "cl-eggs": { src: "/menu/cl/cl-cover-cl-eggs-v3.webp", mood: "still", cutout: true, native: 1100 },
   "cl-parfait": { src: "/menu/cl/cl-cover-cl-parfait-v2.webp", mood: "still", cutout: true, native: 1100 },
   "cl-cakes": { src: "/menu/cl/cl-cover-cl-cakes-v3.webp", mood: "still", cutout: true, native: 1100 },

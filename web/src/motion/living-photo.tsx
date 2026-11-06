@@ -34,6 +34,8 @@ export type PhotoSpec = {
   sweep?: boolean;
   /** The photograph itself flows: silk that waves, liquid that drifts. */
   flow?: "silk" | "liquid";
+  /** An ellipse of liquid that drifts on its own: the surface of a cup, the body of a glass. Percent of the photograph. */
+  liquid?: Region;
   /** Plates without a ground: drawn whole on the page, no frame. */
   cutout?: boolean;
   /** A product shot on plain white: drawn whole on white paper, like a cut-out, never cropped or darkened. */
@@ -175,6 +177,10 @@ export function LivingPhoto({ photo, style, className, children, interactive = t
 
   const map = frame ? (photo.cutout ? containMapper(frame) : mapper(frame, photo.focus ?? "50% 50%")) : null;
   const live = effects && !reduced && visible && map !== null;
+  // On white paper (a cut-out, a studio shot) steam is grey and there is no cold haze: white on white shows nothing.
+  const paper = !!(photo.cutout || photo.studio);
+  const srcSet = /\.(jpg|webp)$/.test(photo.src) ? `${photo.src} 1x, ${retina(photo.src)} 2x` : undefined;
+  const drifting = drift && !reduced && !videoOk;
 
   return (
     <motion.div
@@ -183,19 +189,24 @@ export function LivingPhoto({ photo, style, className, children, interactive = t
       data-testid={testId}
       style={{ position: "relative", overflow: photo.cutout ? "visible" : "hidden", borderRadius: photo.cutout ? 0 : radius, transformPerspective: 1000, rotateX: tilt.rotateX, rotateY: tilt.rotateY, transformStyle: "preserve-3d", background: photo.cutout ? "transparent" : "#1b1612", ...style }}
     >
-      {photo.flow && effects && !reduced ? <FlowFilters /> : null}
+      {(photo.flow || photo.liquid || photo.steam?.length) && effects && !reduced ? <FlowFilters /> : null}
       <motion.div style={{ position: "absolute", inset: 0, x: shiftX, y: shiftY }}>
-        <motion.img
-          ref={imgRef}
-          src={photo.src}
-          srcSet={/\.(jpg|webp)$/.test(photo.src) ? `${photo.src} 1x, ${retina(photo.src)} 2x` : undefined}
-          alt=""
-          draggable={false}
-          decoding="async"
-          style={{ position: "absolute", ...(photo.fade ? fadeMask(photo.fade) : {}), ...(photo.cutout ? { inset: 0, width: "100%", height: "100%", objectFit: "contain" } : { inset: "-6%", width: "112%", height: "112%", objectFit: "cover", objectPosition: photo.focus ?? "50% 50%" }), maxWidth: "none", ...(photo.flow && effects && !reduced ? { filter: `url(#lp-flow-${photo.flow})` } : {}) }}
-          animate={drift && !reduced && !videoOk ? (photo.cutout ? { y: [0, -3, 0] } : { scale: [1, 1.05, 1] }) : { scale: 1 }}
+        <motion.div
+          style={{ position: "absolute", inset: 0 }}
+          animate={drifting ? (photo.cutout ? { y: [0, -3, 0] } : { scale: [1, 1.05, 1] }) : { scale: 1, y: 0 }}
           transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-        />
+        >
+          <img
+            ref={imgRef}
+            src={photo.src}
+            srcSet={srcSet}
+            alt=""
+            draggable={false}
+            decoding="async"
+            style={{ position: "absolute", ...(photo.fade ? fadeMask(photo.fade) : {}), ...(photo.cutout ? { inset: 0, width: "100%", height: "100%", objectFit: "contain" } : { inset: "-6%", width: "112%", height: "112%", objectFit: "cover", objectPosition: photo.focus ?? "50% 50%" }), maxWidth: "none", ...(photo.flow && effects && !reduced ? { filter: `url(#lp-flow-${photo.flow})` } : {}) }}
+          />
+          {live && map && photo.liquid ? <Liquid region={photo.liquid} map={map} src={photo.src} srcSet={srcSet} /> : null}
+        </motion.div>
         {photo.video && effects && !reduced ? (
           <motion.video
             ref={videoRef}
@@ -224,12 +235,12 @@ export function LivingPhoto({ photo, style, className, children, interactive = t
             {!videoOk && photo.pours?.map((pour, i) => (
               <Stream key={`p${i}`} uid={`${uid}p${i}`} spec={{ from: map.px(pour.from), to: map.px(pour.to), width: Math.max(2.5, map.len(pour.width)), color: pour.color, spiral: map.len(pour.spiral ?? 0), body: pour.body ?? true, ...(pour.speed !== undefined ? { speed: pour.speed } : {}) }} />
             ))}
-            {photo.steam?.map((point, i) => <Steam key={`st${i}`} at={map.px(point)} size={map.len(9)} index={i} />)}
+            {photo.steam?.map((point, i) => <Steam key={`st${i}`} at={map.px(point)} size={map.len(9)} index={i} paper={paper} />)}
             {photo.glints?.length ? <Glints points={photo.glints.map((point) => map.px(point))} size={map.len(1.6)} /> : null}
             {photo.sweep ? <Sweep /> : null}
           </>
         ) : null}
-        {photo.mood === "cold" && live ? <ColdAir /> : null}
+        {photo.mood === "cold" && live && !paper ? <ColdAir /> : null}
       </motion.div>
       <motion.div aria-hidden="true" style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "radial-gradient(240px 160px at var(--mx) var(--my), rgba(255,255,255,0.2), rgba(255,255,255,0) 70%)", ["--mx" as string]: sheenX, ["--my" as string]: sheenY, mixBlendMode: "soft-light" }} />
       {children ? <div style={{ position: "absolute", inset: 0 }}>{children}</div> : null}
@@ -239,26 +250,52 @@ export function LivingPhoto({ photo, style, className, children, interactive = t
 
 type Map = ReturnType<typeof mapper>;
 
-/** Real steam: soft blobs that rise, swell, sway and dissolve. */
-function Steam({ at, size, index }: { at: Point; size: number; index: number }) {
+/**
+ * Real steam: soft wisps that rise, swell, sway, turn and dissolve, torn by a drifting noise.
+ * White that glows over a dark photograph; a warm grey over white paper, where white would vanish.
+ */
+function Steam({ at, size, index, paper }: { at: Point; size: number; index: number; paper: boolean }) {
   const blobs = Array.from({ length: 7 }, (_, i) => ({
     dx: ((i * 37) % 21) - 10,
     s: size * (0.7 + ((i * 13) % 7) * 0.12),
     delay: ((i * 0.47 + index * 0.31) % 2.6),
-    duration: 2.6 + ((i * 7) % 5) * 0.3,
+    duration: 3 + ((i * 7) % 5) * 0.35,
     sway: ((i % 2 ? 1 : -1) * (6 + ((i * 5) % 9))),
+    turn: ((i % 3) - 1) * 14,
   }));
+  // the box the wisps live in: the filter needs a real area to work on
+  const bw = size * 6;
+  const bh = size * 7;
+  const tone = paper
+    ? "radial-gradient(ellipse at 50% 55%, rgba(128,118,110,0.6) 0%, rgba(128,118,110,0.3) 38%, rgba(128,118,110,0) 70%)"
+    : "radial-gradient(ellipse at 50% 55%, rgba(255,255,255,0.78) 0%, rgba(255,255,255,0.36) 40%, rgba(255,255,255,0) 70%)";
   return (
-    <div aria-hidden="true" style={{ position: "absolute", left: at.x, top: at.y, width: 0, height: 0, pointerEvents: "none" }}>
+    <div aria-hidden="true" style={{ position: "absolute", left: at.x - bw / 2, top: at.y - bh + size * 0.6, width: bw, height: bh, pointerEvents: "none", filter: "url(#lp-wisp)" }}>
       {blobs.map((blob, i) => (
         <motion.div
           key={i}
-          style={{ position: "absolute", left: blob.dx - blob.s / 2, top: -blob.s / 2, width: blob.s, height: blob.s, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.35) 40%, rgba(255,255,255,0) 70%)", filter: `blur(${Math.max(4, blob.s * 0.22)}px)`, mixBlendMode: "screen" }}
-          initial={{ opacity: 0, y: 0, x: 0, scale: 0.5 }}
-          animate={{ opacity: [0, 0.55, 0.4, 0], y: [0, -size * 1.4, -size * 3.2, -size * 4.6], x: [0, blob.sway * 0.4, blob.sway, blob.sway * 0.6], scale: [0.5, 1, 1.5, 2] }}
+          style={{ position: "absolute", left: bw / 2 + blob.dx - blob.s * 0.4, top: bh - size * 0.6 - blob.s * 0.75, width: blob.s * 0.8, height: blob.s * 1.5, borderRadius: "50%", background: tone, filter: `blur(${Math.max(3, blob.s * 0.18)}px)`, mixBlendMode: paper ? "normal" : "screen" }}
+          initial={{ opacity: 0, y: 0, x: 0, scale: 0.4, rotate: 0 }}
+          animate={{ opacity: [0, 0.6, 0.4, 0], y: [0, -size * 1.4, -size * 3.2, -size * 4.8], x: [0, blob.sway * 0.4, blob.sway, blob.sway * 0.6], scale: [0.4, 0.9, 1.4, 1.9], rotate: [0, blob.turn * 0.5, blob.turn, blob.turn * 1.4] }}
           transition={{ duration: blob.duration, delay: blob.delay, repeat: Infinity, ease: "easeOut" }}
         />
       ))}
+    </div>
+  );
+}
+
+/** The liquid itself drifts: the same photograph, inside a soft ellipse, displaced by a slow noise. */
+function Liquid({ region, map, src, srcSet }: { region: Region; map: Map; src: string; srcSet: string | undefined }) {
+  const origin = map.px({ x: region.x, y: region.y });
+  const w = map.len(region.w);
+  const scaleY = map.px({ x: 0, y: 100 }).y - map.px({ x: 0, y: 0 }).y;
+  const h = (region.h / 100) * scaleY;
+  const top = map.px({ x: 0, y: 0 });
+  const bottom = map.px({ x: 100, y: 100 });
+  const mask = "radial-gradient(50% 50% at 50% 50%, #000 62%, rgba(0,0,0,0) 100%)";
+  return (
+    <div aria-hidden="true" style={{ position: "absolute", left: origin.x, top: origin.y, width: w, height: h, overflow: "hidden", pointerEvents: "none", maskImage: mask, WebkitMaskImage: mask }}>
+      <img src={src} srcSet={srcSet} alt="" draggable={false} style={{ position: "absolute", left: top.x - origin.x, top: top.y - origin.y, width: bottom.x - top.x, height: bottom.y - top.y, maxWidth: "none", filter: "url(#lp-liquid)" }} />
     </div>
   );
 }
@@ -377,7 +414,8 @@ function Sweep() {
 
 /**
  * Noise that drifts and the photograph displaced along it: silk waves, liquid
- * swirls. Units are CSS pixels of the image.
+ * swirls, a cup's surface that trembles, steam torn into wisps. Units are CSS
+ * pixels of the image.
  */
 function FlowFilters() {
   return (
@@ -389,6 +427,22 @@ function FlowFilters() {
           <animate attributeName="dy" values="0;24;0" dur="15s" repeatCount="indefinite" />
         </feOffset>
         <feDisplacementMap in="SourceGraphic" in2="moved" scale="16" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+      <filter id="lp-liquid" x="-10%" y="-10%" width="120%" height="120%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.014 0.022" numOctaves="1" seed="7" result="noise" />
+        <feOffset in="noise" result="moved">
+          <animate attributeName="dx" values="0;36;0" dur="9s" repeatCount="indefinite" />
+          <animate attributeName="dy" values="0;-28;0" dur="7s" repeatCount="indefinite" />
+        </feOffset>
+        <feDisplacementMap in="SourceGraphic" in2="moved" scale="7" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+      <filter id="lp-wisp" x="-20%" y="-20%" width="140%" height="140%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.028 0.02" numOctaves="2" seed="3" result="noise" />
+        <feOffset in="noise" result="moved">
+          <animate attributeName="dy" values="0;-60;-120" dur="6s" repeatCount="indefinite" />
+          <animate attributeName="dx" values="0;14;0" dur="5s" repeatCount="indefinite" />
+        </feOffset>
+        <feDisplacementMap in="SourceGraphic" in2="moved" scale="14" xChannelSelector="R" yChannelSelector="G" />
       </filter>
       <filter id="lp-flow-liquid" x="-5%" y="-5%" width="110%" height="110%">
         <feTurbulence type="fractalNoise" baseFrequency="0.006 0.008" numOctaves="1" seed="11" result="noise" />

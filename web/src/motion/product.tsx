@@ -1,6 +1,7 @@
 import { motion, useTransform } from "motion/react";
 import type { CSSProperties } from "react";
 
+import { retina } from "./living-photo";
 import { useTilt } from "./tilt";
 import { useReduced } from "./prefs";
 
@@ -41,7 +42,7 @@ export function Product({ src, alt = "", size = 220, style, float = true, testId
         animate={float && !reduced ? { y: [0, -9, 0] } : {}}
         transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
       >
-        <img src={src} alt={alt} draggable={false} style={{ position: "absolute", inset: 0, width: "100%", height: "92%", objectFit: "contain", filter: "drop-shadow(0 18px 24px rgba(27,22,18,0.28))" }} />
+        <img src={src} srcSet={/\.(jpg|webp)$/.test(src) ? `${src} 1x, ${retina(src)} 2x` : undefined} alt={alt} draggable={false} style={{ position: "absolute", inset: 0, width: "100%", height: "92%", objectFit: "contain", filter: "drop-shadow(0 18px 24px rgba(27,22,18,0.28))" }} />
         <motion.div
           aria-hidden="true"
           style={{

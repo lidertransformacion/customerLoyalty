@@ -19,12 +19,16 @@ export const PRODUCT_IMAGES: Record<string, string> = {
   COMPETITION: "/products/rock-2.png",
 };
 
-/** The Chile bags: the real store photographs cut off their white, so they float like the renders do. */
+/**
+ * The Chile bags: the real store photographs cut off their white (BiRefNet mask, white matte removed from
+ * the edge pixels), 713 px tall and @2x 1426 px with alpha, so they float like the renders do.
+ * A replaced cut carries a new name (-v2…): the phones keep the old one 90 days.
+ */
 export const CHILE_PACKS: Record<string, string> = {
-  PAZ: "/menu/cl/cl-bag-paz.webp",
-  LIBRE: "/menu/cl/cl-bag-libre.webp",
-  ROCK: "/menu/cl/cl-bag-rock.webp",
-  PUNK: "/menu/cl/cl-bag-punk.webp",
+  PAZ: "/menu/cl/cl-bag-paz-v2.webp",
+  LIBRE: "/menu/cl/cl-bag-libre-v2.webp",
+  ROCK: "/menu/cl/cl-bag-rock-v2.webp",
+  PUNK: "/menu/cl/cl-bag-punk-v2.webp",
 };
 
 export const BRAND = {
