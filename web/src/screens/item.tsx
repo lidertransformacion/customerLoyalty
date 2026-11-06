@@ -14,11 +14,15 @@ import { Glass } from "../ui/glass";
 import { Press } from "../ui/press";
 import { Screen } from "../ui/screen";
 
+import "./item.css";
+import { useBack } from "../ui/use-back";
+
 /** One product. The photograph lives: it pours, sweats cold, steams or fizzes. Packs float in 3D. */
 export function ItemScreen() {
   const copy = useCopy();
   const { money } = useLocale();
   const navigate = useNavigate();
+  const back = useBack();
   const { id } = useParams();
   const catalog = useCatalog();
   const { account, dispatch } = useAccount();
@@ -29,7 +33,7 @@ export function ItemScreen() {
       <Screen testId="item">
         <div className="pad pad-top">
           <div className="serif-italic" style={{ fontSize: 18 }}>{copy.menu.missingItem}</div>
-          <button onClick={() => navigate(-1)} className="chip" style={{ marginTop: 12, background: "var(--cream)" }}>{copy.back}</button>
+          <button onClick={() => back()} className="chip" style={{ marginTop: 12, background: "var(--cream)" }}>{copy.back}</button>
         </div>
       </Screen>
     );
@@ -48,8 +52,8 @@ export function ItemScreen() {
 
   return (
     <Screen direction="up" testId="item" className="full">
-      <div className="scroll" style={{ paddingBottom: 140 }}>
-        <div style={{ position: "relative", height: visual.kind === "photo" ? "58dvh" : "50dvh", minHeight: 360, maxHeight: 620 }}>
+      <div className="scroll it-scroll">
+        <div className={`it-hero${visual.kind === "photo" ? " photo" : ""}`}>
           {visual.kind === "photo" && onPaper ? (
             <div style={{ position: "absolute", inset: 0, background: "var(--paper)", display: "grid", placeItems: "center", padding: "calc(var(--sat) + 70px) 20px 56px" }}>
               <LivingPhoto
@@ -68,12 +72,12 @@ export function ItemScreen() {
               <Product src={visual.src} size={Math.min(300, window.innerWidth * 0.7)} testId="product-3d" />
             </div>
           )}
-          <button onClick={() => navigate(-1)} aria-label={copy.back} data-testid="item-back" style={{ position: "absolute", top: "calc(var(--sat) + 14px)", left: 16, zIndex: 2 }}>
+          <button onClick={() => back()} aria-label={copy.back} data-testid="item-back" style={{ position: "absolute", top: "calc(var(--sat) + 14px)", left: 16, zIndex: 2 }}>
             <Glass pill lens dark={dark} style={{ width: 44, height: 44, display: "grid", placeItems: "center", fontSize: 20 }}>←</Glass>
           </button>
         </div>
 
-        <div className="pad" style={{ marginTop: -40, position: "relative", maxWidth: 760, marginLeft: "auto", marginRight: "auto", width: "100%" }}>
+        <div className="pad it-info">
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 220, damping: 26, delay: 0.1 }}>
             <Glass strong lens style={{ padding: 20, borderRadius: 28 }}>
               <div className="kicker">{category?.name}</div>
@@ -101,9 +105,9 @@ export function ItemScreen() {
         </div>
       </div>
 
-      <div className="dock" style={{ position: "absolute", left: 0, right: 0, bottom: 0, padding: "12px 20px calc(var(--sab) + 16px)", background: "linear-gradient(180deg, rgba(255,255,255,0), #fff 40%)", display: "flex", gap: 10 }}>
+      <div className="dock" style={{ position: "absolute", bottom: 0, padding: "12px 20px calc(var(--sab) + 16px)", background: "linear-gradient(180deg, rgba(255,255,255,0), #fff 40%)", display: "flex", gap: 10 }}>
         {menuOnly ? (
-          <Press className="ink-button" onClick={() => navigate(-1)} data-testid="item-back-bottom">{copy.back}</Press>
+          <Press className="ink-button" onClick={() => back()} data-testid="item-back-bottom">{copy.back}</Press>
         ) : account ? (
           <>
             <Press className="ink-button" onClick={() => dispatch({ type: "addToTable", itemId: item.id })} data-testid="item-add">

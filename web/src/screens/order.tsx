@@ -175,7 +175,7 @@ export function OrderScreen() {
       </div>
 
       {lines.length > 0 ? (
-        <div className="dock" style={{ position: "absolute", left: 0, right: 0, bottom: "calc(var(--tabbar) + var(--sab))", padding: "10px 20px 8px", background: "linear-gradient(180deg, rgba(255,255,255,0), #fff 45%)", zIndex: 10 }}>
+        <div className="dock" style={{ position: "absolute", bottom: "calc(var(--tabbar) + var(--sab))", padding: "10px 20px 8px", background: "linear-gradient(180deg, rgba(255,255,255,0), #fff 45%)", zIndex: 10 }}>
           <Press className="ink-button" onClick={send} disabled={sending} data-testid="order-send">
             {sending ? copy.order.sending : copy.order.send}
           </Press>

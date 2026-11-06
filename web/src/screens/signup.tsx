@@ -205,7 +205,7 @@ export function SignupScreen() {
         </AnimatePresence>
       </div>
 
-      <div className="dock" style={{ position: "absolute", left: 0, right: 0, bottom: 0, padding: "12px 20px calc(var(--sab) + 16px)", background: "linear-gradient(180deg, rgba(255,255,255,0), #fff 40%)" }}>
+      <div className="dock" style={{ position: "absolute", bottom: 0, padding: "12px 20px calc(var(--sab) + 16px)", background: "linear-gradient(180deg, rgba(255,255,255,0), #fff 40%)" }}>
         <Press className="ink-button" onClick={next} data-testid="signup-next">
           {step < 2 ? copy.legal.next : copy.signup.submit}
         </Press>

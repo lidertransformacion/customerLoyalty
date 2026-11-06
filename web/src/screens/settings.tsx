@@ -8,6 +8,7 @@ import { useAccount } from "../state/account";
 import { Glass } from "../ui/glass";
 import { Press } from "../ui/press";
 import { Screen } from "../ui/screen";
+import { useBack } from "../ui/use-back";
 
 /** Language, country, city, and the way out. */
 export function SettingsScreen() {
@@ -17,12 +18,13 @@ export function SettingsScreen() {
   const catalog = useCatalog();
   const { account, dispatch } = useAccount();
   const navigate = useNavigate();
+  const back = useBack();
 
   return (
     <Screen direction="up" testId="settings">
       <div className="pad pad-top row" style={{ justifyContent: "space-between" }}>
         <h1 className="serif" style={{ fontSize: 32, margin: 0 }}>{copy.settings.title}</h1>
-        <button onClick={() => navigate(-1)} className="chip" style={{ background: "var(--cream)" }} data-testid="settings-close">{copy.web.close}</button>
+        <button onClick={back} className="chip" style={{ background: "var(--cream)" }} data-testid="settings-close">{copy.web.close}</button>
       </div>
       <div className="scroll pad" style={{ paddingTop: 14, paddingBottom: 40 }}>
         {account ? (

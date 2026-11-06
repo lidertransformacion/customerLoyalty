@@ -95,6 +95,14 @@ a {
   color: var(--smoke);
 }
 
+/* A bar that stays at the foot of a screen; a wide window narrows it to the reading column. */
+.dock {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
 .screen {
   position: absolute;
   inset: 0;
@@ -242,6 +250,15 @@ a {
     margin: 24px auto;
     border-radius: 32px;
     box-shadow: 0 40px 100px -40px rgba(27, 22, 18, 0.45), 0 0 0 1px rgba(27, 22, 18, 0.06);
+  }
+
+  /* the menu alone is a site, not a demo: no frame, the whole window */
+  html.menu-only #root {
+    width: 100%;
+    height: 100dvh;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
   }
 
   .screen > .scroll,

@@ -1,0 +1,49 @@
+/* The product page: the photograph above the card on a phone, beside it on a wide window. */
+.it-scroll {
+  padding-bottom: 140px;
+}
+
+.it-hero {
+  position: relative;
+  height: 50dvh;
+  min-height: 360px;
+  max-height: 620px;
+}
+
+.it-hero.photo {
+  height: 58dvh;
+}
+
+.it-info {
+  position: relative;
+  width: 100%;
+  max-width: 760px;
+  margin: -40px auto 0;
+}
+
+@media (min-width: 1024px) {
+  .it-scroll {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    align-items: center;
+    gap: 24px;
+    min-height: 100%;
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 32px 40px 150px;
+  }
+
+  .it-hero,
+  .it-hero.photo {
+    height: min(68vh, 640px);
+    min-height: 420px;
+    max-height: none;
+    border-radius: 28px;
+    overflow: hidden;
+  }
+
+  .it-info {
+    margin-top: 0;
+    max-width: 560px;
+  }
+}
