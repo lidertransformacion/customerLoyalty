@@ -109,11 +109,11 @@ export function translateCatalog(catalog: Catalog, lang: "es" | "en"): Catalog {
   return {
     city: catalog.city,
     categories: catalog.categories.map((category) => {
-      const text = CATEGORIES_EN[category.id] ?? EXTRA_CATEGORIES_EN[category.id];
+      const text = EXTRA_CATEGORIES_EN[category.id] ?? CATEGORIES_EN[category.id];
       return text ? { ...category, name: text.name, intro: text.intro } : category;
     }),
     items: catalog.items.map((item) => {
-      const text = ITEMS_EN[item.id] ?? EXTRA_ITEMS_EN[item.id];
+      const text = EXTRA_ITEMS_EN[item.id] ?? ITEMS_EN[item.id];
       return text ? { ...item, name: text.name, description: text.description } : item;
     }),
   };

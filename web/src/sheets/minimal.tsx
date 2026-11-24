@@ -7,8 +7,8 @@ import type { MenuItem } from "@/src/data/menu";
 
 import type { Catalog } from "../core/catalog";
 import { groupsOf, type Group } from "../core/chile";
-import { CHILE_COVERS } from "../core/chile-covers";
 import { CHILE_RECOMMENDED } from "../core/chile-data";
+import { chileKey, CO_RECOMMENDED, coverOf, kindOf } from "../core/colombia";
 import { searchGroups } from "../core/search";
 import { CHILE_PACKS, photoSpec } from "../core/photos";
 import { visualFor } from "../core/visuals";
@@ -108,13 +108,14 @@ function printPhoto(item: MenuItem) {
 
 /** The chapter's star at the top of its sheet: its cover cut-out, else the first product's print cut, else its photograph. */
 export function heroOf(products: MenuItem[][], chapterId: string) {
-  const cover = CHILE_COVERS[chapterId];
+  const cover = coverOf(chapterId);
   if (cover) return cover;
   for (const [first] of products) {
     const print = first ? printPhoto(first) : null;
     if (print?.cutout) return print;
   }
-  const first = products[0]?.[0];
+  // a product with its own studio photograph before the chapter's general one
+  const first = products.find(([line]) => line?.studio)?.[0] ?? products[0]?.[0];
   const visual = first ? visualFor(first) : null;
   return visual?.kind === "photo" ? visual.photo : null;
 }
@@ -160,7 +161,7 @@ export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { c
   }, []);
   const turn = (direction: "forward" | "back") => setCommand({ id: Date.now(), direction });
   // what the index shows first: the bags and the first covers, fetched while the cover holds
-  const warm = useMemo(() => [...Object.values(CHILE_PACKS), ...FORMAT_CUTS.map((key) => photoSpec(key).src), ...chapters.slice(0, 6).map((category) => CHILE_COVERS[category.id]?.src).filter((src): src is string => !!src)], [chapters]);
+  const warm = useMemo(() => [...Object.values(CHILE_PACKS), ...FORMAT_CUTS.map((key) => photoSpec(key).src), ...chapters.slice(0, 6).map((category) => coverOf(category.id)?.src).filter((src): src is string => !!src)], [chapters]);
 
   const pages = useMemo(
     () => [
@@ -332,11 +333,22 @@ function CoverSheet({ copy, active, auto, warm, onStart }: { copy: Copy; active:
   );
 }
 
+/** What a line is called next to its price: its size, or the blend it is made with. */
+export function lineLabel(line: Group["lines"][number], group: Group, copy: Copy): string {
+  if (line.name.includes(" · ")) return line.name.split(" · ")[1]!;
+  if (line.id.endsWith("-so")) return copy.menu.originLine;
+  if (group.lines.some((other) => other.id.endsWith("-so"))) return copy.menu.blendLine;
+  return line.name;
+}
+
 /** A product as a little card: its studio photograph, its name, the price it starts from, a line under it and a heart. */
 export function ProductCard({ group, index, note, copy, money, favorite, onToggleFavorite, onItem, prefix = "" }: { group: Group; index: number; note: string | null; copy: Copy; money: (value: number) => string; favorite: boolean; onToggleFavorite: (id: string) => void; onItem: (item: MenuItem) => void; /** Before the test ids, when the same product appears twice on a page. */ prefix?: string }) {
   const first = group.lines[0]!;
   const from = Math.min(...group.lines.map((line) => line.price));
-  const spec = first.studio ? photoSpec(first.studio) : null;
+  const kind = kindOf(first.id);
+  // its studio photograph; else what its page shows (the pack render, the chapter photograph)
+  const visual = first.studio ? null : visualFor(first);
+  const spec = first.studio ? photoSpec(first.studio) : visual?.kind === "photo" ? visual.photo : visual ? { src: visual.src } : null;
   return (
     <motion.article
       className="mn-pcard"
@@ -350,8 +362,28 @@ export function ProductCard({ group, index, note, copy, money, favorite, onToggl
           {spec ? <img src={spec.src} alt="" loading={index < 4 ? "eager" : "lazy"} decoding="async" /> : null}
         </span>
         <span className="mn-pcard-name">{first.name.split(" · ")[0]}</span>
-        <span className="mn-pcard-price">{from > 0 ? money(from) : copy.menu.askAtBar}</span>
-        {note ? <span className="mn-pcard-note">{note}</span> : null}
+        {kind ? (
+          <span className="mn-pcard-kind">
+            {kind.trait}
+            <strong>{kind.origin}</strong>
+          </span>
+        ) : null}
+        {/* up to three sizes or blends: each with its price, as the print lists them; more than that, the price it starts from */}
+        {(group.lines.length > 1 && group.lines.length <= 3) || (group.lines.length === 1 && first.name.includes(" · ")) ? (
+          <span className="mn-pcard-lines" data-testid={`${prefix}lines-${group.id}`}>
+            {group.lines.map((line) => (
+              <span key={line.id}>
+                <span>{lineLabel(line, group, copy)}</span>
+                <strong>{line.price > 0 ? money(line.price) : copy.menu.askAtBar}</strong>
+              </span>
+            ))}
+          </span>
+        ) : (
+          <>
+            <span className="mn-pcard-price">{from > 0 ? money(from) : copy.menu.askAtBar}</span>
+            {note ? <span className="mn-pcard-note">{note}</span> : null}
+          </>
+        )}
         {first.vegan ? <span className="mn-tag">{copy.menu.plant}</span> : null}
       </button>
       <button
@@ -457,7 +489,7 @@ function IndexSheet({
   const asked = query.trim();
   const favoritesView = !searching && favoritesOpen;
   const results = asked ? searchGroups(all, asked) : null;
-  const recommended = CHILE_RECOMMENDED.map((id) => all.find((group) => group.id === id)).filter((group): group is Group => !!group);
+  const recommended = (catalog.city.market === "CL" ? CHILE_RECOMMENDED : CO_RECOMMENDED).map((id) => all.find((group) => group.id === id)).filter((group): group is Group => !!group);
   const products = searching ? (results ?? recommended) : favoritesView ? all.filter((group) => favorites.includes(group.id)) : null;
   const heading = searching ? (results ? copy.menu.resultsFor(asked) : copy.menu.recommended) : null;
   const title = searching ? copy.menu.searchTitle : favoritesView ? copy.menu.favorites : copy.book.toCategories;
@@ -526,8 +558,8 @@ function IndexSheet({
             {chapters.map((category, i) => {
               const groups = groupsOf(catalog, category.id);
               const hero = heroOf(groups.map((group) => group.lines), category.id);
-              const coffee = category.id === "cl-coffee";
-              const formats = category.id === "cl-formats";
+              const coffee = chileKey(category.id) === "cl-coffee";
+              const formats = chileKey(category.id) === "cl-formats";
               return (
                 <motion.button
                   key={category.id}
@@ -539,7 +571,7 @@ function IndexSheet({
                   onClick={() => onOpen(i)}
                   data-testid={`index-${category.id}`}
                 >
-                  <span className="mn-ccard-art" style={{ background: coffee || formats ? "#fff" : (TINT[category.id] ?? "#f4f1ec") }}>
+                  <span className="mn-ccard-art" style={{ background: coffee || formats ? "#fff" : (TINT[chileKey(category.id)] ?? "#f4f1ec") }}>
                     {coffee ? (
                       PACK_PROFILES.map((profile, k) => <img key={profile} src={CHILE_PACKS[profile]} alt="" className="cut" decoding="async" style={{ animationDelay: `${k * 0.4}s` }} />)
                     ) : formats ? (
@@ -599,13 +631,13 @@ function ChapterPage({
       <section ref={sheet} className="book-page-inner mn-sheet mn-page" data-testid={`chapter-${category.id}`} aria-label={category.name}>
         <div className="mn-hero">
           {live ? (
-            category.id === "cl-coffee" ? (
+            chileKey(category.id) === "cl-coffee" ? (
               <div className="mn-packs">
                 {PACK_PROFILES.map((profile) => (
                   <Product key={profile} src={CHILE_PACKS[profile]!} size={bag} float style={{ margin: `0 ${-Math.round(bag * 0.16)}px` }} />
                 ))}
               </div>
-            ) : category.id === "cl-formats" ? (
+            ) : chileKey(category.id) === "cl-formats" ? (
               <div className="mn-packs">
                 {FORMAT_CUTS.map((key, i) => (
                   <Product key={key} src={photoSpec(key).src} size={i === 0 ? Math.round(box * 1.4) : box} float style={{ margin: `0 ${-Math.round(box * 0.08)}px` }} />

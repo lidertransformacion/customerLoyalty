@@ -21,6 +21,114 @@
   margin: -40px auto 0;
 }
 
+/*
+ * On a phone nothing on the page moves: the photograph stays, the card sits under it and a long text
+ * scrolls inside the card. The photograph gives up height first, down to 36 % of the screen.
+ */
+@media (max-width: 1023px) {
+  .it-scroll {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding-bottom: calc(var(--sab) + 78px);
+  }
+
+  .it-hero,
+  .it-hero.photo {
+    /* shrinks long before the card does: the card only scrolls once the photograph is at its smallest */
+    flex: 0 1000 58dvh;
+    height: auto;
+    min-height: 36dvh;
+  }
+
+  .it-info {
+    flex: 0 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    z-index: 1;
+  }
+
+  .it-info > div {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .it-card.glass {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .it-card.glass::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* «Volver» on the menu: a small pill, not a bar across the screen. */
+.it-dock-back {
+  justify-content: center;
+}
+
+.it-dock-back .ink-button {
+  width: auto;
+  min-height: 44px;
+  height: 44px;
+  padding: 0 30px;
+  font-size: 15px;
+}
+
+.it-kind {
+  margin-top: 6px;
+  font-size: 15px;
+  color: var(--smoke);
+}
+
+.it-kind strong {
+  font-weight: 700;
+}
+
+.it-size {
+  font-family: var(--sans);
+  font-size: 15px;
+  color: var(--smoke);
+}
+
+/* Every size or blend of the product with its price, as the print lists them. */
+.it-lines {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+}
+
+.it-lines li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid rgba(27, 22, 18, 0.08);
+  font-size: 15px;
+}
+
+.it-lines strong {
+  font-size: 22px;
+  font-weight: 400;
+}
+
+/* The card lifts off the white sheet: a hairline edge, a tight contact shadow and a deep soft one under it. */
+.it-card.glass {
+  background: #fff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 0 0 1px rgba(27, 22, 18, 0.06),
+    0 2px 6px rgba(27, 22, 18, 0.06),
+    0 22px 48px -14px rgba(27, 22, 18, 0.26);
+}
+
 @media (min-width: 1024px) {
   .it-scroll {
     display: grid;

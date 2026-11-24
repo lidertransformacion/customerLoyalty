@@ -16,6 +16,7 @@ import { App } from "./app";
 import { menuOnly } from "./core/mode";
 import "./core/cities";
 import "./core/chile";
+import "./core/colombia";
 import { LocaleProvider } from "./i18n";
 import { AccountProvider } from "./state/account";
 import { CatalogProvider } from "./state/catalog";

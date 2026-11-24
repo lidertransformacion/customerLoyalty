@@ -30,9 +30,29 @@ const PHOTO_BY_CATEGORY: Record<string, string> = {
   cookies: "cookies.jpg",
   cocktails: "bar.jpg",
   extras: "coffee.jpg",
+  // the same chapters in the Chile layout (core/colombia.ts)
+  "co-coffee": "coffee.jpg",
+  "co-cold": "coffee.jpg",
+  "co-filter": "filter.jpg",
+  "co-espresso": "espresso.jpg",
+  "co-signature": "drinks.jpg",
+  "co-matcha": "matcha.jpg",
+  "co-other": "drinks.jpg",
+  "co-eggs": "brunch.jpg",
+  "co-parfait": "sweet.jpg",
+  "co-toast": "toast.jpg",
+  "co-bakery": "bread.jpg",
+  "co-sandwiches": "sandwiches.jpg",
+  "co-bowls": "bowls.jpg",
+  "co-cakes": "cakes.jpg",
+  "co-cookies": "cookies.jpg",
+  "co-cocktails": "bar.jpg",
+  "co-extras": "coffee.jpg",
+  "co-formats": "coffee.jpg",
+  "co-soup": "brunch.jpg",
 };
 
-const PACKS = new Set(["coffee", "cl-coffee"]);
+const PACKS = new Set(["coffee", "cl-coffee", "co-coffee"]);
 
 export function visualFor(item: MenuItem): Visual {
   // Its own studio photograph comes first: the real bag, the real plate.
@@ -45,7 +65,7 @@ export function visualFor(item: MenuItem): Visual {
   const name = PHOTO_BY_CATEGORY[item.category] ?? "coffee.jpg";
   const base = photoSpec(name);
   // Iced espresso drinks are cold, not hot.
-  if (item.category === "espresso" && (item.id.startsWith("iced-") || item.id === "affogato")) {
+  if ((item.category === "espresso" || item.category === "co-espresso") && (item.id.startsWith("iced-") || item.id === "affogato")) {
     return { kind: "photo", photo: { ...photoSpec("coffee.jpg") } };
   }
   return { kind: "photo", photo: base };

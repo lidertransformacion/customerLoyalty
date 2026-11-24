@@ -40,6 +40,8 @@ export type PhotoSpec = {
   cutout?: boolean;
   /** A product shot on plain white: drawn whole on white paper, like a cut-out, never cropped or darkened. */
   studio?: boolean;
+  /** A wide, low subject in a square photograph (a row of boxes): the product page lets it span the screen's width. */
+  wide?: boolean;
   /** Real pixels across the photograph; it is never shown much larger than this. */
   native?: number;
   /** Edges where the photograph was cut straight: they fade into the page. */

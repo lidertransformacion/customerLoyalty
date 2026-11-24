@@ -5,6 +5,7 @@ import type { Catalog } from "./catalog";
 import { registerCatalog, registerTranslations } from "./catalog";
 import { CHILE_CHAPTERS, CHILE_SOURCE, focusKey, type ChileSource } from "./chile-data";
 import { STUDIO_OF } from "./chile-studio";
+import { colombiaGroups } from "./colombia";
 
 /**
  * Santiago, from the printed Chile menu. Same book as Colombia; its own
@@ -83,6 +84,7 @@ export type Group = { id: string; chapterId: string; lines: MenuItem[] };
 
 /** The products of one chapter, in the print's order, each with its lines from the catalog given (translated or not). */
 export function groupsOf(catalog: Catalog, chapterId: string): Group[] {
+  if (chapterId.startsWith("co-")) return colombiaGroups(catalog, chapterId);
   return CHILE_SOURCE.filter((source) => source.category === chapterId)
     .map((source) => ({
       id: source.id,

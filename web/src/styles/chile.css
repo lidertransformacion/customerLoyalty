@@ -37,3 +37,8 @@
   font-variation-settings: normal;
   letter-spacing: -0.005em;
 }
+
+/* Colombia keeps its own type and colours, but its sheets are white like Chile's: the studio photographs sit on white. */
+:root[data-menu="co"] {
+  --paper: #ffffff;
+}

@@ -3,6 +3,8 @@ import { useNavigate, useParams } from "react-router";
 
 import { pointsForPrice } from "@/src/data/program";
 
+import { groupsOf } from "../core/chile";
+import { kindOf } from "../core/colombia";
 import { menuOnly } from "../core/mode";
 import { visualFor } from "../core/visuals";
 import { useCopy, useLocale } from "../i18n";
@@ -14,6 +16,7 @@ import { Glass } from "../ui/glass";
 import { Press } from "../ui/press";
 import { Screen } from "../ui/screen";
 
+import { lineLabel } from "../sheets/minimal";
 import "./item.css";
 import { useBack } from "../ui/use-back";
 
@@ -40,6 +43,10 @@ export function ItemScreen() {
   }
 
   const category = catalog.categories.find((c) => c.id === item.category);
+  // the product this line belongs to: all its sizes or blends are priced on the card
+  const group = groupsOf(catalog, item.category).find((entry) => entry.lines.some((line) => line.id === item.id));
+  const lines = group && (group.lines.length > 1 || item.name.includes(" · ")) ? group.lines : null;
+  const kind = kindOf(item.id);
   const visual = visualFor(item);
   const pairing = item.description.match(/(?:Maridaje|Pairing):\s*(.+?)\.?$/)?.[1];
   const inOrder = account?.order.find((line) => line.itemId === item.id)?.quantity ?? 0;
@@ -55,11 +62,12 @@ export function ItemScreen() {
       <div className="scroll it-scroll">
         <div className={`it-hero${visual.kind === "photo" ? " photo" : ""}`}>
           {visual.kind === "photo" && onPaper ? (
-            <div style={{ position: "absolute", inset: 0, background: "var(--paper)", display: "grid", placeItems: "center", padding: "calc(var(--sat) + 70px) 20px 56px" }}>
+            <div style={{ position: "absolute", inset: 0, background: "var(--paper)", display: "grid", placeItems: "center", overflow: "hidden", padding: visual.photo.wide ? "calc(var(--sat) + 40px) 8px 40px" : "calc(var(--sat) + 70px) 20px 56px" }}>
               <LivingPhoto
                 photo={{ ...visual.photo, cutout: true }}
                 radius={18}
-                style={{ width: `min(100%, ${sharpWidth}px)`, height: "100%" }}
+                // a wide subject takes the screen's width; the white above and below it spills out of sight
+                style={visual.photo.wide ? { width: `min(100%, ${sharpWidth}px)`, aspectRatio: "1", height: "auto" } : { width: `min(100%, ${sharpWidth}px)`, height: "100%" }}
                 testId={`living-${visual.photo.mood}`}
               />
             </div>
@@ -79,13 +87,18 @@ export function ItemScreen() {
 
         <div className="pad it-info">
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 220, damping: 26, delay: 0.1 }}>
-            <Glass strong lens style={{ padding: 20, borderRadius: 28 }}>
+            <Glass strong lens className="it-card" style={{ padding: 20, borderRadius: 28 }}>
               <div className="kicker">{category?.name}</div>
-              <h1 className="serif" style={{ fontSize: 32, margin: "4px 0 0", lineHeight: 1.05 }}>{item.name}</h1>
+              <h1 className="serif" style={{ fontSize: 32, margin: "4px 0 0", lineHeight: 1.05 }}>{lines || kind ? item.name.split(" · ")[0] : item.name}</h1>
+              {kind ? (
+                <div className="it-kind" data-testid="item-kind">
+                  {kind.trait} · <strong>{kind.origin}</strong>
+                </div>
+              ) : null}
               <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
                 {item.vegan ? <span className="chip" style={{ background: "rgba(111,143,75,0.14)", color: "var(--matcha)", minHeight: 30, fontSize: 12 }}>🌱 {copy.menu.plant}</span> : null}
                 {item.nuts ? <span className="chip" style={{ background: "rgba(122,67,40,0.12)", color: "var(--roast)", minHeight: 30, fontSize: 12 }}>🥜</span> : null}
-                {item.profile ? <span className="chip" style={{ background: "var(--cream)", minHeight: 30, fontSize: 12 }}>{item.profile}</span> : null}
+                {item.profile && !kind ? <span className="chip" style={{ background: "var(--cream)", minHeight: 30, fontSize: 12 }}>{item.profile}</span> : null}
                 {visual.kind === "photo" && visual.photo.mood === "cold" ? <span className="chip" style={{ background: "rgba(120,180,255,0.18)", color: "#2a5a9a", minHeight: 30, fontSize: 12 }}>❄︎</span> : null}
               </div>
               <p style={{ fontSize: 16, lineHeight: 1.45, margin: "14px 0 0" }}>{item.description.replace(/\s*(?:Maridaje|Pairing):.*$/, "")}</p>
@@ -95,7 +108,17 @@ export function ItemScreen() {
                   {pairing}
                 </div>
               ) : null}
-              <div className="row" style={{ justifyContent: "space-between", marginTop: 18 }}>
+              {lines && group ? (
+                <ul className="it-lines" data-testid="item-lines">
+                  {lines.map((line) => (
+                    <li key={line.id}>
+                      <span>{lineLabel(line, group, copy)}</span>
+                      <strong className="serif">{line.price > 0 ? money(line.price) : copy.menu.askAtBar}</strong>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              <div className="row" style={{ justifyContent: "space-between", marginTop: 18, display: lines ? "none" : undefined }}>
                 <div className="serif" style={{ fontSize: 30 }} data-testid="item-price">{item.price > 0 ? money(item.price) : copy.menu.askAtBar}</div>
                 {!menuOnly ? <div style={{ textAlign: "right", fontSize: 13, color: "var(--roast)", maxWidth: 170, lineHeight: 1.3 }}>{copy.menu.earnsAtCounter(points)}</div> : null}
               </div>
@@ -105,7 +128,7 @@ export function ItemScreen() {
         </div>
       </div>
 
-      <div className="dock" style={{ position: "absolute", bottom: 0, padding: "12px 20px calc(var(--sab) + 16px)", background: "linear-gradient(180deg, rgba(255,255,255,0), #fff 40%)", display: "flex", gap: 10 }}>
+      <div className={`dock${menuOnly ? " it-dock-back" : ""}`} style={{ position: "absolute", bottom: 0, padding: "12px 20px calc(var(--sab) + 16px)", background: "linear-gradient(180deg, rgba(255,255,255,0), #fff 40%)", display: "flex", gap: 10 }}>
         {menuOnly ? (
           <Press className="ink-button" onClick={() => back()} data-testid="item-back-bottom">{copy.back}</Press>
         ) : account ? (

@@ -102,8 +102,8 @@ export function MenuScreen() {
     return () => observer.disconnect();
   }, []);
 
-  // Chile has its own menu: the minimal book of cards
-  const sheets = catalog.city.market === "CL";
+  // Chile and Colombia: the minimal book of cards
+  const sheets = true;
 
   const book = useMemo(
     () => buildBook({ catalog, copy, money, spread: wide, onItem, onChapter, onOpen, points: !menuOnly, ...(frame ? { pageHeight: frame.height, pageWidth: frame.width } : {}) }),

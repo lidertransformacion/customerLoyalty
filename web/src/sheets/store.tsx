@@ -6,8 +6,8 @@ import { pointsForPrice } from "@/src/data/program";
 
 import type { Catalog } from "../core/catalog";
 import { groupsOf, type Group } from "../core/chile";
-import { CHILE_COVERS } from "../core/chile-covers";
 import { CHILE_RECOMMENDED } from "../core/chile-data";
+import { chileKey, CO_RECOMMENDED, coverOf, kindOf } from "../core/colombia";
 import { menuOnly } from "../core/mode";
 import { CHILE_PACKS, photoSpec } from "../core/photos";
 import { searchGroups } from "../core/search";
@@ -18,7 +18,7 @@ import { Beans } from "../motion/beans";
 import { LivingPhoto } from "../motion/living-photo";
 import { Product } from "../motion/product";
 import { Glass } from "../ui/glass";
-import { FORMAT_CUTS, heroOf, LangSwitch, PACK_PROFILES, ProductCard } from "./minimal";
+import { FORMAT_CUTS, heroOf, LangSwitch, lineLabel, PACK_PROFILES, ProductCard } from "./minimal";
 
 import "./store.css";
 
@@ -66,7 +66,7 @@ export function Store({ chapters, catalog, copy, money, lang, setLang, favorites
   const asked = query.trim();
   const results = asked ? searchGroups(all, asked) : null;
   const favoritesView = !asked && favoritesOpen;
-  const recommended = useMemo(() => CHILE_RECOMMENDED.map((id) => all.find((group) => group.id === id)).filter((group): group is Group => !!group), [all]);
+  const recommended = useMemo(() => (catalog.city.market === "CL" ? CHILE_RECOMMENDED : CO_RECOMMENDED).map((id) => all.find((group) => group.id === id)).filter((group): group is Group => !!group), [all]);
   const products = results ?? (favoritesView ? all.filter((group) => favorites.includes(group.id)) : null);
 
   // the mobile book keeps a "searching" switch; here the field is always there
@@ -129,7 +129,8 @@ export function Store({ chapters, catalog, copy, money, lang, setLang, favorites
     [onFavoritesOpen, onQuery],
   );
 
-  const thumb = (id: string) => (id === "cl-coffee" ? CHILE_PACKS.PAZ : id === "cl-formats" ? photoSpec("cl-drip").src : CHILE_COVERS[id]?.src);
+  // the chapter's cover; a chapter without one (Colombian dishes Chile does not serve) shows its sheet's star
+  const thumb = (id: string) => (chileKey(id) === "cl-coffee" ? CHILE_PACKS.PAZ : chileKey(id) === "cl-formats" ? photoSpec("cl-drip").src : coverOf(id)?.src ?? heroOf(groupsOf(catalog, id).map((group) => group.lines), id)?.src);
   const city = catalog.city.name === "Santiago" ? "Santiago de Chile" : catalog.city.name;
 
   return (
@@ -229,8 +230,8 @@ export function Store({ chapters, catalog, copy, money, lang, setLang, favorites
               {chapters.map((category) => {
                 const groups = groupsOf(catalog, category.id);
                 const hero = heroOf(groups.map((group) => group.lines), category.id);
-                const coffee = category.id === "cl-coffee";
-                const formats = category.id === "cl-formats";
+                const coffee = chileKey(category.id) === "cl-coffee";
+                const formats = chileKey(category.id) === "cl-formats";
                 return (
                   <section key={category.id} className="st-section" data-chapter={category.id} data-testid={`store-${category.id}`}>
                     <div className="st-section-head">
@@ -313,14 +314,6 @@ export function Store({ chapters, catalog, copy, money, lang, setLang, favorites
   );
 }
 
-/** What a line is called next to its price: its size, or the blend it is made with. */
-function lineLabel(line: Group["lines"][number], group: Group, copy: Copy): string {
-  if (line.name.includes(" · ")) return line.name.split(" · ")[1]!;
-  if (line.id.endsWith("-so")) return copy.menu.originLine;
-  if (group.lines.some((other) => other.id.endsWith("-so"))) return copy.menu.blendLine;
-  return line.name;
-}
-
 /** A product in the shop's panel: its living photograph, what it is, its lines and prices. */
 function ProductPanel({ group, chapter, copy, money, favorite, onToggleFavorite, onClose }: { group: Group; chapter: string; copy: Copy; money: (value: number) => string; favorite: boolean; onToggleFavorite: () => void; onClose: () => void }) {
   const item = group.lines[0]!;
@@ -328,6 +321,7 @@ function ProductPanel({ group, chapter, copy, money, favorite, onToggleFavorite,
   const pairing = item.description.match(/(?:Maridaje|Pairing):\s*(.+?)\.?$/)?.[1];
   const description = item.description.replace(/\s*(?:Maridaje|Pairing):.*$/, "");
   const from = Math.min(...group.lines.map((line) => line.price));
+  const kind = kindOf(item.id);
   return (
     <div className="st-panel-inner">
       <div className="st-panel-top">
@@ -357,7 +351,7 @@ function ProductPanel({ group, chapter, copy, money, favorite, onToggleFavorite,
         <div className="st-panel-chips">
           {item.vegan ? <span className="chip" style={{ background: "rgba(111,143,75,0.14)", color: "var(--matcha)", minHeight: 30, fontSize: 12 }}>🌱 {copy.menu.plant}</span> : null}
           {item.nuts ? <span className="chip" style={{ background: "rgba(122,67,40,0.12)", color: "var(--roast)", minHeight: 30, fontSize: 12 }}>🥜</span> : null}
-          {item.profile ? <span className="chip" style={{ background: "var(--cream)", minHeight: 30, fontSize: 12 }}>{item.profile}</span> : null}
+          {kind ? <span className="chip" style={{ background: "var(--cream)", minHeight: 30, fontSize: 12 }}>{kind.trait} · {kind.origin}</span> : item.profile ? <span className="chip" style={{ background: "var(--cream)", minHeight: 30, fontSize: 12 }}>{item.profile}</span> : null}
           {visual.kind === "photo" && visual.photo.mood === "cold" ? <span className="chip" style={{ background: "rgba(120,180,255,0.18)", color: "#2a5a9a", minHeight: 30, fontSize: 12 }}>❄︎</span> : null}
         </div>
         {description ? <p className="st-panel-text">{description}</p> : null}

@@ -2,6 +2,7 @@ import type { MenuItem } from "@/src/data/menu";
 import { fold } from "@/src/format";
 
 import type { Group } from "./chile";
+import { chileKey } from "./colombia";
 
 /**
  * Search over the Chile menu that understands what the guest means, not only
@@ -55,6 +56,7 @@ const INTENTS: Intent[] = [
   { words: ["huevo", "huevos", "egg", "eggs", "cacerola"], chapters: ["cl-eggs"], ids: ["huevos-benedictinos", "huevos-fritos-tocino", "adicion-huevo"] },
   { words: ["pan", "panaderia", "bakery", "pastry", "croissant", "medialuna", "medialunas"], chapters: ["cl-bakery"] },
   { words: ["galleta", "galletas", "cookie", "cookies"], chapters: ["cl-cookies"] },
+  { words: ["sopa", "sopas", "crema", "cremas", "soup", "tomate"], chapters: ["cl-soup"] },
   { words: ["sin azucar", "sugar free", "no sugar", "sin gluten"], ids: ["alfajor", "canele"] },
   { words: ["vegetariano", "vegetariana", "vegetarianos", "vegano", "vegana", "vegetal", "vegan", "veggie", "vegetarian", "plant"], ids: ["bowl-vegetariano", "sandwich-vegetariano", "tostada-vegetariana", "tostada-palta-tomates", "bowl-caprese", "bowl-green"], test: (line) => line.vegan },
   { words: ["grano", "granos", "bolsa", "bolsas", "llevar", "para la casa", "casa", "beans", "bag", "bags", "take home", "whole bean"], chapters: ["cl-coffee", "cl-formats"] },
@@ -147,7 +149,7 @@ export function searchGroups(groups: readonly Group[], query: string): Group[] {
 }
 
 function intentMatches(intent: Intent, group: Group): boolean {
-  if (intent.chapters?.includes(group.chapterId)) return true;
+  if (intent.chapters?.includes(chileKey(group.chapterId))) return true;
   if (intent.ids?.includes(group.id)) return true;
   if (intent.test && group.lines.some(intent.test)) return true;
   return false;
