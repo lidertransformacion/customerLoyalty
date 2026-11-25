@@ -9,7 +9,7 @@ import { CATEGORIES_EN, ITEMS_EN } from "../i18n/menu-en";
  * (Bogotá) with price and availability overrides; what is not overridden
  * is the same product at the same price.
  */
-export type CityId = "bogota" | "medellin" | "cartagena" | "santiago";
+export type CityId = "bogota" | "medellin" | "cartagena" | "santiago" | "sura";
 
 export type City = { id: CityId; name: string; market: "CO" | "CL" };
 
@@ -18,6 +18,8 @@ export const CITIES: readonly City[] = [
   { id: "medellin", name: "Medellín", market: "CO" },
   { id: "cartagena", name: "Cartagena", market: "CO" },
   { id: "santiago", name: "Santiago", market: "CL" },
+  // a corporate corner, not a city: only the Sura build serves it (core/sura.ts)
+  { id: "sura", name: "Sura", market: "CO" },
 ];
 
 export type CityOverride = {

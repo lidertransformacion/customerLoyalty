@@ -5,7 +5,7 @@ import { pointsForPrice } from "@/src/data/program";
 
 import { groupsOf } from "../core/chile";
 import { kindOf } from "../core/colombia";
-import { menuOnly } from "../core/mode";
+import { menuOnly, showPrices, suraBuild } from "../core/mode";
 import { visualFor } from "../core/visuals";
 import { useCopy, useLocale } from "../i18n";
 import { LivingPhoto } from "../motion/living-photo";
@@ -17,6 +17,8 @@ import { Press } from "../ui/press";
 import { Screen } from "../ui/screen";
 
 import { lineLabel } from "../sheets/minimal";
+import { AddControl, ComboChooser } from "../sheets/sura-add";
+import { useSura } from "../state/sura";
 import "./item.css";
 import { useBack } from "../ui/use-back";
 
@@ -29,6 +31,7 @@ export function ItemScreen() {
   const { id } = useParams();
   const catalog = useCatalog();
   const { account, dispatch } = useAccount();
+  const sura = useSura();
   const item = catalog.items.find((entry) => entry.id === id);
 
   if (!item) {
@@ -118,7 +121,7 @@ export function ItemScreen() {
                   ))}
                 </ul>
               ) : null}
-              <div className="row" style={{ justifyContent: "space-between", marginTop: 18, display: lines ? "none" : undefined }}>
+              <div className="row" style={{ justifyContent: "space-between", marginTop: 18, display: lines || !showPrices ? "none" : undefined }}>
                 <div className="serif" style={{ fontSize: 30 }} data-testid="item-price">{item.price > 0 ? money(item.price) : copy.menu.askAtBar}</div>
                 {!menuOnly ? <div style={{ textAlign: "right", fontSize: 13, color: "var(--roast)", maxWidth: 170, lineHeight: 1.3 }}>{copy.menu.earnsAtCounter(points)}</div> : null}
               </div>
@@ -128,8 +131,21 @@ export function ItemScreen() {
         </div>
       </div>
 
-      <div className={`dock${menuOnly ? " it-dock-back" : ""}`} style={{ position: "absolute", bottom: 0, padding: "12px 20px calc(var(--sab) + 16px)", background: "linear-gradient(180deg, rgba(255,255,255,0), #fff 40%)", display: "flex", gap: 10 }}>
-        {menuOnly ? (
+      <div className={`dock${menuOnly && !suraBuild ? " it-dock-back" : ""}`} style={{ position: "absolute", bottom: 0, padding: "12px 20px calc(var(--sab) + 16px)", background: "linear-gradient(180deg, rgba(255,255,255,0), #fff 40%)", display: "flex", gap: 10 }}>
+        {suraBuild ? (
+          // at Sura the product goes into the order from here; once it is in, the order is one tap away
+          sura.quantityOf(item.id) > 0 ? (
+            <>
+              <AddControl item={item} big />
+              <Press className="su-add big" onClick={() => navigate("/pedido")} data-testid="item-see-order">{copy.sura.seeOrder}</Press>
+            </>
+          ) : (
+            <>
+              <Press className="ghost-button" style={{ width: "auto", padding: "0 22px" }} onClick={() => back()} data-testid="item-back-bottom">{copy.back}</Press>
+              <AddControl item={item} big />
+            </>
+          )
+        ) : menuOnly ? (
           <Press className="ink-button" onClick={() => back()} data-testid="item-back-bottom">{copy.back}</Press>
         ) : account ? (
           <>
@@ -143,6 +159,7 @@ export function ItemScreen() {
           <Press className="ink-button" onClick={() => navigate("/signup")} data-testid="item-signup">{copy.order.createAccount}</Press>
         )}
       </div>
+      {suraBuild ? <ComboChooser /> : null}
     </Screen>
   );
 }

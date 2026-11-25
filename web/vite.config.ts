@@ -1,3 +1,4 @@
+import { realpathSync } from "node:fs";
 import { fileURLToPath, URL } from "node:url";
 
 import react from "@vitejs/plugin-react";
@@ -25,10 +26,36 @@ function devWhere() {
   };
 }
 
+/**
+ * Local stand-in for the orders sheet's web app (web/sura/Code.gs): numbers the orders and prints them in the
+ * terminal, so the Sura flow runs end to end in development without writing to the sheet.
+ */
+function devSuraOrders() {
+  let number = 0;
+  return {
+    name: "dev-sura-orders",
+    configureServer(server: { middlewares: { use: (path: string, handler: (req: { on: (event: string, listener: (chunk?: unknown) => void) => void }, res: { setHeader: (k: string, v: string) => void; end: (body: string) => void }) => void) => void } }) {
+      server.middlewares.use("/api/sura-order", (req, res) => {
+        let body = "";
+        req.on("data", (chunk) => {
+          body += String(chunk);
+        });
+        req.on("end", () => {
+          number += 1;
+          console.log(`[sura] pedido #${number} ${body}`);
+          res.setHeader("content-type", "application/json; charset=utf-8");
+          res.end(JSON.stringify({ ok: true, number }));
+        });
+      });
+    },
+  };
+}
+
 export default defineConfig({
   plugins: [
     react(),
     devWhere(),
+    devSuraOrders(),
     VitePWA({
       registerType: "autoUpdate",
       // the manifest icons are not pushed into the precache by themselves: the ones the phone needs are in includeAssets
@@ -99,7 +126,8 @@ export default defineConfig({
     alias: { "@": root },
   },
   server: {
-    fs: { allow: [root] },
+    // a worktree links node_modules to the main checkout: the fonts live there
+    fs: { allow: [root, realpathSync(fileURLToPath(new URL("./node_modules", import.meta.url)))] },
   },
   build: {
     target: "es2022",

@@ -8,13 +8,14 @@ import { pointsForPrice } from "@/src/data/program";
 import { Book } from "../book/book";
 import "../sheets/chile.css";
 import { MinimalMenu } from "../sheets/minimal";
+import { CartBar, ComboChooser } from "../sheets/sura-add";
 import "../sheets/minimal.css";
 import { ChileDefs } from "../sheets/effects";
 import { buildBook, Verso } from "../book/pages";
 import { filterCatalog, type MenuFilter } from "../core/catalog";
 import { haptics } from "../core/haptics";
 import { readVisit } from "../core/market";
-import { menuOnly } from "../core/mode";
+import { menuOnly, suraBuild } from "../core/mode";
 import { visualFor } from "../core/visuals";
 import { useCopy, useLocale } from "../i18n";
 import { LivingPhoto } from "../motion/living-photo";
@@ -123,6 +124,8 @@ export function MenuScreen() {
       <Screen testId="menu" className="full">
         <ChileDefs />
         <MinimalMenu catalog={catalog} copy={copy} money={money} lang={lang} setLang={setLang} onItem={onItem} />
+        {suraBuild ? <CartBar /> : null}
+        {suraBuild ? <ComboChooser /> : null}
       </Screen>
     );
   }

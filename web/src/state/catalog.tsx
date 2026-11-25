@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { catalogFor, cityById, translateCatalog, type Catalog, type CityId } from "../core/catalog";
+import { suraBuild } from "../core/mode";
 import { cityFromHint, cityFromPosition, fetchIpHint } from "../core/geo";
 import type { LatLng } from "../core/stores";
 import { useLocale } from "../i18n";
@@ -106,7 +107,8 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
 
   // The menu belongs to the country: a guest in Chile never gets a Colombian city, and the other way round.
   const chosen = cityById(state.id);
-  const cityId: CityId = chosen.market === market.id ? chosen.id : market.id === "CL" ? "santiago" : "bogota";
+  // the Sura build serves the Sura menu wherever it is opened
+  const cityId: CityId = suraBuild ? "sura" : chosen.market === market.id ? chosen.id : market.id === "CL" ? "santiago" : "bogota";
 
   // a QR or a choice of a Chilean city also switches the money and the legal text to Chile
   useEffect(() => {

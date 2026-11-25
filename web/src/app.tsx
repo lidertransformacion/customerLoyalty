@@ -4,7 +4,7 @@ import { Navigate, Route, Routes, useLocation } from "react-router";
 
 import { productionBlocked } from "@/src/data/program";
 
-import { menuOnly } from "./core/mode";
+import { menuOnly, suraBuild } from "./core/mode";
 import { useCopy } from "./i18n";
 import { ItemScreen } from "./screens/item";
 import { MenuScreen } from "./screens/menu";
@@ -19,6 +19,7 @@ const Landing = lazy(() => import("./screens/landing").then((m) => ({ default: m
 const Opening = lazy(() => import("./screens/opening").then((m) => ({ default: m.Opening })));
 const OrderScreen = lazy(() => import("./screens/order").then((m) => ({ default: m.OrderScreen })));
 const SettingsScreen = lazy(() => import("./screens/settings").then((m) => ({ default: m.SettingsScreen })));
+const SuraOrderScreen = lazy(() => import("./screens/sura-order").then((m) => ({ default: m.SuraOrderScreen })));
 const SignupScreen = lazy(() => import("./screens/signup").then((m) => ({ default: m.SignupScreen })));
 const WalletScreen = lazy(() => import("./screens/wallet").then((m) => ({ default: m.WalletScreen })));
 const TabBar = lazy(() => import("./ui/tabbar").then((m) => ({ default: m.TabBar })));
@@ -57,6 +58,7 @@ export function App() {
             <Route path="/chile" element={<MenuScreen />} />
             <Route path="/menu" element={<Navigate to={{ pathname: "/", search: location.search }} replace />} />
             <Route path="/item/:id" element={<ItemScreen />} />
+            {suraBuild ? <Route path="/pedido" element={<Suspense fallback={null}><SuraOrderScreen /></Suspense>} /> : null}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </AnimatePresence>

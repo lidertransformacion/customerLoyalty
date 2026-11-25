@@ -64,7 +64,14 @@ const SHARED_COVERS = new Set(["co-filter", "co-espresso", "co-matcha", "co-othe
 
 /** The cover of a chapter: the Colombian cut when it has one, else the Chile cover it shares, else none. */
 export function coverOf(chapterId: string): PhotoSpec | undefined {
-  return CO_COVERS[chapterId] ?? CHILE_COVERS[coverKey(chapterId)];
+  return LENT_COVERS[chapterId] ?? CO_COVERS[chapterId] ?? CHILE_COVERS[coverKey(chapterId)];
+}
+
+/** Covers of the chapters of another menu built on this one (the Sura corner), by chapter id: a Colombian cover by its chapter, or a photograph of its own. */
+const LENT_COVERS: Record<string, PhotoSpec> = {};
+export function lendCover(chapterId: string, from: string | PhotoSpec): void {
+  const cover = typeof from === "string" ? CO_COVERS[from] : from;
+  if (cover) LENT_COVERS[chapterId] = cover;
 }
 
 export function coverKey(chapterId: string): string {

@@ -13,7 +13,7 @@ import { BrowserRouter } from "react-router";
 import { registerSW } from "virtual:pwa-register";
 
 import { App } from "./app";
-import { menuOnly } from "./core/mode";
+import { menuOnly, suraBuild } from "./core/mode";
 import "./core/cities";
 import "./core/chile";
 import "./core/colombia";
@@ -21,9 +21,11 @@ import { LocaleProvider } from "./i18n";
 import { AccountProvider } from "./state/account";
 import { CatalogProvider } from "./state/catalog";
 import { PresenceProvider } from "./state/presence";
+import { SuraProvider } from "./state/sura";
 
 registerSW({ immediate: true });
 document.documentElement.classList.toggle("menu-only", menuOnly);
+document.documentElement.classList.toggle("sura", suraBuild);
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -32,7 +34,9 @@ createRoot(document.getElementById("root")!).render(
         <CatalogProvider>
           <AccountProvider>
             <PresenceProvider>
-              <App />
+              <SuraProvider>
+                <App />
+              </SuraProvider>
             </PresenceProvider>
           </AccountProvider>
         </CatalogProvider>

@@ -9,6 +9,7 @@ import type { Catalog } from "../core/catalog";
 import { groupsOf, type Group } from "../core/chile";
 import { CHILE_RECOMMENDED } from "../core/chile-data";
 import { chileKey, CO_RECOMMENDED, coverOf, kindOf } from "../core/colombia";
+import { showPrices, suraBuild } from "../core/mode";
 import { searchGroups } from "../core/search";
 import { CHILE_PACKS, photoSpec } from "../core/photos";
 import { visualFor } from "../core/visuals";
@@ -19,6 +20,7 @@ import { useWide } from "../ui/use-wide";
 import { Product } from "../motion/product";
 import { ChileSpread } from "./spread";
 import { Store } from "./store";
+import { AddControl } from "./sura-add";
 
 type Lang = "es" | "en";
 
@@ -201,7 +203,7 @@ export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { c
       // the last sheet says what the Colombian menu says on its last page
       <div key="colophon" className="book-page-inner mn-sheet mn-colophon" data-testid="book-colophon">
         <Beans profile="LIBRE" size={180} />
-        <p>{copy.menu.notCharged}</p>
+        <p>{suraBuild ? copy.sura.colophon : copy.menu.notCharged}</p>
       </div>,
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -323,6 +325,8 @@ function CoverSheet({ copy, active, auto, warm, onStart }: { copy: Copy; active:
       <div className="mn-cover-art">
         <ChileSpread n={1} view="full" label={copy.brand} />
       </div>
+      {/* the Sura corner signs its cover, quietly, in a corner */}
+      {suraBuild ? <img className="su-cover-logo" src="/brand/sura-white.png" alt="Sura" decoding="async" data-testid="cover-sura" /> : null}
       <button className="mn-cover-tap" onClick={onStart} aria-label={copy.book.open} data-testid="book-open" />
       {auto ? (
         <div className="mn-load" aria-hidden="true">
@@ -380,7 +384,7 @@ export function ProductCard({ group, index, note, copy, money, favorite, onToggl
           </span>
         ) : (
           <>
-            <span className="mn-pcard-price">{from > 0 ? money(from) : copy.menu.askAtBar}</span>
+            {showPrices ? <span className="mn-pcard-price">{from > 0 ? money(from) : copy.menu.askAtBar}</span> : null}
             {note ? <span className="mn-pcard-note">{note}</span> : null}
           </>
         )}
@@ -395,6 +399,12 @@ export function ProductCard({ group, index, note, copy, money, favorite, onToggl
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill={favorite ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinejoin="round"><path d="M12 20.5s-7.5-4.6-7.5-10A4.2 4.2 0 0 1 12 8.2a4.2 4.2 0 0 1 7.5 2.3c0 5.4-7.5 10-7.5 10Z" /></svg>
       </button>
+      {/* at Sura a product goes into the order from its card: one line each, so the card's line is the product */}
+      {suraBuild ? (
+        <div className="su-card-add">
+          <AddControl item={first} />
+        </div>
+      ) : null}
     </motion.article>
   );
 }
@@ -571,7 +581,7 @@ function IndexSheet({
                   onClick={() => onOpen(i)}
                   data-testid={`index-${category.id}`}
                 >
-                  <span className="mn-ccard-art" style={{ background: coffee || formats ? "#fff" : (TINT[chileKey(category.id)] ?? "#f4f1ec") }}>
+                  <span className="mn-ccard-art" style={{ background: coffee || formats || suraBuild ? "#fff" : (TINT[chileKey(category.id)] ?? "#f4f1ec") }}>
                     {coffee ? (
                       PACK_PROFILES.map((profile, k) => <img key={profile} src={CHILE_PACKS[profile]} alt="" className="cut" decoding="async" style={{ animationDelay: `${k * 0.4}s` }} />)
                     ) : formats ? (
@@ -649,7 +659,7 @@ function ChapterPage({
           ) : null}
         </div>
         <h1 className="mn-title">{category.name}</h1>
-        {category.intro ? <p className="mn-intro">{category.intro}</p> : null}
+        {category.intro && (showPrices || !category.intro.includes("$")) ? <p className="mn-intro">{category.intro}</p> : null}
         <div className="mn-grid" data-testid={`grid-${category.id}`}>
           {groups.map((group, i) => (
             <ProductCard

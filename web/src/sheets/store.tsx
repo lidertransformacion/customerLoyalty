@@ -8,7 +8,7 @@ import type { Catalog } from "../core/catalog";
 import { groupsOf, type Group } from "../core/chile";
 import { CHILE_RECOMMENDED } from "../core/chile-data";
 import { chileKey, CO_RECOMMENDED, coverOf, kindOf } from "../core/colombia";
-import { menuOnly } from "../core/mode";
+import { menuOnly, showPrices, suraBuild } from "../core/mode";
 import { CHILE_PACKS, photoSpec } from "../core/photos";
 import { searchGroups } from "../core/search";
 import { visualFor } from "../core/visuals";
@@ -209,6 +209,8 @@ export function Store({ chapters, catalog, copy, money, lang, setLang, favorites
             <>
               <section className="st-hero" data-testid="store-hero">
                 <img src="/chile/img/p1-1.webp" alt="" decoding="async" />
+                {/* the Sura corner signs its banner, quietly, in a corner: the same mark as the phone's cover */}
+                {suraBuild ? <img className="su-cover-logo wide" src="/brand/sura-white.png" alt="Sura" decoding="async" data-testid="cover-sura" /> : null}
                 <div className="st-hero-text">
                   <span className="st-hero-kicker">{city}</span>
                   <h1>{copy.brandFull}</h1>
@@ -246,7 +248,7 @@ export function Store({ chapters, catalog, copy, money, lang, setLang, favorites
                       </div>
                       <div className="st-section-text">
                         <h2 className="mn-title">{category.name}</h2>
-                        {category.intro ? <p className="mn-intro">{category.intro}</p> : null}
+                        {category.intro && (showPrices || !category.intro.includes("$")) ? <p className="mn-intro">{category.intro}</p> : null}
                         <span className="mn-ccard-count">{copy.book.items(groups.length)}</span>
                       </div>
                     </div>
@@ -271,7 +273,7 @@ export function Store({ chapters, catalog, copy, money, lang, setLang, favorites
 
               <footer className="st-colophon" data-testid="book-colophon">
                 <Beans profile="LIBRE" size={140} />
-                <p>{copy.menu.notCharged}</p>
+                <p>{suraBuild ? copy.sura.colophon : copy.menu.notCharged}</p>
               </footer>
             </>
           )}
@@ -370,9 +372,9 @@ function ProductPanel({ group, chapter, copy, money, favorite, onToggleFavorite,
               </li>
             ))}
           </ul>
-        ) : (
+        ) : showPrices ? (
           <div className="serif st-panel-price" data-testid="item-price">{from > 0 ? money(from) : copy.menu.askAtBar}</div>
-        )}
+        ) : null}
         {!menuOnly ? <div className="st-panel-points">{copy.menu.earnsAtCounter(pointsForPrice(from))}</div> : null}
       </Glass>
     </div>
