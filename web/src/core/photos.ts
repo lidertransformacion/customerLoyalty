@@ -1,3 +1,4 @@
+import { SURA_STUDIO } from "./sura-studio";
 import type { PhotoSpec } from "../motion/living-photo";
 import { CHILE_PHOTOS } from "./chile-photos";
 import { CHILE_STUDIO } from "./chile-studio";
@@ -121,5 +122,5 @@ export const CLIPS: Record<string, PhotoSpec> = {
 };
 
 export function photoSpec(name: string): PhotoSpec {
-  return PHOTOS[name] ?? CHILE_PHOTOS[name] ?? CHILE_STUDIO[name] ?? CO_STUDIO_PHOTOS[name] ?? { src: photoUrl(name), mood: "still" };
+  return PHOTOS[name] ?? CHILE_PHOTOS[name] ?? CHILE_STUDIO[name] ?? CO_STUDIO_PHOTOS[name] ?? SURA_STUDIO[name] ?? { src: photoUrl(name), mood: "still" };
 }
