@@ -8,8 +8,7 @@ const CEDULA_KEY = "libertario-sura-cedula-v1";
 const NAME_KEY = "libertario-sura-name-v1";
 import { readSuraArea, rememberSuraArea } from "./sura-area";
 
-/** In development Vite answers this path itself (vite.config.ts), so the whole flow runs without the sheet. */
-const ORDERS_URL = import.meta.env.VITE_SURA_ORDERS_URL || (import.meta.env.DEV ? "/api/sura-order" : "");
+import { ORDERS_URL } from "./sura-url";
 
 function read(store: "local" | "session", key: string): string | null {
   try {
@@ -72,6 +71,8 @@ type Api = {
   problem: OrderProblem | null;
   sending: boolean;
   failed: boolean;
+  /** The sheet said this ID number already ordered today. */
+  already: boolean;
   sent: SentOrder | null;
   send: () => Promise<void>;
   /** Leaves the thank-you screen behind. */
@@ -88,6 +89,7 @@ export function SuraProvider({ children }: { children: ReactNode }) {
   const [area, setAreaState] = useState<SuraArea | null>(choice.area);
   const [sending, setSending] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [already, setAlready] = useState(false);
   const [sent, setSent] = useState<SentOrder | null>(null);
   // one id per order: a second tap after a lost answer does not write the order twice
   const attempt = useRef(newId());
@@ -138,10 +140,12 @@ export function SuraProvider({ children }: { children: ReactNode }) {
     if (sending || problem || !area) return;
     setSending(true);
     setFailed(false);
+    setAlready(false);
     const result = await sendOrder(buildOrder(lines, area, name, cedula, attempt.current, new Date()), ORDERS_URL, (input, init) => fetch(input, init));
     setSending(false);
     if (!result.ok) {
-      setFailed(true);
+      if (result.already) setAlready(true);
+      else setFailed(true);
       return;
     }
     setSent({ number: result.number, lines, total, area: area.name });
@@ -153,11 +157,12 @@ export function SuraProvider({ children }: { children: ReactNode }) {
   const finish = useCallback(() => {
     setSent(null);
     setFailed(false);
+    setAlready(false);
   }, []);
 
   const value = useMemo<Api>(
-    () => ({ cart, count: cartCount(cart), lines, total, quantityOf: unitsOf, add, remove, choosing, choose, closeChooser, name, setName, cedula, setCedula, area, areaFixed: choice.fixed, setArea, problem, sending, failed, sent, send, finish }),
-    [cart, lines, total, unitsOf, add, remove, choosing, choose, closeChooser, name, setName, cedula, setCedula, area, choice.fixed, setArea, problem, sending, failed, sent, send, finish],
+    () => ({ cart, count: cartCount(cart), lines, total, quantityOf: unitsOf, add, remove, choosing, choose, closeChooser, name, setName, cedula, setCedula, area, areaFixed: choice.fixed, setArea, problem, sending, failed, already, sent, send, finish }),
+    [cart, lines, total, unitsOf, add, remove, choosing, choose, closeChooser, name, setName, cedula, setCedula, area, choice.fixed, setArea, problem, sending, failed, already, sent, send, finish],
   );
   return <SuraContext.Provider value={value}>{children}</SuraContext.Provider>;
 }

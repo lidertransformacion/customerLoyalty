@@ -27,11 +27,39 @@ function devWhere() {
 }
 
 /**
- * Local stand-in for the orders sheet's web app (web/sura/Code.gs): numbers the orders and prints them in the
- * terminal, so the Sura flow runs end to end in development without writing to the sheet.
+ * Local stand-in for the orders sheet's web app (web/sura/Code.gs): it numbers the orders, keeps them in memory
+ * and answers the bar's board (login with barra / barra, list, deliver, return, cancel, printed), so the Sura flow and
+ * the board run end to end in development without writing to the sheet.
  */
 function devSuraOrders() {
-  let number = 0;
+  type Row = { number: number; at: string; cedula: string; name: string; area: string; items: unknown[]; delivered: boolean; deliveredAt: string; printedAt: string };
+  const rows: Row[] = [];
+  const TOKEN = "dev-token";
+  const answer = (body: Record<string, unknown>): Record<string, unknown> => {
+    if (body.action === undefined) {
+      // one order per ID number a day, as the sheet does
+      if (rows.some((entry) => entry.cedula === String(body.cedula ?? "") && entry.at.slice(0, 10) === new Date().toISOString().slice(0, 10))) return { ok: false, error: "ya pidió hoy" };
+      const row: Row = { number: rows.length + 1, at: new Date().toISOString(), cedula: String(body.cedula ?? ""), name: String(body.nombre ?? ""), area: String(body.area ?? ""), items: Array.isArray(body.items) ? body.items : [], delivered: false, deliveredAt: "", printedAt: "" };
+      rows.push(row);
+      console.log(`[sura] pedido #${row.number} ${JSON.stringify(body)}`);
+      return { ok: true, number: row.number };
+    }
+    if (body.action === "login") return body.user === "barra" && body.password === "barra" ? { ok: true, token: TOKEN, name: "Barra Calle 100" } : { ok: false, error: "credenciales" };
+    if (body.token !== TOKEN) return { ok: false, error: "sesion" };
+    if (body.action === "list") return { ok: true, orders: rows };
+    const row = rows.find((entry) => entry.number === Number(body.number));
+    if (!row) return { ok: false, error: "no existe" };
+    if (body.action === "deliver") Object.assign(row, { delivered: true, deliveredAt: new Date().toISOString() });
+    else if (body.action === "return") Object.assign(row, { delivered: false, deliveredAt: "" });
+    else if (body.action === "cancel") rows.splice(rows.indexOf(row), 1);
+    else if (body.action === "printed") {
+      if (row.printedAt && body.force !== true) return { ok: true, claimed: false };
+      row.printedAt = new Date().toISOString();
+      return { ok: true, claimed: true };
+    } else if (body.action === "unprinted") row.printedAt = "";
+    else return { ok: false, error: "acción desconocida" };
+    return { ok: true };
+  };
   return {
     name: "dev-sura-orders",
     configureServer(server: { middlewares: { use: (path: string, handler: (req: { on: (event: string, listener: (chunk?: unknown) => void) => void }, res: { setHeader: (k: string, v: string) => void; end: (body: string) => void }) => void) => void } }) {
@@ -41,10 +69,12 @@ function devSuraOrders() {
           body += String(chunk);
         });
         req.on("end", () => {
-          number += 1;
-          console.log(`[sura] pedido #${number} ${body}`);
           res.setHeader("content-type", "application/json; charset=utf-8");
-          res.end(JSON.stringify({ ok: true, number }));
+          try {
+            res.end(JSON.stringify(answer(JSON.parse(body) as Record<string, unknown>)));
+          } catch {
+            res.end(JSON.stringify({ ok: false, error: "pedido vacío" }));
+          }
         });
       });
     },

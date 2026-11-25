@@ -339,7 +339,8 @@ export function buildOrder(lines: readonly OrderLine[], area: SuraArea, name: st
   };
 }
 
-export type Sent = { ok: true; number: number } | { ok: false };
+/** `already`: the sheet refused the order because that ID number already ordered today. */
+export type Sent = { ok: true; number: number } | { ok: false; already?: true };
 
 /**
  * Posts the order to the sheet's web app. The body goes as plain text so the
@@ -352,6 +353,7 @@ export async function sendOrder(order: SuraOrder, url: string, post: typeof fetc
     if (!response.ok) return { ok: false };
     const data: unknown = await response.json();
     if (data && typeof data === "object" && "ok" in data && data.ok === true && "number" in data && typeof data.number === "number") return { ok: true, number: data.number };
+    if (data && typeof data === "object" && "error" in data && data.error === "ya pidió hoy") return { ok: false, already: true };
     return { ok: false };
   } catch {
     return { ok: false };

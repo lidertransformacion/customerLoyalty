@@ -137,6 +137,8 @@ describe("the order", () => {
     const drop = (async () => {
       throw new Error("offline");
     }) as typeof fetch;
+    const twice = (async () => ({ ok: true, json: async () => ({ ok: false, error: "ya pidió hoy" }) })) as unknown as typeof fetch;
+    expect(await sendOrder(order, "https://example.test", twice)).toEqual({ ok: false, already: true });
     expect(await sendOrder(order, "", refuse)).toEqual({ ok: false });
     expect(await sendOrder(order, "https://example.test", refuse)).toEqual({ ok: false });
     expect(await sendOrder(order, "https://example.test", drop)).toEqual({ ok: false });

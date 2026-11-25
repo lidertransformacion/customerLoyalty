@@ -37,3 +37,20 @@ npx wrangler pages deploy dist --project-name libertario-sura --branch sura
 ```
 
 Es un proyecto aparte de `libertario-carta` (la carta de Colombia) y de `libertario-corners`. El QR de cada área apunta a `https://libertario-sura.pages.dev/?area=<id>`.
+
+## La página de comandas (`/comandas`)
+
+La barra ya no trabaja sobre el Sheet: abre `https://libertario-sura.pages.dev/comandas` (directo, no dentro de Odoo) y entra con un usuario de la hoja «usuarios». El Sheet queda como la base: «Cola» es la lista de todos los pedidos y «Pedidos» lo que lee la automatización de Odoo.
+
+- **Nuevos**: los tiquetes pendientes, el más antiguo primero. «Entregado» lo pasa al historial y escribe sus filas en «Pedidos».
+- **Entregados**: el historial (hoy o todos). «Devolver» borra sus filas de «Pedidos» y lo deja pendiente otra vez; si Odoo ya tomó alguna fila (`estado_odoo` o `factura_odoo` con algo), no se puede devolver.
+- **Impresión**: en «Impresora» se pone la IP de la Epson de ese equipo. Con «Imprimir sola» cada comanda nueva sale una vez (el Sheet anota la hora en la columna «Impreso» de «Cola», así dos equipos no la sacan dos veces). «Reimprimir» la saca de nuevo.
+- La comanda se envía como la envía el punto de venta de Odoo: `POST https://<IP>/cgi-bin/epos/service.cgi?devid=local_printer` con una imagen y un corte (ePOS-Print). El equipo debe haber aceptado el certificado de la impresora (abrir `https://<IP>` una vez); si no responde por https, se intenta por la red local con el permiso del navegador.
+
+### Usuarios
+
+Hoja «usuarios»: `usuario`, `clave`, `nombre`, `activo`. La clave se escribe tal cual en la columna B y el código la cambia por su huella (`sha256$…`): la clave no queda en el Sheet. Para cambiarla se escribe una nueva encima; las sesiones abiertas con la anterior se cierran. Desmarcar `activo` saca al usuario. Cinco intentos fallidos cierran la entrada diez minutos.
+
+### En local
+
+`VITE_SURA_ORDERS_URL= npx vite --port 5175` usa el servidor de mentira de `vite.config.ts` (usuario `barra`, clave `barra`) y no toca el Sheet.

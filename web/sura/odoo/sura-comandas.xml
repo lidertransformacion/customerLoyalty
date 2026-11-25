@@ -1,0 +1,35 @@
+<t t-name="website.sura-comandas">
+    <t t-call="website.layout">
+        <div id="wrap" class="oe_structure">
+            <style>
+                /* La pagina no se desplaza: el tablero se desplaza por dentro. */
+                html, body { overflow: hidden !important; }
+                /* El tablero de la barra ocupa toda la pantalla en cualquier equipo: ya trae su propio encabezado. */
+                #sura-comandas {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100vw;
+                    height: 100vh;
+                    height: 100dvh;
+                    border: 0;
+                    margin: 0;
+                    padding: 0;
+                    background: #1d2e54;
+                    z-index: 2147483000;
+                }
+                /* Lo que Odoo pone encima despues: la barra de cookies y el chat. */
+                #website_cookies_bar, .o_livechat_button, .o-livechat-root, .o_cookies_bar { display: none !important; }
+                footer, #footer, .o_footer { display: none !important; }
+            </style>
+            <!-- local-network-access: deja que el tablero hable con la impresora Epson de la red de la barra.
+                 autoplay: deja sonar el aviso de comanda nueva. -->
+            <iframe id="sura-comandas" title="Comandas Sura - Calle 100" src="https://libertario-sura.pages.dev/comandas" allow="local-network-access; autoplay; clipboard-write" loading="eager">Comandas de Libertario para Sura</iframe>
+            <noscript>
+                <p style="padding: 24px; text-align: center;">
+                    <a href="https://libertario-sura.pages.dev/comandas">Abrir las comandas de Sura</a>
+                </p>
+            </noscript>
+        </div>
+    </t>
+</t>

@@ -23,7 +23,7 @@ export function SuraOrderScreen() {
   const { lang } = useLocale();
   const navigate = useNavigate();
   const back = useBack("/");
-  const { lines, area, areaFixed, setArea, name, setName, cedula, setCedula, problem, sending, failed, sent, send, finish } = useSura();
+  const { lines, area, areaFixed, setArea, name, setName, cedula, setCedula, problem, sending, failed, already, sent, send, finish } = useSura();
   const [nudge, setNudge] = useState<OrderProblem | null>(null);
   const areaStep = useRef<HTMLElement>(null);
   const cedulaField = useRef<HTMLInputElement>(null);
@@ -186,6 +186,7 @@ export function SuraOrderScreen() {
 
           <div className="dock su-dock">
             {failed ? <p className="su-failed" role="alert" data-testid="sura-failed">{copy.sura.failed}</p> : null}
+            {already ? <p className="su-failed" role="alert" data-testid="sura-already">{copy.sura.already}</p> : null}
             <Press className="su-send" onClick={onSend} disabled={sending} data-testid="sura-send">
               {sending ? copy.sura.sending : copy.sura.send}
             </Press>
