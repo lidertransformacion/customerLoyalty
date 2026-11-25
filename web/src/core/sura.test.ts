@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { catalogFor, translateCatalog } from "./catalog";
 import { groupsOf } from "./chile";
-import { addToCart, areaById, areasBySite, buildOrder, cartCount, cartLines, changeQuantity, cleanCart, cleanCedula, comboById, lineKey, linesTotal, MAX_PRODUCTS, MAX_QUANTITY, orderProblem, picksComplete, quantityOf, sendOrder, SURA_AREAS, SURA_COMBOS, validCedula, type Cart } from "./sura";
+import { addToCart, areaById, areasBySite, chapterOf, cleanName, menuFor, buildOrder, cartCount, cartLines, removeFromCart, cleanCart, cleanCedula, comboById, lineKey, linesTotal, MAX_PRODUCTS, MAX_QUANTITY, orderProblem, picksComplete, quantityOf, sendOrder, SURA_AREAS, SURA_COMBOS, validCedula, type Cart } from "./sura";
 
 const catalog = catalogFor("sura");
 const snack = comboById("su-refrigerio-galleta")!;
@@ -26,6 +26,19 @@ describe("the Sura menu", () => {
     for (const group of groups) expect(group.lines).toHaveLength(1);
   });
 
+  it("shows each service only what it may order: breakfasts or refrigerios, in one chapter", () => {
+    const menus = SURA_AREAS.map((area) => [area.id, menuFor(catalog, area).categories.map((c) => c.id).join(), menuFor(catalog, area).items.length]);
+    expect(menus).toEqual([
+      ["c100-ejecutivos", "co-su-desayunos", 4],
+      ["c100-ensayos", "co-su-desayunos", 4],
+      ["c100-muestras", "co-su-refrigerios", 3],
+      ["usaquen-arl", "co-su-desayunos", 4],
+      ["usaquen-muestras", "co-su-refrigerios", 3],
+    ]);
+    expect(menuFor(catalog, null).categories).toHaveLength(2);
+    expect(chapterOf(SURA_AREAS[2]!)).toBe("co-su-refrigerios");
+  });
+
   it("gives every combo and option a photograph, and reads in English", () => {
     for (const combo of SURA_COMBOS) {
       expect(combo.photo).toMatch(/^(co|su)-p-/);
@@ -37,7 +50,6 @@ describe("the Sura menu", () => {
 
 describe("the cart", () => {
   const coffee = { bebida: "americano" };
-  const tea = { bebida: "infusion" };
 
   it("asks for every choice before a combo goes in", () => {
     expect(picksComplete(snack, {})).toBe(false);
@@ -47,37 +59,31 @@ describe("the cart", () => {
     expect(addToCart([], snack, {})).toEqual([]);
   });
 
-  it("keeps the same combo chosen two ways as two lines", () => {
+  it("holds one combo, once: adding again or adding another replaces it", () => {
     let cart: Cart = addToCart([], snack, coffee);
     cart = addToCart(cart, snack, coffee);
-    cart = addToCart(cart, snack, tea);
-    cart = addToCart(cart, executive, {});
-    expect(cart.map((line) => [line.key, line.quantity])).toEqual([["su-refrigerio-galleta|americano", 2], ["su-refrigerio-galleta|infusion", 1], ["su-ejecutivo", 1]]);
-    expect(cartCount(cart)).toBe(4);
-    expect(quantityOf(cart, "su-refrigerio-galleta")).toBe(3);
-    cart = changeQuantity(cart, lineKey(snack, tea), -1);
-    expect(cart).toHaveLength(2);
+    expect(cart.map((line) => [line.key, line.quantity])).toEqual([["su-refrigerio-galleta|americano", 1]]);
+    cart = addToCart(cart, arepa, { bebida: "infusion" });
+    expect(cart.map((line) => line.key)).toEqual(["su-refrigerio-arepa|infusion"]);
+    expect(cartCount(cart)).toBe(MAX_PRODUCTS * MAX_QUANTITY);
+    expect(quantityOf(cart, "su-refrigerio-arepa")).toBe(1);
+    expect(quantityOf(cart, "su-refrigerio-galleta")).toBe(0);
+    // a combo that is missing a choice leaves the order as it was
+    expect(addToCart(cart, eggs, { bebida: "jugo" })).toBe(cart);
+    expect(removeFromCart(cart, lineKey(arepa, { bebida: "infusion" }))).toEqual([]);
   });
 
-  it("stops at nine units and at eight lines", () => {
-    let cart: Cart = [];
-    for (let i = 0; i < 12; i++) cart = addToCart(cart, executive, {});
-    expect(cart[0]!.quantity).toBe(MAX_QUANTITY);
-    let many: Cart = [];
-    for (const combo of [snack, arepa, comboById("su-refrigerio-pandeyuca")!]) for (const drink of combo.choices[0]!.options) many = addToCart(many, combo, { bebida: drink.id });
-    expect(many).toHaveLength(MAX_PRODUCTS);
-  });
-
-  it("reads lines with what was chosen, in Spanish, and their total", () => {
-    const lines = cartLines(addToCart(addToCart([], snack, coffee), eggs, { bebida: "jugo", huevos: "revueltos" }));
-    expect(lines.map((line) => [line.name, line.detail])).toEqual([["Refrigerio", "Galleta + Americano"], ["Desayuno con huevos", "Croissant + Parfait + Jugo de naranja + Huevos revueltos"]]);
-    expect(linesTotal(lines)).toBe(40000);
+  it("reads the line with everything in it, in Spanish, and its total", () => {
+    const lines = cartLines(addToCart([], eggs, { bebida: "jugo", huevos: "revueltos" }));
+    expect(lines.map((line) => [line.name, line.detail])).toEqual([["Desayuno con huevos", "Croissant + Parfait + Jugo de naranja + Huevos revueltos"]]);
+    expect(linesTotal(lines)).toBe(28000);
+    expect(cartLines(addToCart([], snack, coffee))[0]).toMatchObject({ name: "Refrigerio", detail: "Galleta + Americano", quantity: 1, price: 12000 });
     expect(cartLines(addToCart([], executive, {}))[0]!.detail).toBe("Sándwich de jamón serrano + Jugo de naranja");
   });
 
   it("cleans what storage hands back", () => {
-    const stored = [{ comboId: "su-refrigerio-galleta", picks: coffee, quantity: 40 }, { comboId: "gone", picks: {}, quantity: 1 }, { comboId: "su-refrigerio-arepa", picks: {}, quantity: 1 }, { comboId: "su-ejecutivo", picks: {}, quantity: 0 }, null];
-    expect(cleanCart(stored)).toEqual([{ key: "su-refrigerio-galleta|americano", comboId: "su-refrigerio-galleta", picks: coffee, quantity: MAX_QUANTITY }]);
+    const stored = [{ comboId: "gone", picks: {}, quantity: 1 }, { comboId: "su-refrigerio-arepa", picks: {}, quantity: 1 }, { comboId: "su-refrigerio-galleta", picks: coffee, quantity: 40 }, { comboId: "su-ejecutivo", picks: {}, quantity: 2 }, null];
+    expect(cleanCart(stored)).toEqual([{ key: "su-refrigerio-galleta|americano", comboId: "su-refrigerio-galleta", picks: coffee, quantity: 1 }]);
     expect(cleanCart({ a: 1 })).toEqual([]);
   });
 });
@@ -94,10 +100,12 @@ describe("the order", () => {
   });
 
   it("says what is missing, in order", () => {
-    expect(orderProblem([], null, "")).toBe("empty");
-    expect(orderProblem(lines, null, "")).toBe("area");
-    expect(orderProblem(lines, area, "123")).toBe("cedula");
-    expect(orderProblem(lines, area, "1032456789")).toBeNull();
+    expect(orderProblem([], null, "", "")).toBe("empty");
+    expect(orderProblem(lines, null, "", "")).toBe("area");
+    expect(orderProblem(lines, area, " a ", "1032456789")).toBe("name");
+    expect(orderProblem(lines, area, "Ana Ruiz", "123")).toBe("cedula");
+    expect(cleanName("  Ana   María  Ruiz")).toBe("Ana María Ruiz");
+    expect(orderProblem(lines, area, "Ana Ruiz", "1032456789")).toBeNull();
   });
 
   it("finds an area by what the QR carries", () => {
@@ -107,12 +115,12 @@ describe("the order", () => {
   });
 
   it("builds what the sheet receives", () => {
-    const order = buildOrder(lines, area, "1032456789", "abc", new Date("2026-11-24T12:00:00Z"));
-    expect(order).toEqual({ clientId: "abc", cedula: "1032456789", area: "Calle 100 · Chequeos ejecutivos", items: [{ id: "su-refrigerio-arepa", name: "Refrigerio", detail: "Arepa de queso + Latte Paz deslactosado", quantity: 1, price: 12000 }], total: 12000, sentAt: "2026-11-24T12:00:00.000Z" });
+    const order = buildOrder(lines, area, " Ana Ruiz ", "1032456789", "abc", new Date("2026-11-24T12:00:00Z"));
+    expect(order).toEqual({ clientId: "abc", nombre: "Ana Ruiz", cedula: "1032456789", area: "Calle 100 · Chequeos ejecutivos", items: [{ id: "su-refrigerio-arepa", name: "Refrigerio", detail: "Arepa de queso + Latte Paz deslactosado", quantity: 1, price: 12000 }], total: 12000, sentAt: "2026-11-24T12:00:00.000Z" });
   });
 
   it("sends as plain text and reads the number back", async () => {
-    const order = buildOrder(lines, area, "1032456789", "abc", new Date(0));
+    const order = buildOrder(lines, area, " Ana Ruiz ", "1032456789", "abc", new Date(0));
     let seen: RequestInit | undefined;
     const post = (async (_url: unknown, init?: RequestInit) => {
       seen = init;
@@ -124,7 +132,7 @@ describe("the order", () => {
   });
 
   it("fails quietly without an address, on a refusal and when the network drops", async () => {
-    const order = buildOrder(lines, area, "1032456789", "abc", new Date(0));
+    const order = buildOrder(lines, area, " Ana Ruiz ", "1032456789", "abc", new Date(0));
     const refuse = (async () => new Response(JSON.stringify({ ok: false }))) as typeof fetch;
     const drop = (async () => {
       throw new Error("offline");

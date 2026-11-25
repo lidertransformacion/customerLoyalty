@@ -4,7 +4,7 @@ import { useNavigate } from "react-router";
 
 import { areasBySite, type OrderProblem } from "../core/sura";
 import { useCopy, useLocale } from "../i18n";
-import { Stepper } from "../sheets/sura-add";
+import { RemoveButton } from "../sheets/sura-add";
 import { useSura } from "../state/sura";
 import { Glass } from "../ui/glass";
 import { Press } from "../ui/press";
@@ -23,10 +23,11 @@ export function SuraOrderScreen() {
   const { lang } = useLocale();
   const navigate = useNavigate();
   const back = useBack("/");
-  const { lines, change, area, setArea, cedula, setCedula, problem, sending, failed, sent, send, finish } = useSura();
+  const { lines, area, areaFixed, setArea, name, setName, cedula, setCedula, problem, sending, failed, sent, send, finish } = useSura();
   const [nudge, setNudge] = useState<OrderProblem | null>(null);
   const areaStep = useRef<HTMLElement>(null);
   const cedulaField = useRef<HTMLInputElement>(null);
+  const nameField = useRef<HTMLInputElement>(null);
 
   if (sent) {
     return (
@@ -75,6 +76,12 @@ export function SuraOrderScreen() {
       areaStep.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
+    if (problem === "name") {
+      setNudge("name");
+      nameField.current?.focus();
+      nameField.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
     if (problem === "cedula") {
       setNudge("cedula");
       cedulaField.current?.focus();
@@ -91,7 +98,10 @@ export function SuraOrderScreen() {
         <Press className="su-back" onClick={() => back()} aria-label={copy.back} data-testid="sura-back">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
         </Press>
-        <h1>{copy.sura.title}</h1>
+        <div>
+          <h1>{copy.sura.title}</h1>
+          {areaFixed && area ? <p className="su-where" data-testid="sura-where">{area.site} · {lang === "en" ? area.serviceEn : area.service}</p> : null}
+        </div>
       </header>
 
       {lines.length === 0 ? (
@@ -106,7 +116,7 @@ export function SuraOrderScreen() {
         <>
           <div className="scroll su-body">
             <section className="su-stepbox">
-              <h2>{copy.sura.stepOrder}</h2>
+              <h2>1. {copy.sura.stepOrder}</h2>
               <Glass strong className="su-lines">
                 {lines.map((line) => (
                   <div key={line.key} className="su-line" data-testid={`sura-line-${line.id}`}>
@@ -114,17 +124,16 @@ export function SuraOrderScreen() {
                       <span className="su-line-name">{line.name}</span>
                       {line.detail ? <span className="su-line-detail">{line.detail}</span> : null}
                     </div>
-                    <Stepper quantity={line.quantity} name={line.name} onLess={() => change(line.key, -1)} onMore={() => change(line.key, 1)} testId={line.key} />
+                    <RemoveButton lineKey={line.key} name={line.name} testId="line" />
                   </div>
                 ))}
               </Glass>
-              <Press className="su-more" onClick={() => navigate("/", { replace: true })} data-testid="sura-add-more">
-                + {copy.sura.addMore}
-              </Press>
             </section>
 
+            {/* a QR already said where the guest is: nothing to ask */}
+            {areaFixed ? null : (
             <section className={`su-stepbox${nudge === "area" && !area ? " nudge" : ""}`} ref={areaStep}>
-              <h2>{copy.sura.stepArea}</h2>
+              <h2>2. {copy.sura.stepArea}</h2>
               <div className="su-sites" role="radiogroup" aria-label={copy.sura.stepArea}>
                 {areasBySite().map((group) => (
                   <div key={group.site} className="su-site">
@@ -141,10 +150,21 @@ export function SuraOrderScreen() {
               </div>
               {nudge === "area" && !area ? <p className="su-missing" role="alert">{copy.sura.missingArea}</p> : null}
             </section>
+            )}
+
+            <section className={`su-stepbox${nudge === "name" && problem === "name" ? " nudge" : ""}`}>
+              <h2>
+                <label htmlFor="sura-name">{areaFixed ? 2 : 3}. {copy.sura.stepName}</label>
+              </h2>
+              <Glass strong className="su-cedula su-name">
+                <input id="sura-name" ref={nameField} value={name} onChange={(event) => setName(event.target.value)} autoComplete="name" autoCapitalize="words" enterKeyHint="next" placeholder={copy.sura.cedulaPlaceholder} data-testid="sura-name" />
+              </Glass>
+              {nudge === "name" && problem === "name" ? <p className="su-missing" role="alert">{copy.sura.missingName}</p> : null}
+            </section>
 
             <section className={`su-stepbox${nudge === "cedula" && problem === "cedula" ? " nudge" : ""}`}>
               <h2>
-                <label htmlFor="sura-cedula">{copy.sura.stepCedula}</label>
+                <label htmlFor="sura-cedula">{areaFixed ? 3 : 4}. {copy.sura.stepCedula}</label>
               </h2>
               <Glass strong className="su-cedula">
                 <input

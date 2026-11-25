@@ -2,6 +2,8 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 
 import { catalogFor, cityById, translateCatalog, type Catalog, type CityId } from "../core/catalog";
 import { suraBuild } from "../core/mode";
+import { menuFor } from "../core/sura";
+import { readSuraArea } from "./sura-area";
 import { cityFromHint, cityFromPosition, fetchIpHint } from "../core/geo";
 import type { LatLng } from "../core/stores";
 import { useLocale } from "../i18n";
@@ -66,6 +68,7 @@ const RANK: Record<CitySource, number> = { chosen: 4, url: 4, gps: 3, ip: 2, def
 export function CatalogProvider({ children }: { children: ReactNode }) {
   const { market, setMarket, lang } = useLocale();
   const [state, setState] = useState<Stored>(() => readStored() ?? { id: "bogota", source: "default" });
+  const [suraArea] = useState(readSuraArea);
 
   const setCity = useCallback((id: CityId, source: CitySource = "chosen") => {
     setState((current) => {
@@ -121,8 +124,12 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
   }, [cityId]);
 
   const value = useMemo<Api>(
-    () => ({ catalog: translateCatalog(catalogFor(cityId), lang), source: state.source, setCity, placeFromPosition }),
-    [cityId, state.source, lang, setCity, placeFromPosition],
+    () => {
+      const catalog = translateCatalog(catalogFor(cityId), lang);
+      // at Sura a QR says which service the guest is with, and each service sees only its own menu
+      return { catalog: suraBuild && suraArea.fixed ? menuFor(catalog, suraArea.area) : catalog, source: state.source, setCity, placeFromPosition };
+    },
+    [cityId, state.source, lang, setCity, placeFromPosition, suraArea],
   );
   return <CatalogContext.Provider value={value}>{children}</CatalogContext.Provider>;
 }

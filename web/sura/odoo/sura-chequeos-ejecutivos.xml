@@ -1,0 +1,69 @@
+<t t-name="website.sura-chequeos-ejecutivos">
+    <t t-call="website.layout">
+        <div id="wrap" class="oe_structure">
+            <style>
+                /* La pagina no se desplaza: la carta se desplaza por dentro. */
+                html, body { overflow: hidden !important; }
+                #sura-carta {
+                    display: block;
+                    width: 100%;
+                    border: 0;
+                    margin: 0;
+                    padding: 0;
+                    background: #ffffff;
+                }
+                /* Lo que Odoo pone encima despues: la barra de cookies y el chat. */
+                #website_cookies_bar, .o_livechat_button, .o-livechat-root, .o_cookies_bar { display: none !important; }
+                /* El pie del sitio no se muestra aqui: quedaria debajo de la carta, fuera de la pantalla. */
+                footer, #footer, .o_footer { display: none !important; }
+
+                /* Celular y tableta: la carta ocupa toda la pantalla, sin el encabezado del sitio. */
+                @media (max-width: 1023px) {
+                    #sura-carta {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100vw;
+                        height: 100vh;
+                        height: 100dvh;
+                        z-index: 2147483000;
+                    }
+                }
+
+                /* Computador: el encabezado de Libertario se queda arriba y la carta llena el resto de la ventana. */
+                @media (min-width: 1024px) {
+                    #sura-carta { height: calc(100vh - 80px); }
+                }
+            </style>
+            <iframe id="sura-carta" title="Carta Libertario para Sura: Chequeos ejecutivos" allow="clipboard-write" loading="eager">Carta Libertario para Sura</iframe>
+            <noscript>
+                <p style="padding: 24px; text-align: center;">
+                    <a href="https://libertario-sura.pages.dev/">Abrir la carta de Libertario para Sura</a>
+                </p>
+            </noscript>
+            <script>
+                (function () {
+                    var carta = document.getElementById("sura-carta");
+                    if (!carta) { return; }
+                    // Desayunos · Chequeos ejecutivos · Salud Sura Calle 100: esta pagina abre la carta de ese servicio y de ningun otro.
+                    carta.src = "https://libertario-sura.pages.dev/?area=c100-ejecutivos";
+
+                    // En computador la carta mide exactamente lo que queda de ventana debajo del encabezado del sitio.
+                    var ancho = window.matchMedia("(min-width: 1024px)");
+                    function ajustar() {
+                        if (ancho.matches) {
+                            var arriba = carta.getBoundingClientRect().top;
+                            carta.style.height = Math.max(320, window.innerHeight - arriba) + "px";
+                        } else {
+                            carta.style.height = "";
+                        }
+                    }
+                    ajustar();
+                    window.addEventListener("resize", ajustar);
+                    window.addEventListener("load", ajustar);
+                    setTimeout(ajustar, 600);
+                })();
+            </script>
+        </div>
+    </t>
+</t>

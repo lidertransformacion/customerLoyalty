@@ -1,11 +1,12 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from "react";
 
-import { addToCart, areaById, buildOrder, cartCount, cartLines, changeQuantity, cleanCart, cleanCedula, comboById, linesTotal, orderProblem, quantityOf, sendOrder, type Cart, type OrderLine, type OrderProblem, type Picks, type SuraArea, type SuraCombo } from "../core/sura";
+import { addToCart, buildOrder, cartCount, cartLines, cleanCart, cleanCedula, cleanName, comboById, linesTotal, orderProblem, quantityOf, removeFromCart, sendOrder, type Cart, type OrderLine, type OrderProblem, type Picks, type SuraArea, type SuraCombo } from "../core/sura";
 
 /** The cart lives while the tab does; the ID number and the area stay on the phone for the next breakfast. */
 const CART_KEY = "libertario-sura-cart-v2";
 const CEDULA_KEY = "libertario-sura-cedula-v1";
-const AREA_KEY = "libertario-sura-area-v1";
+const NAME_KEY = "libertario-sura-name-v1";
+import { readSuraArea, rememberSuraArea } from "./sura-area";
 
 /** In development Vite answers this path itself (vite.config.ts), so the whole flow runs without the sheet. */
 const ORDERS_URL = import.meta.env.VITE_SURA_ORDERS_URL || (import.meta.env.DEV ? "/api/sura-order" : "");
@@ -33,22 +34,6 @@ function readCart(): Cart {
   }
 }
 
-/** The area a QR carries (`?area=ips`) wins and is remembered; else the one chosen before. */
-function readArea(): SuraArea | null {
-  let fromUrl: string | null = null;
-  try {
-    fromUrl = new URLSearchParams(window.location.search).get("area");
-  } catch {
-    /* no address to read */
-  }
-  const area = areaById(fromUrl);
-  if (area) {
-    write("local", AREA_KEY, area.id);
-    return area;
-  }
-  return areaById(read("local", AREA_KEY));
-}
-
 function newId(): string {
   try {
     return crypto.randomUUID();
@@ -70,15 +55,19 @@ type Api = {
   quantityOf: (comboId: string) => number;
   /** Puts a combo in the order with what was chosen in it. */
   add: (comboId: string, picks: Picks) => void;
-  /** One more or one less of a line of the order. */
-  change: (key: string, by: 1 | -1) => void;
+  /** Takes a line out of the order. */
+  remove: (key: string) => void;
   /** The combo whose choices are being asked, if any. */
   choosing: SuraCombo | null;
   choose: (comboId: string) => void;
   closeChooser: () => void;
+  name: string;
+  setName: (text: string) => void;
   cedula: string;
   setCedula: (text: string) => void;
   area: SuraArea | null;
+  /** A QR said where the guest is: the order does not ask. */
+  areaFixed: boolean;
   setArea: (area: SuraArea) => void;
   problem: OrderProblem | null;
   sending: boolean;
@@ -94,7 +83,9 @@ const SuraContext = createContext<Api | null>(null);
 export function SuraProvider({ children }: { children: ReactNode }) {
   const [cart, setCartState] = useState<Cart>(readCart);
   const [cedula, setCedulaState] = useState(() => cleanCedula(read("local", CEDULA_KEY) ?? ""));
-  const [area, setAreaState] = useState<SuraArea | null>(readArea);
+  const [name, setNameState] = useState(() => cleanName(read("local", NAME_KEY) ?? ""));
+  const [choice] = useState(readSuraArea);
+  const [area, setAreaState] = useState<SuraArea | null>(choice.area);
   const [sending, setSending] = useState(false);
   const [failed, setFailed] = useState(false);
   const [sent, setSent] = useState<SentOrder | null>(null);
@@ -119,7 +110,7 @@ export function SuraProvider({ children }: { children: ReactNode }) {
     },
     [setCart],
   );
-  const change = useCallback((key: string, by: 1 | -1) => setCart((current) => changeQuantity(current, key, by)), [setCart]);
+  const remove = useCallback((key: string) => setCart((current) => removeFromCart(current, key)), [setCart]);
   const choose = useCallback((comboId: string) => setChoosing(comboById(comboId) ?? null), []);
   const closeChooser = useCallback(() => setChoosing(null), []);
   const unitsOf = useCallback((comboId: string) => quantityOf(cart, comboId), [cart]);
@@ -128,21 +119,26 @@ export function SuraProvider({ children }: { children: ReactNode }) {
     write("local", CEDULA_KEY, clean);
     setCedulaState(clean);
   }, []);
+  const setName = useCallback((text: string) => {
+    const clean = cleanName(text);
+    write("local", NAME_KEY, clean);
+    setNameState(clean);
+  }, []);
   const setArea = useCallback((next: SuraArea) => {
-    write("local", AREA_KEY, next.id);
+    rememberSuraArea(next);
     setAreaState(next);
   }, []);
 
   // the bar reads Spanish, whatever language the guest reads
   const lines = useMemo(() => cartLines(cart), [cart]);
   const total = linesTotal(lines);
-  const problem = orderProblem(lines, area, cedula);
+  const problem = orderProblem(lines, area, name, cedula);
 
   const send = useCallback(async () => {
     if (sending || problem || !area) return;
     setSending(true);
     setFailed(false);
-    const result = await sendOrder(buildOrder(lines, area, cedula, attempt.current, new Date()), ORDERS_URL, (input, init) => fetch(input, init));
+    const result = await sendOrder(buildOrder(lines, area, name, cedula, attempt.current, new Date()), ORDERS_URL, (input, init) => fetch(input, init));
     setSending(false);
     if (!result.ok) {
       setFailed(true);
@@ -152,7 +148,7 @@ export function SuraProvider({ children }: { children: ReactNode }) {
     write("session", CART_KEY, "[]");
     setCartState([]);
     attempt.current = newId();
-  }, [sending, problem, area, lines, cedula, total]);
+  }, [sending, problem, area, lines, name, cedula, total]);
 
   const finish = useCallback(() => {
     setSent(null);
@@ -160,8 +156,8 @@ export function SuraProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<Api>(
-    () => ({ cart, count: cartCount(cart), lines, total, quantityOf: unitsOf, add, change, choosing, choose, closeChooser, cedula, setCedula, area, setArea, problem, sending, failed, sent, send, finish }),
-    [cart, lines, total, unitsOf, add, change, choosing, choose, closeChooser, cedula, setCedula, area, setArea, problem, sending, failed, sent, send, finish],
+    () => ({ cart, count: cartCount(cart), lines, total, quantityOf: unitsOf, add, remove, choosing, choose, closeChooser, name, setName, cedula, setCedula, area, areaFixed: choice.fixed, setArea, problem, sending, failed, sent, send, finish }),
+    [cart, lines, total, unitsOf, add, remove, choosing, choose, closeChooser, name, setName, cedula, setCedula, area, choice.fixed, setArea, problem, sending, failed, sent, send, finish],
   );
   return <SuraContext.Provider value={value}>{children}</SuraContext.Provider>;
 }

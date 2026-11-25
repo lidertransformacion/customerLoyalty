@@ -131,7 +131,11 @@ export function heroOf(products: MenuItem[][], chapterId: string) {
  */
 export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { catalog: Catalog; copy: Copy; money: (value: number) => string; lang: Lang; setLang: (lang: Lang) => void; onItem: (item: MenuItem) => void }) {
   const chapters = catalog.categories.filter((category) => productsOf(catalog, category.id).length > 0);
-  const total = chapters.length + 3;
+  // a Sura service sees one chapter: the book has no index of chapters, the cover turns straight into it
+  const single = suraBuild && chapters.length === 1;
+  /** The page of the first chapter: after the cover and, when there is one, the index. */
+  const first = single ? 1 : 2;
+  const total = chapters.length + first + 1;
   const [page, setPageState] = useState(() => Math.min(memory.page, total - 1));
   const [command, setCommand] = useState<{ id: number; direction: "forward" | "back" } | null>(null);
   const [favoritesOpen, setFavoritesOpenState] = useState(() => readSession(VIEW_KEY) === "favorites");
@@ -168,23 +172,27 @@ export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { c
   const pages = useMemo(
     () => [
       <CoverSheet key="cover" copy={copy} active={page === 0} auto warm={warm} onStart={() => turn("forward")} />,
+      ...(single
+        ? []
+        : [
       <IndexSheet
-        key="index"
-        chapters={chapters}
-        catalog={catalog}
-        copy={copy}
-        money={money}
-        favoritesOpen={favoritesOpen}
-        onFavoritesOpen={setFavoritesOpen}
-        query={query}
-        onQuery={setQuery}
-        searching={searching}
-        onSearching={setSearching}
-        favorites={favorites}
-        onToggleFavorite={toggleFavorite}
-        onItem={onItem}
-        onOpen={(i) => goTo(i + 2)}
-      />,
+            key="index"
+            chapters={chapters}
+            catalog={catalog}
+            copy={copy}
+            money={money}
+            favoritesOpen={favoritesOpen}
+            onFavoritesOpen={setFavoritesOpen}
+            query={query}
+            onQuery={setQuery}
+            searching={searching}
+            onSearching={setSearching}
+            favorites={favorites}
+            onToggleFavorite={toggleFavorite}
+            onItem={onItem}
+            onOpen={(i) => goTo(i + first)}
+          />,
+          ]),
       ...chapters.map((category, i) => (
         <ChapterPage
           key={category.id}
@@ -192,7 +200,7 @@ export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { c
           catalog={catalog}
           copy={copy}
           money={money}
-          live={Math.abs(i + 2 - page) <= 1}
+          live={Math.abs(i + first - page) <= 1}
           next={chapters[i + 1]?.name}
           favorites={favorites}
           onToggleFavorite={toggleFavorite}
@@ -207,7 +215,7 @@ export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { c
       </div>,
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [chapters.map((c) => c.id + c.name).join(), catalog, copy, money, lang, page, wide, favoritesOpen, query, searching, favorites, onItem, goTo, setFavoritesOpen, setQuery, toggleFavorite],
+    [chapters.map((c) => c.id + c.name).join(), catalog, copy, money, lang, page, wide, single, first, favoritesOpen, query, searching, favorites, onItem, goTo, setFavoritesOpen, setQuery, toggleFavorite],
   );
 
   if (wide) {
@@ -230,11 +238,11 @@ export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { c
     );
   }
   const onCover = page === 0;
-  const onIndex = page === 1;
+  const onIndex = !single && page === 1;
   const onEnd = page === total - 1;
-  const canBack = page >= 2;
+  const canBack = single ? page > first : page >= 2;
   const canForward = page >= 1 && page < total - 1;
-  const count = String(Math.max(1, page - 1)).padStart(2, "0");
+  const count = String(Math.max(1, page - first + 1)).padStart(2, "0");
   return (
     <div className="mn" data-testid="minimal-menu">
       <div className="mn-stage">
@@ -264,7 +272,7 @@ export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { c
             <img src="/chile/brujula-azul.webp" srcSet="/chile/brujula-azul.webp 1x, /chile/brujula-azul@2x.webp 2x" alt="" width={28} height={28} decoding="async" />
             {onCover || onIndex ? <span className="mn-city">{catalog.city.name === "Santiago" ? "Santiago de Chile" : catalog.city.name}</span> : null}
           </button>
-          {onIndex || onCover || onEnd ? (
+          {onIndex || onCover || onEnd || single ? (
             <span className="mn-spacer" />
           ) : (
             <span className="mn-count" aria-live="polite">
@@ -286,7 +294,7 @@ export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { c
               </button>
             )}
             <LangSwitch lang={lang} setLang={setLang} />
-            {onIndex ? null : (
+            {onIndex || single ? null : (
               <button className="mn-index-button" onClick={() => goTo(1)} data-testid="book-to-index">
                 {copy.book.toCategories}
               </button>
@@ -294,7 +302,7 @@ export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { c
           </div>
         </div>
         <div className="mn-progress" aria-hidden="true">
-          <motion.span animate={{ width: `${(Math.max(0, page - 1) / chapters.length) * 100}%` }} transition={{ type: "spring", stiffness: 200, damping: 30 }} />
+          <motion.span animate={{ width: `${(Math.max(0, page - first + 1) / chapters.length) * 100}%` }} transition={{ type: "spring", stiffness: 200, damping: 30 }} />
         </div>
       </header>
     </div>

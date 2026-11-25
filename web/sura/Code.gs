@@ -5,13 +5,16 @@
  * Hace dos cosas:
  *   1. doPost: recibe el pedido que envía la carta de Sura y lo escribe en la hoja oculta «Cola»,
  *      que es lo que lee el tablero.
- *   2. onEdit: cuando alguien marca la casilla de un tiquete en «Comandas», pone el pedido como
+ *   2. onEdit: cuando alguien marca la casilla de un tiquete en el tablero de su sede, pone el pedido como
  *      Entregado en «Cola» y escribe en la hoja oculta «Pedidos» una fila por cada producto, con las
  *      columnas del «Registro de Bebidas» de Mercado Libre, que es lo que lee la automatización de Odoo.
  *      Solo lo entregado llega a «Pedidos». El tiquete desaparece porque «Comandas» solo muestra pendientes.
  *
  * Cómo se instala (una sola vez): ver web/sura/README.md.
  */
+
+/** Qué versión es esta. La dirección de la aplicación web la devuelve, así se sabe desde fuera cuál quedó publicada. */
+var VERSION = "2026-11-25.3";
 
 var ORDERS = "Cola";
 var LINES = "Pedidos";
@@ -20,11 +23,12 @@ var CONFIG = "config";
 var BOARD = "Comandas";
 
 /** Columnas de «Cola» (la primera es 1). */
-var COL = { number: 1, date: 2, time: 3, cedula: 4, area: 5, firstProduct: 6, total: 14, status: 15, deliveredAt: 16, summary: 17, detail: 18, clientId: 19 };
+var COL = { number: 1, date: 2, time: 3, cedula: 4, area: 5, firstProduct: 6, total: 14, status: 15, deliveredAt: 16, summary: 17, detail: 18, clientId: 19, name: 20 };
 var PRODUCT_COLUMNS = 8;
 
 /**
- * «Comandas» es un tablero de tiquetes: cinco por fila desde la fila 8, cada uno de seis filas de alto
+ * «Comandas» es el tablero de las dos sedes; el filtro «Punto de venta» (celda K6: Todos, Calle 100, Usaquén)
+ * deja solo los pedidos de una. Es una rejilla de tiquetes: cinco por fila desde la fila 8, cada uno de seis filas de alto
  * (la casilla va en la quinta) y tres columnas de ancho (la casilla va en la primera: B, E, H, K, N).
  * El tiquete número k muestra la fila k de la cola de pendientes, que vive oculta desde U8.
  */
@@ -84,6 +88,7 @@ function doPost(e) {
     row[COL.summary - 1] = summary.join("\n");
     row[COL.detail - 1] = JSON.stringify(order.items);
     row[COL.clientId - 1] = order.clientId;
+    row[COL.name - 1] = typeof order.nombre === "string" ? order.nombre.replace(/\s+/g, " ").trim().slice(0, 60) : "";
 
     sheet.getRange(last + 1, 1, 1, row.length).setValues([row]);
     SpreadsheetApp.flush();
@@ -116,9 +121,9 @@ function fullName(item) {
 /**
  * «Pedidos»: una fila por unidad entregada, con la fecha y hora de la entrega y las columnas cedula, Productos, precio, etiqueta, fecha, nombre,
  * categoria, referencia_odoo, id_odoo, punto_venta, pos_config_id, product_id, fecha_dia, estado_odoo y
- * factura_odoo. Lo de Odoo de cada producto sale de la hoja «productos» (por su id en la carta) y lo del
+ * factura_odoo, y al final razon_social y nit (la compañía que asume el consumo). Lo de Odoo de cada producto sale de la hoja «productos» (por su id en la carta) y lo del
  * punto de venta de «config»; lo que allí falte queda vacío. punto_venta es la sede desde donde se pidió. estado_odoo y factura_odoo los llena la
- * automatización; nombre queda vacío porque la carta solo pide la cédula.
+ * automatización; nombre es el que la persona escribió al pedir.
  */
 function writeLines(book, order, now) {
   var products = {};
@@ -134,11 +139,16 @@ function writeLines(book, order, now) {
   // según las columnas «sede» y «pos_config_id» de la hoja «areas»; si allí faltan, lo que diga «config»
   var store = config.punto_venta || "";
   var storeId = config.pos_config_id === undefined ? "" : String(config.pos_config_id);
+  // razon_social: la compañía que asume el consumo del servicio desde donde se pidió (columna «compania» de «areas»)
+  var company = "";
+  var nit = "";
   var areas = book.getSheetByName(AREAS);
   if (areas && areas.getLastRow() > 1) {
     var places = areas.getRange(2, 1, areas.getLastRow() - 1, 13).getValues();
     for (var a = 0; a < places.length; a++) {
       if (String(places[a][1]) !== String(order.area)) continue;
+      if (places[a][3]) company = String(places[a][3]);
+      if (places[a][4]) nit = String(places[a][4]);
       if (places[a][5]) store = String(places[a][5]);
       if (places[a][12] !== "") storeId = String(places[a][12]);
     }
@@ -159,7 +169,7 @@ function writeLines(book, order, now) {
         price,
         config.etiqueta || "Sura",
         stamp,
-        "",
+        order.nombre || "",
         known.category || "",
         known.reference || "",
         known.odooId === undefined ? "" : String(known.odooId),
@@ -169,6 +179,8 @@ function writeLines(book, order, now) {
         day,
         "",
         "",
+        company,
+        nit,
       ]);
     }
   }
@@ -179,13 +191,14 @@ function writeLines(book, order, now) {
 
 /** Abrir la dirección en el navegador dice si quedó publicada. */
 function doGet() {
-  return reply({ ok: true, service: "Pedidos Sura" });
+  return reply({ ok: true, service: "Pedidos Sura", version: VERSION });
 }
 
 function problemWith(order) {
   if (!order || typeof order !== "object") return "pedido vacío";
   if (typeof order.clientId !== "string" || order.clientId.length < 8 || order.clientId.length > 80) return "envío sin identificar";
   if (!/^\d{6,15}$/.test(String(order.cedula))) return "cédula no válida";
+  if (order.nombre !== undefined && (typeof order.nombre !== "string" || order.nombre.length > 120)) return "nombre no válido";
   if (typeof order.area !== "string" || order.area.length === 0 || order.area.length > 80) return "área no válida";
   if (!Array.isArray(order.items) || order.items.length === 0 || order.items.length > PRODUCT_COLUMNS) return "productos no válidos";
   for (var i = 0; i < order.items.length; i++) {
@@ -211,35 +224,52 @@ function reply(body) {
   return ContentService.createTextOutput(JSON.stringify(body)).setMimeType(ContentService.MimeType.JSON);
 }
 
-/** La casilla de un tiquete: marca su pedido como entregado y se desmarca sola para el tiquete que ocupe ese lugar. */
+/**
+ * Entrega un pedido por su número: escribe sus filas en «Pedidos» y lo pone como Entregado en «Cola» y escribe sus filas en «Pedidos».
+ * Devuelve "entregado", "ya estaba" (dos toques seguidos: no se escribe dos veces) o "no existe".
+ */
+function deliver(book, number) {
+  var orders = book.getSheetByName(ORDERS);
+  var last = orders.getLastRow();
+  if (last < 2) return "no existe";
+  var numbers = orders.getRange(2, COL.number, last - 1, 1).getValues();
+  for (var i = numbers.length - 1; i >= 0; i--) {
+    if (String(numbers[i][0]) !== String(number)) continue;
+    var row = orders.getRange(i + 2, 1, 1, COL.name).getValues()[0];
+    if (row[COL.status - 1] === "Entregado") return "ya estaba";
+    // primero se lee lo pedido: si no se puede leer, el pedido no queda marcado a medias
+    var items = JSON.parse(row[COL.detail - 1]);
+    var now = new Date();
+    writeLines(book, { cedula: row[COL.cedula - 1], nombre: row[COL.name - 1], area: row[COL.area - 1], items: items }, now);
+    orders.getRange(i + 2, COL.status, 1, 2).setValues([["Entregado", now]]);
+    return "entregado";
+  }
+  return "no existe";
+}
+
+/**
+ * La casilla de un tiquete: entrega su pedido y se desmarca sola para el tiquete que ocupe ese lugar.
+ * Vale en toda hoja cuyo nombre empiece por «Comandas». Si algo falla, lo dice en un aviso en la pantalla
+ * en vez de quedarse callada.
+ */
 function onEdit(e) {
   var range = e.range;
   var sheet = range.getSheet();
-  if (sheet.getName() !== BOARD || range.getNumRows() !== 1 || range.getNumColumns() !== 1) return;
+  if (sheet.getName().indexOf(BOARD) !== 0 || range.getNumRows() !== 1 || range.getNumColumns() !== 1) return;
   var down = range.getRow() - BOARD_FIRST_ROW;
   var across = range.getColumn() - BOARD_FIRST_COLUMN;
   if (down < 0 || across < 0 || across >= TICKETS_PER_ROW * TICKET_COLUMNS) return;
   if (down % TICKET_ROWS !== TICKET_CHECK_ROW || across % TICKET_COLUMNS !== 0) return;
   if (range.getValue() !== true) return;
 
-  var ticket = Math.floor(down / TICKET_ROWS) * TICKETS_PER_ROW + Math.floor(across / TICKET_COLUMNS);
-  var number = sheet.getRange(BOARD_FIRST_ROW + ticket, QUEUE_NUMBER_COLUMN).getValue();
-  range.setValue(false);
-  if (number === "" || number === null) return;
-
-  var orders = e.source.getSheetByName(ORDERS);
-  var last = orders.getLastRow();
-  if (last < 2) return;
-  var numbers = orders.getRange(2, COL.number, last - 1, 1).getValues();
-  for (var i = numbers.length - 1; i >= 0; i--) {
-    if (numbers[i][0] === number) {
-      var row = orders.getRange(i + 2, 1, 1, COL.clientId).getValues()[0];
-      // ya entregado (dos toques seguidos): no se escribe dos veces en «Pedidos»
-      if (row[COL.status - 1] === "Entregado") return;
-      var now = new Date();
-      orders.getRange(i + 2, COL.status, 1, 2).setValues([["Entregado", now]]);
-      writeLines(e.source, { cedula: row[COL.cedula - 1], area: row[COL.area - 1], items: JSON.parse(row[COL.detail - 1]) }, now);
-      return;
-    }
+  try {
+    var ticket = Math.floor(down / TICKET_ROWS) * TICKETS_PER_ROW + Math.floor(across / TICKET_COLUMNS);
+    var number = sheet.getRange(BOARD_FIRST_ROW + ticket, QUEUE_NUMBER_COLUMN).getValue();
+    range.setValue(false);
+    if (number === "" || number === null) return;
+    var result = deliver(e.source, number);
+    if (result === "no existe") e.source.toast("No encontré el pedido #" + number + ". Avisa a soporte.", "Pedidos Sura", 15);
+  } catch (error) {
+    e.source.toast("No se pudo marcar el pedido como entregado. Avisa a soporte. (" + error + ")", "Pedidos Sura", 20);
   }
 }

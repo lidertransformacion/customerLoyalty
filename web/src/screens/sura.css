@@ -602,8 +602,7 @@
 }
 
 /* the breakfasts open larger: their photograph holds a plate and a glass with air around them, so it gets more room */
-.sura [data-testid="chapter-co-su-ejecutivo"] .mn-hero,
-.sura [data-testid="chapter-co-su-completos"] .mn-hero {
+.sura [data-testid="chapter-co-su-desayunos"] .mn-hero {
   height: min(32vh, 280px);
   margin-bottom: 6px;
 }
@@ -638,4 +637,91 @@
 
 .sura [data-testid="index-co-su-refrigerios"] .mn-ccard-art img {
   scale: 1.32;
+}
+
+/* where the order comes from, under the title, when a QR already said it */
+.su-where {
+  margin: 4px 0 0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8a4a2c;
+}
+
+/* the name is written in letters, a little smaller than the ID number */
+.su-name input {
+  font-size: 21px;
+  letter-spacing: 0;
+}
+
+.su-stepbox.nudge .su-name {
+  border-radius: 22px;
+  box-shadow: 0 0 0 2.5px #d9483b;
+}
+
+/* every card of a row ends at the same line: a name of one line and a name of two leave «Agregar» at the same height */
+.sura .mn-pcard {
+  display: flex;
+  flex-direction: column;
+}
+
+.sura .mn-pcard-open {
+  flex: 1;
+}
+
+/* ===== in the order: it says so, and a bin takes it out (one combo, once: nothing to count) ===== */
+.su-in {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+  min-width: 0;
+  padding: 4px 4px 4px 10px;
+  border-radius: 999px;
+  background: #e4f3e6;
+  color: #2f7d3b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.su-in.big {
+  flex: 1;
+  min-height: 54px;
+  font-size: 16px;
+}
+
+.su-in > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* a card never grows past its column because of what its button says */
+.sura .mn-pcard,
+.su-card-add {
+  min-width: 0;
+}
+
+.su-trash {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 40px;
+  border-radius: 999px;
+  background: #fff;
+  color: #a8281e;
+  flex: none;
+  box-shadow: inset 0 0 0 1.5px rgba(168, 40, 30, 0.28);
+}
+
+.su-line .su-trash {
+  width: 52px;
+  height: 48px;
 }

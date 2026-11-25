@@ -41,8 +41,7 @@ const DRINK_FULL: SuraChoice = { id: "bebida", title: "Elige tu bebida", titleEn
 
 export const SURA_CHAPTERS: { id: string; name: string; intro: string; en: [string, string] }[] = [
   { id: "co-su-refrigerios", name: "Refrigerios", intro: "Elige qué comer; la bebida va incluida.", en: ["Snacks", "Choose what to eat; the drink is included."] },
-  { id: "co-su-ejecutivo", name: "Desayuno ejecutivo", intro: "Sándwich de jamón serrano y jugo de naranja.", en: ["Executive breakfast", "Serrano ham sandwich and orange juice."] },
-  { id: "co-su-completos", name: "Desayunos completos", intro: "Con parfait y la bebida que elijas.", en: ["Full breakfasts", "With a parfait and the drink you choose."] },
+  { id: "co-su-desayunos", name: "Desayunos", intro: "Elige tu desayuno.", en: ["Breakfasts", "Choose your breakfast."] },
 ];
 
 /** The drinks a refrigerio comes with. */
@@ -76,8 +75,7 @@ function refrigerio(id: string, name: string, nameEn: string, photo: string): Su
 // Each chapter opens with a photograph that stands on the sheet without a ground: Sura's own with its white
 // turned transparent.
 lendCover("co-su-refrigerios", SURA_COVERS["su-cover-portada-refrigerios"]!);
-lendCover("co-su-ejecutivo", SURA_COVERS["su-cover-ejecutivo-granola"]!);
-lendCover("co-su-completos", SURA_COVERS["su-cover-portada-completos"]!);
+lendCover("co-su-desayunos", SURA_COVERS["su-cover-portada-completos"]!);
 
 export const SURA_COMBOS: readonly SuraCombo[] = [
   refrigerio("galleta", "Galleta", "Cookie", "su-p-galleta"),
@@ -85,7 +83,7 @@ export const SURA_COMBOS: readonly SuraCombo[] = [
   refrigerio("pandeyuca", "Pan de yuca × 2", "Pan de yuca × 2", "su-p-pandeyuca"),
   {
     id: "su-ejecutivo",
-    chapter: "co-su-ejecutivo",
+    chapter: "co-su-desayunos",
     name: "Desayuno ejecutivo",
     nameEn: "Executive breakfast",
     description: "Sándwich de jamón serrano y jugo de naranja.",
@@ -97,7 +95,7 @@ export const SURA_COMBOS: readonly SuraCombo[] = [
   },
   {
     id: "su-ejecutivo-granola",
-    chapter: "co-su-ejecutivo",
+    chapter: "co-su-desayunos",
     name: "Desayuno ejecutivo con granola",
     nameEn: "Executive breakfast with granola",
     description: "Sándwich de jamón serrano, jugo de naranja y granola.",
@@ -109,7 +107,7 @@ export const SURA_COMBOS: readonly SuraCombo[] = [
   },
   {
     id: "su-completo-huevos",
-    chapter: "co-su-completos",
+    chapter: "co-su-desayunos",
     name: "Desayuno con huevos",
     nameEn: "Breakfast with eggs",
     description: "Huevos al gusto con croissant, parfait y la bebida que elijas.",
@@ -132,7 +130,7 @@ export const SURA_COMBOS: readonly SuraCombo[] = [
   },
   {
     id: "su-completo-croissant",
-    chapter: "co-su-completos",
+    chapter: "co-su-desayunos",
     name: "Desayuno con sándwich de croissant",
     nameEn: "Breakfast with croissant sandwich",
     description: "Sándwich de croissant, parfait y la bebida que elijas.",
@@ -149,18 +147,32 @@ export function comboById(id: string | null | undefined): SuraCombo | undefined 
 }
 
 /**
- * Where at Sura the order comes from: a service at one of the two sites (the «areas» tab of the sheet has,
- * by the same id, the company that pays and its contacts). `name` is what the bar's ticket reads.
- * A QR can carry it: `/?area=c100-muestras`.
+ * Where at Sura the order comes from: a service at one of the sites, each paid by one company (the «areas» tab of
+ * the sheet has, by the same id, that company and its contacts). Each has its own QR, `/?area=c100-muestras`,
+ * and its own menu: a service is entitled to breakfasts or to refrigerios, never both. `name` is what the bar's
+ * ticket reads.
  */
-export type SuraArea = { id: string; name: string; site: string; service: string; serviceEn: string };
+export type SuraMenu = "desayunos" | "refrigerios";
+export type SuraArea = { id: string; name: string; site: string; service: string; serviceEn: string; menu: SuraMenu };
 export const SURA_AREAS: readonly SuraArea[] = [
-  { id: "c100-ejecutivos", name: "Calle 100 · Chequeos ejecutivos", site: "Salud Sura Calle 100", service: "Chequeos ejecutivos", serviceEn: "Executive check-ups" },
-  { id: "c100-ensayos", name: "Calle 100 · Ensayos clínicos", site: "Salud Sura Calle 100", service: "Ensayos clínicos", serviceEn: "Clinical trials" },
-  { id: "c100-muestras", name: "Calle 100 · Toma de muestras", site: "Salud Sura Calle 100", service: "Toma de muestras", serviceEn: "Sample collection" },
-  { id: "usaquen-arl", name: "Usaquén · Chequeos ARL", site: "Salud Sura Usaquén", service: "Chequeos ARL", serviceEn: "ARL check-ups" },
-  { id: "usaquen-muestras", name: "Usaquén · Toma de muestras", site: "Salud Sura Usaquén", service: "Toma de muestras", serviceEn: "Sample collection" },
+  { id: "c100-ejecutivos", name: "Calle 100 · Chequeos ejecutivos", site: "Salud Sura Calle 100", service: "Chequeos ejecutivos", serviceEn: "Executive check-ups", menu: "desayunos" },
+  { id: "c100-ensayos", name: "Calle 100 · Ensayos clínicos", site: "Salud Sura Calle 100", service: "Ensayos clínicos", serviceEn: "Clinical trials", menu: "desayunos" },
+  { id: "c100-muestras", name: "Calle 100 · Toma de muestras", site: "Salud Sura Calle 100", service: "Toma de muestras", serviceEn: "Sample collection", menu: "refrigerios" },
+  { id: "usaquen-arl", name: "Usaquén · Chequeos ARL", site: "Salud Sura Usaquén", service: "Chequeos ARL", serviceEn: "ARL check-ups", menu: "desayunos" },
+  { id: "usaquen-muestras", name: "Usaquén · Toma de muestras", site: "Salud Sura Usaquén", service: "Toma de muestras", serviceEn: "Sample collection", menu: "refrigerios" },
 ];
+
+/** The one chapter a service may order from. */
+export function chapterOf(area: SuraArea): string {
+  return area.menu === "refrigerios" ? "co-su-refrigerios" : "co-su-desayunos";
+}
+
+/** The menu a service sees: only its chapter and that chapter's combos. Without a service, the whole menu. */
+export function menuFor<T extends { categories: Category[]; items: MenuItem[] }>(catalog: T, area: SuraArea | null): T {
+  if (!area) return catalog;
+  const chapter = chapterOf(area);
+  return { ...catalog, categories: catalog.categories.filter((category) => category.id === chapter), items: catalog.items.filter((item) => item.category === chapter) };
+}
 
 /** The sites, in order, each with its services: how the order screen asks. */
 export function areasBySite(): { site: string; areas: SuraArea[] }[] {
@@ -178,9 +190,9 @@ export function areaById(id: string | null | undefined): SuraArea | null {
   return SURA_AREAS.find((area) => area.id === wanted) ?? null;
 }
 
-/** The sheet has eight product columns; one line never goes past nine units. */
-export const MAX_PRODUCTS = 8;
-export const MAX_QUANTITY = 9;
+/** An order is one combo, once: the agreement gives each person one breakfast or one refrigerio. */
+export const MAX_PRODUCTS = 1;
+export const MAX_QUANTITY = 1;
 
 {
   const items: MenuItem[] = SURA_COMBOS.map((combo) => ({
@@ -218,25 +230,17 @@ export function lineKey(combo: SuraCombo, picks: Picks): string {
   return [combo.id, ...combo.choices.map((choice) => picks[choice.id] ?? "")].join("|");
 }
 
-export function addToCart(cart: Cart, combo: SuraCombo, picks: Picks): Cart {
-  if (!picksComplete(combo, picks)) return cart;
-  const key = lineKey(combo, picks);
-  const existing = cart.find((line) => line.key === key);
-  if (existing) return changeQuantity(cart, key, 1);
-  if (cart.length >= MAX_PRODUCTS) return cart;
+/** Puts a combo in the order. The order holds one: choosing another replaces what was there. */
+export function addToCart(_cart: Cart, combo: SuraCombo, picks: Picks): Cart {
+  if (!picksComplete(combo, picks)) return _cart;
   const kept: Picks = {};
   for (const choice of combo.choices) kept[choice.id] = picks[choice.id]!;
-  return [...cart, { key, comboId: combo.id, picks: kept, quantity: 1 }];
+  return [{ key: lineKey(combo, picks), comboId: combo.id, picks: kept, quantity: 1 }];
 }
 
-/** One more or one less of a line; a line at zero leaves the cart. */
-export function changeQuantity(cart: Cart, key: string, by: 1 | -1): Cart {
-  const line = cart.find((entry) => entry.key === key);
-  if (!line) return cart;
-  const next = line.quantity + by;
-  if (next > MAX_QUANTITY) return cart;
-  if (next <= 0) return cart.filter((entry) => entry.key !== key);
-  return cart.map((entry) => (entry.key === key ? { ...entry, quantity: next } : entry));
+/** Takes a line out of the order. */
+export function removeFromCart(cart: Cart, key: string): Cart {
+  return cart.filter((entry) => entry.key !== key);
 }
 
 export function cartCount(cart: Cart): number {
@@ -247,22 +251,18 @@ export function quantityOf(cart: Cart, comboId: string): number {
   return cart.reduce((sum, line) => (line.comboId === comboId ? sum + line.quantity : sum), 0);
 }
 
-/** A cart that came back from storage: only combos still served, with every choice made and whole positive units. */
+/** A cart that came back from storage: one combo still served, with every choice made. */
 export function cleanCart(value: unknown): Cart {
   if (!Array.isArray(value)) return [];
-  let cart: Cart = [];
   for (const entry of value) {
     if (!entry || typeof entry !== "object") continue;
-    const { comboId, picks, quantity } = entry as { comboId?: unknown; picks?: unknown; quantity?: unknown };
+    const { comboId, picks } = entry as { comboId?: unknown; picks?: unknown };
     const combo = typeof comboId === "string" ? comboById(comboId) : undefined;
     if (!combo || !picks || typeof picks !== "object") continue;
-    if (typeof quantity !== "number" || !Number.isInteger(quantity) || quantity < 1) continue;
-    const before = cart.length;
-    cart = addToCart(cart, combo, picks as Picks);
-    if (cart.length === before) continue;
-    cart = cart.map((line, index) => (index === cart.length - 1 ? { ...line, quantity: Math.min(quantity, MAX_QUANTITY) } : line));
+    const cart = addToCart([], combo, picks as Picks);
+    if (cart.length > 0) return cart;
   }
-  return cart;
+  return [];
 }
 
 /** What goes to the bar: the combo, everything that comes in it with what was chosen (in Spanish, whatever the guest reads), units and price. The sheet lists `detail` split at « + ». */
@@ -295,9 +295,20 @@ export function validCedula(text: string): boolean {
   return /^\d{6,15}$/.test(text);
 }
 
+/** A name as typed, without stray spaces, at most sixty characters. */
+export function cleanName(text: string): string {
+  return text.replace(/\s+/g, " ").replace(/^ /, "").slice(0, 60);
+}
+
+/** At least three letters: enough for the bar to call someone. */
+export function validName(text: string): boolean {
+  return text.trim().length >= 3;
+}
+
 export type SuraOrder = {
   /** Made once per attempt, so a retry of the same order is not written twice. */
   clientId: string;
+  nombre: string;
   cedula: string;
   area: string;
   items: { id: string; name: string; detail: string; quantity: number; price: number }[];
@@ -305,19 +316,21 @@ export type SuraOrder = {
   sentAt: string;
 };
 
-export type OrderProblem = "empty" | "area" | "cedula";
+export type OrderProblem = "empty" | "area" | "name" | "cedula";
 
 /** What is still missing before the order can go, in the order the screen asks for it. */
-export function orderProblem(lines: readonly OrderLine[], area: SuraArea | null, cedula: string): OrderProblem | null {
+export function orderProblem(lines: readonly OrderLine[], area: SuraArea | null, name: string, cedula: string): OrderProblem | null {
   if (lines.length === 0) return "empty";
   if (!area) return "area";
+  if (!validName(name)) return "name";
   if (!validCedula(cedula)) return "cedula";
   return null;
 }
 
-export function buildOrder(lines: readonly OrderLine[], area: SuraArea, cedula: string, clientId: string, now: Date): SuraOrder {
+export function buildOrder(lines: readonly OrderLine[], area: SuraArea, name: string, cedula: string, clientId: string, now: Date): SuraOrder {
   return {
     clientId,
+    nombre: name.trim(),
     cedula,
     area: area.name,
     items: lines.map(({ id, name, detail, quantity, price }) => ({ id, name, detail, quantity, price })),

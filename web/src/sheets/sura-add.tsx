@@ -5,7 +5,7 @@ import { useNavigate } from "react-router";
 import type { MenuItem } from "@/src/data/menu";
 
 import { photoSpec } from "../core/photos";
-import { comboById, lineKey, MAX_PRODUCTS, MAX_QUANTITY, picksComplete, type Picks, type SuraCombo } from "../core/sura";
+import { comboById, picksComplete, type Picks, type SuraCombo } from "../core/sura";
 import { useCopy, useLocale } from "../i18n";
 import { useSura } from "../state/sura";
 import { Press } from "../ui/press";
@@ -14,44 +14,48 @@ import { Sheet } from "../ui/sheet";
 import "../screens/sura.css";
 
 const PLUS = <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>;
-const MINUS = <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" aria-hidden="true"><path d="M5 12h14" /></svg>;
+const CHECK = <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>;
+const TRASH = <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3" /></svg>;
 
-/** A minus, the units and a plus. */
-export function Stepper({ quantity, name, onLess, onMore, testId, big = false }: { quantity: number; name: string; onLess: () => void; onMore: () => void; testId: string; big?: boolean }) {
+/** The bin that takes a combo out of the order. */
+export function RemoveButton({ lineKey: key, name, testId }: { lineKey: string; name: string; testId: string }) {
   const copy = useCopy();
+  const { remove } = useSura();
   return (
-    <div className={`su-step${big ? " big" : ""}`} data-no-turn="true" data-testid={`sura-step-${testId}`}>
-      <Press onClick={onLess} aria-label={copy.sura.removeOne(name)} data-testid={`sura-less-${testId}`}>{MINUS}</Press>
-      <span aria-live="polite" data-testid={`sura-units-${testId}`}>{quantity}</span>
-      <Press onClick={onMore} disabled={quantity >= MAX_QUANTITY} aria-label={copy.sura.addOne(name)} data-testid={`sura-more-${testId}`}>{PLUS}</Press>
-    </div>
+    <Press className="su-trash" onClick={() => remove(key)} aria-label={copy.sura.removeOne(name)} data-no-turn="true" data-testid={`sura-remove-${testId}`}>
+      {TRASH}
+    </Press>
   );
 }
 
 /**
- * How a combo gets into the order: one button that says «Agregar». A combo with nothing to choose goes
- * straight in and the button becomes a minus, the units and a plus. A combo with choices opens the
- * chooser, and the button keeps saying «Agregar», with how many are already in. `big` is the one on
- * the combo's own page.
+ * How a combo gets into the order: one button that says «Agregar». The order holds one combo, once, so there
+ * is no counting: a combo with choices opens the chooser, one without goes straight in, and choosing another
+ * replaces it. Once it is in, the button says so and a bin takes it out. `big` is the one on the combo's page.
  */
 export function AddControl({ item, big = false }: { item: MenuItem; big?: boolean }) {
   const copy = useCopy();
-  const { cart, quantityOf, add, change, choose } = useSura();
+  const { cart, add, choose } = useSura();
   const combo = comboById(item.id);
   if (!combo) return null;
-  const quantity = quantityOf(combo.id);
-  const simple = combo.choices.length === 0;
+  const line = cart.find((entry) => entry.comboId === combo.id);
 
-  if (simple && quantity > 0) {
-    const key = lineKey(combo, {});
-    return <Stepper quantity={quantity} name={item.name} onLess={() => change(key, -1)} onMore={() => change(key, 1)} testId={combo.id} big={big} />;
+  if (line) {
+    return (
+      <div className={`su-in${big ? " big" : ""}`} data-no-turn="true" data-testid={`sura-in-${combo.id}`}>
+        {/* a card is narrow: there it says «Agregado»; the combo's own page has room for the tick and the whole phrase */}
+        <span>
+          {big ? CHECK : null}
+          {big ? copy.sura.added : copy.sura.addedShort}
+        </span>
+        <RemoveButton lineKey={line.key} name={item.name} testId={combo.id} />
+      </div>
+    );
   }
-  const full = quantity === 0 && cart.length >= MAX_PRODUCTS;
   return (
-    <Press className={`su-add${big ? " big" : ""}`} disabled={full} title={full ? copy.sura.full : undefined} onClick={() => (simple ? add(combo.id, {}) : choose(combo.id))} data-no-turn="true" data-testid={`sura-add-${combo.id}`}>
+    <Press className={`su-add${big ? " big" : ""}`} onClick={() => (combo.choices.length === 0 ? add(combo.id, {}) : choose(combo.id))} data-no-turn="true" data-testid={`sura-add-${combo.id}`}>
       {PLUS}
       {big ? copy.sura.addToOrder : copy.sura.add}
-      {quantity > 0 ? <span className="su-add-count" data-testid={`sura-units-${combo.id}`}>{quantity}</span> : null}
     </Press>
   );
 }
@@ -63,7 +67,7 @@ export function AddControl({ item, big = false }: { item: MenuItem; big?: boolea
 export function ComboChooser() {
   const copy = useCopy();
   const { lang } = useLocale();
-  const { choosing, closeChooser, add, quantityOf } = useSura();
+  const { choosing, closeChooser, add } = useSura();
   const [picks, setPicks] = useState<Picks>({});
   const [nudge, setNudge] = useState(false);
   // the sheet keeps showing the combo while it slides away
@@ -78,12 +82,10 @@ export function ComboChooser() {
   const combo = choosing ?? shown;
   const english = lang === "en";
   const ready = combo ? picksComplete(combo, picks) : false;
-  const already = combo ? quantityOf(combo.id) : 0;
   return (
     <Sheet open={!!choosing} onClose={closeChooser} title={combo ? (english ? combo.nameEn : combo.name) : undefined}>
       {combo ? (
         <div className="su-chooser" data-testid="sura-chooser">
-          {already > 0 ? <p className="su-chooser-already">{copy.sura.inThisOrder(already)}</p> : null}
           {combo.choices.map((choice) => (
             <section key={choice.id} className={nudge && !picks[choice.id] ? "nudge" : undefined}>
               <h3>{english ? choice.titleEn : choice.title}</h3>
