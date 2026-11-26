@@ -13,8 +13,8 @@ import { searchGroups } from "../core/search";
 import { CHILE_PACKS, photoSpec } from "../core/photos";
 import { visualFor } from "../core/visuals";
 import type { Copy } from "../i18n";
-import { LivingPhoto } from "../motion/living-photo";
 import { Beans } from "../motion/beans";
+import { LivingPhoto } from "../motion/living-photo";
 import { useWide } from "../ui/use-wide";
 import { Product } from "../motion/product";
 import { ChileSpread } from "./spread";
@@ -198,10 +198,16 @@ export function MinimalMenu({ catalog, copy, money, lang, setLang, onItem }: { c
           onItem={onItem}
         />
       )),
-      // the last sheet says what the Colombian menu says on its last page
+      // the last sheet says what the print says on its back cover: the motto and the countries of the house
       <div key="colophon" className="book-page-inner mn-sheet mn-colophon" data-testid="book-colophon">
         <Beans profile="LIBRE" size={180} />
-        <p>{copy.menu.notCharged}</p>
+        <p className="mn-motto">{copy.menu.motto}</p>
+        {/* two lines on a narrow sheet, broken between countries so no line ends on a dot */}
+        <p className="mn-countries">
+          {copy.menu.countries.split(" · ").slice(0, 3).join(" · ")}
+          <br />
+          {copy.menu.countries.split(" · ").slice(3).join(" · ")}
+        </p>
       </div>,
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps

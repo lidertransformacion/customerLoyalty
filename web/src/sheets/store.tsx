@@ -14,6 +14,7 @@ import { searchGroups } from "../core/search";
 import { visualFor } from "../core/visuals";
 import type { Lang } from "../core/market";
 import type { Copy } from "../i18n";
+import { Approach } from "../motion/approach";
 import { Beans } from "../motion/beans";
 import { LivingPhoto } from "../motion/living-photo";
 import { Product } from "../motion/product";
@@ -271,7 +272,8 @@ export function Store({ chapters, catalog, copy, money, lang, setLang, favorites
 
               <footer className="st-colophon" data-testid="book-colophon">
                 <Beans profile="LIBRE" size={140} />
-                <p>{copy.menu.notCharged}</p>
+                <p className="st-motto">{copy.menu.motto}</p>
+                <p className="st-countries">{copy.menu.countries}</p>
               </footer>
             </>
           )}
@@ -340,7 +342,9 @@ function ProductPanel({ group, chapter, copy, money, favorite, onToggleFavorite,
       </div>
       <div className="st-panel-photo">
         {visual.kind === "photo" ? (
-          <LivingPhoto photo={{ ...visual.photo, cutout: true }} radius={18} style={{ width: "100%", height: "100%" }} testId={`living-${visual.photo.mood}`} />
+          <Approach id={visual.photo.src} style={{ width: "100%", height: "100%" }}>
+            <LivingPhoto photo={{ ...visual.photo, cutout: true }} radius={18} style={{ width: "100%", height: "100%" }} testId={`living-${visual.photo.mood}`} />
+          </Approach>
         ) : (
           <Product src={visual.src} size={220} testId="product-3d" />
         )}

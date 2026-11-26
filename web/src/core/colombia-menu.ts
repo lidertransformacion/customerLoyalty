@@ -317,7 +317,7 @@ export const CO_PRODUCTS: CoProduct[] = [
         "price": 102800
       }
     ],
-    "photo": "competition",
+    "photo": "competition-v2",
     "nuts": false
   },
   {
@@ -377,7 +377,7 @@ export const CO_PRODUCTS: CoProduct[] = [
         "price": 30200
       }
     ],
-    "photo": "filtrado-paz",
+    "photo": "filtrado-paz-v2",
     "nuts": false
   },
   {
@@ -407,7 +407,7 @@ export const CO_PRODUCTS: CoProduct[] = [
         "price": 30200
       }
     ],
-    "photo": "filtrado-libre",
+    "photo": "filtrado-libre-v2",
     "nuts": false
   },
   {
@@ -437,7 +437,7 @@ export const CO_PRODUCTS: CoProduct[] = [
         "price": 35200
       }
     ],
-    "photo": "filtrado-impacto",
+    "photo": "filtrado-impacto-v2",
     "nuts": false
   },
   {
@@ -467,7 +467,7 @@ export const CO_PRODUCTS: CoProduct[] = [
         "price": 31200
       }
     ],
-    "photo": "filtrado-rock",
+    "photo": "filtrado-rock-v2",
     "nuts": false
   },
   {
@@ -497,7 +497,7 @@ export const CO_PRODUCTS: CoProduct[] = [
         "price": 37200
       }
     ],
-    "photo": "filtrado-punk",
+    "photo": "filtrado-punk-v2",
     "nuts": false
   },
   {
@@ -517,7 +517,7 @@ export const CO_PRODUCTS: CoProduct[] = [
         "price": 20800
       }
     ],
-    "photo": "filtrado-competition",
+    "photo": "filtrado-competition-v2",
     "nuts": false
   },
   {

@@ -8,6 +8,7 @@ import { kindOf } from "../core/colombia";
 import { menuOnly } from "../core/mode";
 import { visualFor } from "../core/visuals";
 import { useCopy, useLocale } from "../i18n";
+import { Approach } from "../motion/approach";
 import { LivingPhoto } from "../motion/living-photo";
 import { Product } from "../motion/product";
 import { useAccount } from "../state/account";
@@ -61,15 +62,38 @@ export function ItemScreen() {
     <Screen direction="up" testId="item" className="full">
       <div className="scroll it-scroll">
         <div className={`it-hero${visual.kind === "photo" ? " photo" : ""}`}>
-          {visual.kind === "photo" && onPaper ? (
+          {visual.kind === "photo" && onPaper && visual.photo.crop ? (
+            // a small subject in a large square of white: the square is sized and placed so the subject itself
+            // fills what is free between the top of the screen and the card, whole, never cut
+            <div style={{ position: "absolute", inset: 0, background: "var(--paper)", overflow: "hidden", padding: "calc(var(--sat) + 62px) 14px 52px" }}>
+              <div style={{ position: "relative", width: "100%", height: "100%", containerType: "size" }}>
+                <Approach
+                  id={item.id}
+                  style={{
+                    position: "absolute",
+                    ["--side" as string]: `min(${(10000 / visual.photo.crop.w).toFixed(1)}cqw, ${(10000 / visual.photo.crop.h).toFixed(1)}cqh, ${Math.round(sharpWidth * 1.35)}px)`,
+                    width: "var(--side)",
+                    height: "var(--side)",
+                    left: `calc(50cqw - var(--side) * ${((visual.photo.crop.x + visual.photo.crop.w / 2) / 100).toFixed(4)})`,
+                    top: `calc(50cqh - var(--side) * ${((visual.photo.crop.y + visual.photo.crop.h / 2) / 100).toFixed(4)})`,
+                  }}
+                  from={0.9}
+                  to={1}
+                >
+                  <LivingPhoto photo={{ ...visual.photo, cutout: true }} radius={18} style={{ width: "100%", height: "100%" }} testId={`living-${visual.photo.mood}`} />
+                </Approach>
+              </div>
+            </div>
+          ) : visual.kind === "photo" && onPaper ? (
             <div style={{ position: "absolute", inset: 0, background: "var(--paper)", display: "grid", placeItems: "center", overflow: "hidden", padding: visual.photo.wide ? "calc(var(--sat) + 40px) 8px 40px" : "calc(var(--sat) + 70px) 20px 56px" }}>
-              <LivingPhoto
-                photo={{ ...visual.photo, cutout: true }}
-                radius={18}
+              {/* the product comes closer, slowly, from the moment it opens */}
+              <Approach
+                id={item.id}
                 // a wide subject takes the screen's width; the white above and below it spills out of sight
                 style={visual.photo.wide ? { width: `min(100%, ${sharpWidth}px)`, aspectRatio: "1", height: "auto" } : { width: `min(100%, ${sharpWidth}px)`, height: "100%" }}
-                testId={`living-${visual.photo.mood}`}
-              />
+              >
+                <LivingPhoto photo={{ ...visual.photo, cutout: true }} radius={18} style={{ width: "100%", height: "100%" }} testId={`living-${visual.photo.mood}`} />
+              </Approach>
             </div>
           ) : visual.kind === "photo" ? (
             <LivingPhoto photo={visual.photo} radius={0} style={{ position: "absolute", inset: 0 }} testId={`living-${visual.photo.mood}`}>

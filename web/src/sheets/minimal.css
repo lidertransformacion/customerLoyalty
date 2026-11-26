@@ -1040,3 +1040,21 @@
     transform: translateY(-3px) scale(1.03);
   }
 }
+
+/* the last sheet closes with the motto of the print's back cover and the countries of the house */
+.mn-colophon .mn-motto {
+  max-width: 280px;
+  font-family: var(--serif);
+  font-size: 25px;
+  line-height: 1.15;
+  color: #1d2e54;
+}
+
+.mn-colophon .mn-countries {
+  max-width: 300px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  line-height: 1.9;
+  text-transform: uppercase;
+}

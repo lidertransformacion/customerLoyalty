@@ -1,0 +1,81 @@
+<t t-name="website.carta-colombia">
+    <t t-call="website.layout">
+        <div id="wrap" class="oe_structure">
+            <style>
+                /* La pagina no se desplaza: la carta se desplaza por dentro. */
+                html, body { overflow: hidden !important; }
+                #carta-colombia {
+                    display: block;
+                    width: 100%;
+                    border: 0;
+                    margin: 0;
+                    padding: 0;
+                    background: #ffffff;
+                }
+                /* Lo que Odoo pone encima despues: la barra de cookies y el chat. */
+                #website_cookies_bar, .o_livechat_button, .o-livechat-root, .o_cookies_bar { display: none !important; }
+                /* El pie del sitio no se muestra aqui: quedaria debajo de la carta, fuera de la pantalla. */
+                footer, #footer, .o_footer { display: none !important; }
+
+                /* Celular y tableta: la carta ocupa toda la pantalla, sin el encabezado del sitio. */
+                @media (max-width: 1023px) {
+                    #carta-colombia {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100vw;
+                        height: 100vh;
+                        height: 100dvh;
+                        z-index: 2147483000;
+                    }
+                }
+
+                /* Computador: el encabezado de Libertario se queda arriba y la carta llena el resto de la ventana. */
+                @media (min-width: 1024px) {
+                    #carta-colombia { height: calc(100vh - 80px); }
+                }
+            </style>
+            <!-- geolocation: deja que la carta ofrezca la sede mas cercana si el invitado lo permite. -->
+            <iframe id="carta-colombia" title="Carta de Libertario Colombia" allow="geolocation; clipboard-write" loading="eager">Carta de Libertario Colombia</iframe>
+            <noscript>
+                <p style="padding: 24px; text-align: center;">
+                    <a href="https://menucolombia.libertario-carta.pages.dev/">Abrir la carta de Libertario Colombia</a>
+                </p>
+            </noscript>
+            <script>
+                (function () {
+                    var carta = document.getElementById("carta-colombia");
+                    if (!carta) { return; }
+                    // La direccion de la carta. Si cambia (por ejemplo al pasarla a libertario-carta.pages.dev), solo se cambia esta linea.
+                    var CARTA = "https://menucolombia.libertario-carta.pages.dev/";
+
+                    // La ciudad o la sede del enlace o del QR pasan a la carta: /carta-colombia?ciudad=medellin abre la de Medellin.
+                    var paso = [];
+                    try {
+                        var pedido = new URLSearchParams(window.location.search);
+                        ["ciudad", "sede", "lang"].forEach(function (clave) {
+                            var valor = pedido.get(clave);
+                            if (valor) { paso.push(clave + "=" + encodeURIComponent(valor)); }
+                        });
+                    } catch (error) { /* un navegador viejo: la carta detecta la ciudad sola */ }
+                    carta.src = CARTA + (paso.length ? "?" + paso.join("&amp;") : "");
+
+                    // En computador la carta mide exactamente lo que queda de ventana debajo del encabezado del sitio.
+                    var ancho = window.matchMedia("(min-width: 1024px)");
+                    function ajustar() {
+                        if (ancho.matches) {
+                            var arriba = carta.getBoundingClientRect().top;
+                            carta.style.height = Math.max(320, window.innerHeight - arriba) + "px";
+                        } else {
+                            carta.style.height = "";
+                        }
+                    }
+                    ajustar();
+                    window.addEventListener("resize", ajustar);
+                    window.addEventListener("load", ajustar);
+                    setTimeout(ajustar, 600);
+                })();
+            </script>
+        </div>
+    </t>
+</t>

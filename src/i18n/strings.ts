@@ -136,6 +136,9 @@ export const copy = {
     addToTable: "Sumar a la mesa",
     postAtRegister: "Anotar en caja",
     notCharged: "No se cobra aquí. La caja de la sede es la que factura.",
+    // el lema de la contraportada del impreso: va en inglés en los dos idiomas, como en la carta
+    motto: "Born in Colombia. Crafted for the world.",
+    countries: "Colombia · México · Costa Rica · Chile · India",
     askAtBar: "Pregunta en la barra.",
     favorites: "Favoritos",
     recommended: "Recomendados",

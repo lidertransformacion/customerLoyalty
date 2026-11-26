@@ -87,8 +87,8 @@ export const PHOTOS: Record<string, PhotoSpec> = {
     src: photoUrl("coffee.jpg"),
     mood: "cold",
     focus: "50% 62%",
+    // cold brew does not fizz: only the cold on the glass and on the can
     sweat: [{ x: 10, y: 42, w: 36, h: 44 }, { x: 60, y: 46, w: 28, h: 44 }],
-    fizz: [{ x: 14, y: 50, w: 28, h: 34 }],
   },
   "drinks.jpg": {
     src: photoUrl("drinks.jpg"),

@@ -68,6 +68,59 @@
   }
 }
 
+/* On a phone the card is compact, so the photograph keeps most of the screen. */
+@media (max-width: 1023px) {
+  .it-card.glass {
+    padding: 15px 17px 14px !important;
+    border-radius: 24px !important;
+  }
+
+  .it-card h1 {
+    font-size: 26px !important;
+    margin-top: 2px !important;
+  }
+
+  .it-card > p {
+    font-size: 14.5px !important;
+    line-height: 1.4 !important;
+    margin-top: 9px !important;
+  }
+
+  .it-card .it-kind {
+    margin-top: 4px;
+    font-size: 14px;
+  }
+
+  .it-card .it-lines {
+    margin-top: 10px;
+  }
+
+  .it-card .it-lines li {
+    padding: 7px 0;
+    font-size: 14px;
+  }
+
+  .it-card .it-lines strong {
+    font-size: 19px;
+  }
+
+  .it-card [data-testid="item-price"] {
+    font-size: 26px !important;
+  }
+
+  .it-card > .row {
+    margin-top: 10px !important;
+  }
+
+  .it-card .chip {
+    min-height: 26px !important;
+  }
+
+  .it-info {
+    margin-top: -28px;
+  }
+}
+
 /* «Volver» on the menu: a small pill, not a bar across the screen. */
 .it-dock-back {
   justify-content: center;
